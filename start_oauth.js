@@ -9,7 +9,12 @@ exports.handler = function(event, context, callback) {
 
     const access_rawdata = fs.readFileSync('access.json');
     const access = JSON.parse(access_rawdata);
-    var redirect = "";
+    const res = {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "*/*"
+        }
+    };
 
 // Initialize
     const oauth = OAuth({
@@ -36,12 +41,9 @@ exports.handler = function(event, context, callback) {
         },
         function(error, response, body) {
             const req_data = qs.parse(body);
-            const uri = 'https://connect.garmin.com/oauthConfirm' +
+            res.body = 'https://connect.garmin.com/oauthConfirm' +
                 '?' + qs.stringify({oauth_token: req_data.oauth_token});
-            console.log("===URL===");
-            redirect = uri;
-            console.log(redirect);
-            callback(null, uri);
+            callback(null, res);
         }
     );
 };
