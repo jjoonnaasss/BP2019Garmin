@@ -1,9 +1,9 @@
-#!/usr/bin/python3
-import sys
-import subprocess
-hint_proc = subprocess.run(["jshint", "."])
-if hint_proc.returncode != 0:
-    print("Linting failed. Commit aborted")
-    sys.exit(1)
-print("Commit accepted")
-sys.exit(0)
+#!/bin/sh
+jshint .
+if [ $? != 0 ]
+then
+    echo "Linting failed. Commit aborted"
+    exit 1
+fi
+echo "Commit accepted"
+exit 0

@@ -2,7 +2,7 @@
 
 ## Setup
 
-Install Python3, Node.js 10 and npm.
+Install Node.js 10 and npm.
 
 Install jshint:
 
