@@ -1,10 +1,20 @@
 <html>
 <header>
-  <title>Garmin Connect</title>
+    <meta charset="utf-8">
+    <title>Garmin Connec</title>
 </header>
 <body>
-  <div style="text-align: center;">
-    <button type="button">Plugin autorisieren</button>
-  </div>
+<div style="text-align: center;">
+    <button id="authorize-button" type="button">Plugin autorisieren</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+<script>
+    $('#authorize-button').on('click', function () {
+        $.get('https://1dcdfp9vwj.execute-api.us-east-2.amazonaws.com/default/start_oauth', function (data) {
+            window.location.href = data;
+        });
+    });
+</script>
 </body>
 </html>

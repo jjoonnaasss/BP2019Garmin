@@ -12,7 +12,8 @@ exports.handler = function(event, context, callback) {
     const res = {
         "statusCode": 200,
         "headers": {
-            "Content-Type": "*/*"
+            "Content-Type": "text/plain",
+            "Access-Control-Allow-Origin" : "*"
         }
     };
 
