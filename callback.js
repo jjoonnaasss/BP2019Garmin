@@ -1,9 +1,9 @@
 exports.handler = function(event, context, callback) {
 
-    const request = require('request')
-    const OAuth = require('oauth-1.0a')
-    const crypto = require('crypto')
-    const fs = require('fs')
+    const request = require('request');
+    const OAuth = require('oauth-1.0a');
+    const crypto = require('crypto');
+    const fs = require('fs');
 
     var ver = 'no verifier received';
     var oauth_t = 'no oauth_token received';
@@ -12,7 +12,7 @@ exports.handler = function(event, context, callback) {
     if (event.queryStringParameters && event.queryStringParameters.oauth_verifier) {
         ver = event.queryStringParameters.oauth_verifier;
     }
-    if (event.queryStringParameters && event.queryStringParameters.oauth_verifier) {
+    if (event.queryStringParameters && event.queryStringParameters.oauth_token) {
         oauth_t = event.queryStringParameters.oauth_token;
     }
 
@@ -82,15 +82,15 @@ exports.handler = function(event, context, callback) {
                         form: oauth_form,
                     },
                     function(error, response, body) {
-                        console.log("===RESPONSE===")
-                        console.log(body)
+                        console.log("===RESPONSE===");
+                        console.log(body);
                         const newResponse = {
                             statusCode: 200,
                             body: JSON.stringify(body)
-                        }
+                        };
                         return newResponse;
                     }
-                )
+                );
             }
         });
     }
