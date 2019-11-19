@@ -49,7 +49,8 @@ exports.handler = function(event, context, callback) {
 
                 token ={
                     oauth_token : oauth_t,
-                    oauth_token_secret : oauth_t_secret
+                    oauth_token_secret : oauth_t_secret,
+                    secret: oauth_t_secret
                 };
 
                 // Initialize
@@ -69,9 +70,24 @@ exports.handler = function(event, context, callback) {
                     method: 'POST',
                 };
                 var oauth_form = oauth.authorize(request_data, token);
+
+                var base_string_params = {
+                    oauth_consumer_key: access.key,
+                    oauth_nonce: oauth.getNonce(),
+                    oauth_signature_method: oauth.signature_method,
+                    oauth_timestamp: oauth.getTimeStamp(),
+                    oauth_version: oauth.version,
+                    oauth_verifier: ver,
+                    oauth_token: oauth_t
+                };
+
+
+                //var sig = oauth.getSignature(request_data, oauth_t_secret, base_string_params);
+
                 console.log(oauth_form);
                 oauth_form.oauth_verifier = ver;
                 oauth_form.oauth_token = oauth_t;
+                oauth_form.oauth_signature = oauth.percentEncode(oauth_form.oauth_signature);//oauth.percentEncode(sig);
                 console.log(oauth_form);
 
 
