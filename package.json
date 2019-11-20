@@ -9,5 +9,8 @@
   },
   "license": "AGPL-3.0-or-later",
   "repository": "github:jjoonnaasss/BP2019Garmin",
-  "description": "Test"
+  "description": "Test",
+  "devDependencies": {
+    "eslint": "^6.6.0"
+  }
 }

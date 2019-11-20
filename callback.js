@@ -1,12 +1,12 @@
-exports.handler = function(event, context, callback) {
+exports.handler = function(event) {
 
-    const request = require('request');
-    const OAuth = require('oauth-1.0a');
-    const crypto = require('crypto');
-    const fs = require('fs');
+    const request = require("request");
+    const OAuth = require("oauth-1.0a");
+    const crypto = require("crypto");
+    const fs = require("fs");
 
-    var ver = 'no verifier received';
-    var oauth_t = 'no oauth_token received';
+    var ver = "no verifier received";
+    var oauth_t = "no oauth_token received";
 
     //var oauth_t_secret;
     if (event.queryStringParameters && event.queryStringParameters.oauth_verifier) {
@@ -16,22 +16,22 @@ exports.handler = function(event, context, callback) {
         oauth_t = event.queryStringParameters.oauth_token;
     }
 
-    const access_rawdata = fs.readFileSync('access.json');
+    const access_rawdata = fs.readFileSync("access.json");
     const access = JSON.parse(access_rawdata);
 
     // Load the AWS SDK for Node.js
-    var AWS = require('aws-sdk');
+    var AWS = require("aws-sdk");
     // Set the region
-    AWS.config.update({region: 'us-east-2'});
+    AWS.config.update({region: "us-east-2"});
     // Create the DynamoDB service object
-    var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
-    var token = '';
+    var token = "";
 
-    if(oauth_t != 'no oauth_token received'){
+    if(oauth_t != "no oauth_token received"){
 
         var params = {
-            TableName: 'RequestToken',
+            TableName: "RequestToken",
             Key: {
                 "Token": {
                     S: oauth_t
@@ -56,22 +56,22 @@ exports.handler = function(event, context, callback) {
                 // Initialize
                 const oauth = OAuth({
                     consumer: access,
-                    signature_method: 'HMAC-SHA1',
+                    signature_method: "HMAC-SHA1",
                     hash_function(base_string, key) {
                         return crypto
-                            .createHmac('sha1', key)
+                            .createHmac("sha1", key)
                             .update(base_string)
-                            .digest('base64');
+                            .digest("base64");
                     }
                 });
 
                 const request_data = {
-                    url: 'https://connectapi.garmin.com/oauth-service/oauth/access_token',
-                    method: 'POST',
+                    url: "https://connectapi.garmin.com/oauth-service/oauth/access_token",
+                    method: "POST",
                 };
                 var oauth_form = oauth.authorize(request_data, token);
 
-                var base_string_params = {
+                var base_string_params = { // eslint-disable-line no-unused-vars
                     oauth_consumer_key: access.key,
                     oauth_nonce: oauth.getNonce(),
                     oauth_signature_method: oauth.signature_method,
