@@ -82,3 +82,5 @@ node_modules/\.bin/
 node_modules/ajv/
 
 package-lock\.json
+
+packages/

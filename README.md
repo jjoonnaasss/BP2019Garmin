@@ -10,3 +10,7 @@ Install the modules and JSHint:
     npm install -g jshint
 
 Copy files from git_hooks/ to .git/hooks, mark them as executable.
+
+Install and configure AWS CLI.
+
+Create deployment packages with `make all` and deploy to Lambda with `make deploy`.
