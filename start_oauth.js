@@ -1,4 +1,4 @@
-exports.handler = function(event, context, callback) {
+exports.handler = function (event, context, callback) {
 
     // Dependencies
     const request = require("request");
@@ -7,25 +7,25 @@ exports.handler = function(event, context, callback) {
     const qs = require("querystring");
     const fs = require("fs");
 
+    var AWS = require("aws-sdk");
+    AWS.config.update({region: "us-east-2"});
+    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //Datenbank-Objekt initialisieren
+
+    //Consumer-Key und -Secret einlesen
     const access_rawdata = fs.readFileSync("access.json");
     const access = JSON.parse(access_rawdata);
+
+    //Access-Control-Allow-Origin ermöglicht Zugriff auf das Response-Objekt
     const res = {
         "statusCode": 200,
         "headers": {
             "Content-Type": "text/plain",
-            "Access-Control-Allow-Origin" : "*"
+            "Access-Control-Allow-Origin": "*"
         }
     };
 
-    // Load the AWS SDK for Node.js
-    var AWS = require("aws-sdk");
-    // Set the region
-    AWS.config.update({region: "us-east-2"});
-    // Create the DynamoDB service object
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
-
-    // Initialize
+    // OAuth-Instanz initialisieren
     const oauth = OAuth({
         consumer: access,
         signature_method: "HMAC-SHA1",
@@ -42,15 +42,17 @@ exports.handler = function(event, context, callback) {
         method: "POST",
     };
 
+    //HTTPS-Request, um ein Request-Token inklusive Secret anzufordern
     request(
         {
             url: request_data.url,
             method: request_data.method,
             form: oauth.authorize(request_data),
         },
-        function(error, response, body) {
+        function (error, response, body) {
             const req_data = qs.parse(body);
 
+            //Parameter, um das Token in die Datenbank zu speichern
             var params = {
                 TableName: "RequestToken",
                 Item: {
@@ -63,8 +65,8 @@ exports.handler = function(event, context, callback) {
                 }
             };
 
-            // Call DynamoDB to add the item to the table
-            ddb.putItem(params, function(err, data) {
+            //Token in die Datenbank speichern
+            ddb.putItem(params, function (err, data) {
                 if (err) {
                     console.log("Error", err);
                 } else {
@@ -72,6 +74,7 @@ exports.handler = function(event, context, callback) {
                 }
             });
 
+            //Weiterleitung des Nutzers zur Bestätigungs-URL
             res.body = "https://connect.garmin.com/oauthConfirm" +
                 "?" + qs.stringify({oauth_token: req_data.oauth_token});
             callback(null, res);
