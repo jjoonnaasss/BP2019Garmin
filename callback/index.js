@@ -7,13 +7,13 @@ exports.handler = function (event) {
 
     var AWS = require("aws-sdk");
     AWS.config.update({region: "us-east-2"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //Datenbank-Objekt initialisieren
+    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database object
 
-    //Initialwerte, um überprüfen zu können, ob Werte übergeben wurden
+    //initial values to be replaced with the actual parameters
     var ver = "no verifier received";
     var oauth_t = "no oauth_token received";
 
-    //Auslesen und Abspeichern der übergebenden Parameter
+    //read and save the given parameters
     if (event.queryStringParameters && event.queryStringParameters.oauth_verifier) {
         ver = event.queryStringParameters.oauth_verifier;
     }
@@ -21,16 +21,14 @@ exports.handler = function (event) {
         oauth_t = event.queryStringParameters.oauth_token;
     }
 
-    //Consumer-Key und -Secret einlesen
+    //read consumer-key and -secret
     const access_rawdata = fs.readFileSync("access.json");
     const access = JSON.parse(access_rawdata);
 
-    var token = ""; //Variable für das Token aus der Datenbank erstellen
-
-    //Überprüfung, ob ein Token übergeben wurde
+    //check, if a token was received
     if (oauth_t != "no oauth_token received") {
 
-        //Parameter für den Datenbankzugriff
+        //parameters for the database access
         var params = {
             TableName: "RequestToken",
             Key: {
@@ -40,7 +38,7 @@ exports.handler = function (event) {
             }
         };
 
-        //Secret zum vorhandenen Token aus der Datenbank auslesen
+        //read secret matching with the available token from dynamodb table
         ddb.getItem(params, function (err, data) {
             if (err) {
                 console.log("Error", err);
@@ -48,14 +46,7 @@ exports.handler = function (event) {
                 console.log("Success", data);
                 var oauth_t_secret = data.Item.Secret.S;
 
-                //Token für OAuth speichern
-                token = {
-                    oauth_token: oauth_t,
-                    oauth_token_secret: oauth_t_secret,
-                    secret: oauth_t_secret
-                };
-
-                // OAuth-Instanz initialisieren
+                // initialize oauth for the nonce and timestamp
                 const oauth = OAuth({
                     consumer: access,
                     signature_method: "HMAC-SHA1",
@@ -67,53 +58,46 @@ exports.handler = function (event) {
                     }
                 });
 
-                //URL und Zugriffsmethode für HTTPS Aufruf festlegen
+                //define URL and method for the HTTPS call
                 const request_data = {
                     url: "https://connectapi.garmin.com/oauth-service/oauth/access_token",
                     method: "POST",
                 };
 
-                //OAuth-Daten erstellen lassen
-                var oauth_form = oauth.authorize(request_data, token);
+                const nonce = oauth.getNonce();
+                const tstamp = oauth.getTimeStamp();
 
-                //Base-String-Parameter für OAuth erstellen
-                var base_string_params = { // eslint-disable-line no-unused-vars
+                //create base-string-parameters for the oauth-signature
+                var base_string_params = {
                     oauth_consumer_key: access.key,
-                    oauth_nonce: oauth.getNonce(),
+                    oauth_nonce: nonce,
                     oauth_signature_method: oauth.signature_method,
-                    oauth_timestamp: oauth.getTimeStamp(),
+                    oauth_timestamp: tstamp,
                     oauth_version: oauth.version,
                     oauth_verifier: ver,
                     oauth_token: oauth_t
                 };
 
+                //create signature
+                var sig = oauth.getSignature(request_data, oauth_t_secret, base_string_params);
 
-                //var sig = oauth.getSignature(request_data, oauth_t_secret, base_string_params);
-
-                //Verifier und Token manuell hinzufügen
-                console.log(oauth_form);
-                oauth_form.oauth_verifier = ver;
-                oauth_form.oauth_token = oauth_t;
-                oauth_form.oauth_signature = oauth.percentEncode(oauth_form.oauth_signature);//oauth.percentEncode(sig);
-                console.log(oauth_form);
-
-                //HTTPS-Request, um ein UAT anzufordern
-                request(
-                    {
-                        url: request_data.url,
-                        method: request_data.method,
-                        form: oauth_form,
+                //HTTPS-Request to acquire a user-access-token
+                request({
+                    headers: {
+                        "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_nonce=\"" + nonce + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"" + tstamp + "\", oauth_token=\"" + oauth_t + "\", oauth_verifier=\"" + ver + "\", oauth_version=\"1.0\"",
+                        "Content-Length": 0
                     },
-                    function (error, response, body) {
-                        console.log("===RESPONSE===");
-                        console.log(body);
-                        const newResponse = {
-                            statusCode: 200,
-                            body: JSON.stringify(body)
-                        };
-                        return newResponse;
-                    }
-                );
+                    uri: request_data.url,
+                    method: "POST"
+                }, function (error, response, body) {
+                    console.log("===RESPONSE===");
+                    console.log(body);
+                    const newResponse = {
+                        statusCode: 200,
+                        body: JSON.stringify(body)
+                    };
+                    return newResponse;
+                });
             }
         });
     }
