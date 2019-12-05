@@ -90,6 +90,45 @@ exports.handler = function (event) {
                     uri: request_data.url,
                     method: "POST"
                 }, function (error, response, body) {
+
+                    //remove the request-token from the table
+                    var params = {
+                        TableName: "RequestToken",
+                        Key: {
+                            "Token": {S: oauth_t}
+                        }
+                    };
+
+                    ddb.deleteItem(params, function(err, data) {
+                        if (err) {
+                            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+                        } else {
+                            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
+                        }
+                    });
+
+                    //store user access token in the table
+                    params = {
+                        TableName: "UserAccessTokens",
+                        Item: {
+                            "UAT": {
+                                S: body.split("&")[0].split("=")[1] //extract token from string containing token and secret
+                            },
+                            "Secret": {
+                                S: body.split("&")[1].split("=")[1] //extract secret from string containing token and secret
+                            }
+                        }
+                    };
+
+                    //Token in die Datenbank speichern
+                    ddb.putItem(params, function (err, data) {
+                        if (err) {
+                            console.log("Error", err);
+                        } else {
+                            console.log("Success", data);
+                        }
+                    });
+
                     console.log("===RESPONSE===");
                     console.log(body);
                     const newResponse = {
