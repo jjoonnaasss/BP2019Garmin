@@ -1,4 +1,4 @@
-exports.handler = function (event) {
+exports.handler = function (event, context, callback) {
 
     const request = require("request");
     const OAuth = require("oauth-1.0a");
@@ -25,6 +25,14 @@ exports.handler = function (event) {
     const access_rawdata = fs.readFileSync("access.json");
     const access = JSON.parse(access_rawdata);
 
+    //create response object for the callback
+    const res = {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "text/plain",
+        }
+    };
+
     //check, if a token was received
     if (oauth_t != "no oauth_token received") {
 
@@ -37,6 +45,12 @@ exports.handler = function (event) {
                 }
             }
         };
+
+        //set response body
+        res.body = "Authorization in progress!";
+
+        //callback to the user
+        callback(null, res);
 
         //read secret matching with the available token from dynamodb table
         ddb.getItem(params, function (err, data) {
@@ -65,14 +79,14 @@ exports.handler = function (event) {
                 };
 
                 const nonce = oauth.getNonce();
-                const tstamp = oauth.getTimeStamp();
+                const timestamp = oauth.getTimeStamp();
 
                 //create base-string-parameters for the oauth-signature
                 var base_string_params = {
                     oauth_consumer_key: access.key,
                     oauth_nonce: nonce,
                     oauth_signature_method: oauth.signature_method,
-                    oauth_timestamp: tstamp,
+                    oauth_timestamp: timestamp,
                     oauth_version: oauth.version,
                     oauth_verifier: ver,
                     oauth_token: oauth_t
@@ -84,7 +98,7 @@ exports.handler = function (event) {
                 //HTTPS-Request to acquire a user-access-token
                 request({
                     headers: {
-                        "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_nonce=\"" + nonce + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"" + tstamp + "\", oauth_token=\"" + oauth_t + "\", oauth_verifier=\"" + ver + "\", oauth_version=\"1.0\"",
+                        "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_nonce=\"" + nonce + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"" + timestamp + "\", oauth_token=\"" + oauth_t + "\", oauth_verifier=\"" + ver + "\", oauth_version=\"1.0\"",
                         "Content-Length": 0
                     },
                     uri: request_data.url,
@@ -99,7 +113,7 @@ exports.handler = function (event) {
                         }
                     };
 
-                    ddb.deleteItem(params, function(err, data) {
+                    ddb.deleteItem(params, function (err, data) {
                         if (err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
                         } else {
@@ -139,5 +153,11 @@ exports.handler = function (event) {
                 });
             }
         });
+    } else {
+        //set response body
+        res.body = oauth_t;
+
+        //callback to the user
+        callback(null, res);
     }
 };
