@@ -1,5 +1,5 @@
 {
-  "name": "test-node",
+  "name": "garmin-export",
   "version": "1.0.0",
   "dependencies": {
     "fs": "0.0.1-security",
@@ -11,6 +11,11 @@
   "repository": "github:jjoonnaasss/BP2019Garmin",
   "description": "Test",
   "devDependencies": {
-    "eslint": "^6.6.0"
+    "eslint": "^6.6.0",
+    "mocha": "^6.2.2"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha",
+    "lint": "./node_modules/.bin/eslint ."
   }
 }
