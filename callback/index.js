@@ -6,7 +6,7 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
 
     var AWS = require("aws-sdk");
-    AWS.config.update({region: "us-east-2"});
+    AWS.config.update({region: "eu-central-1"});
     var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database object
 
     //initial values to be replaced with the actual parameters
@@ -59,6 +59,7 @@ exports.handler = function (event, context, callback) {
             } else {
                 console.log("Success", data);
                 var oauth_t_secret = data.Item.Secret.S;
+                var mail = data.Item.Mail.S;
 
                 // initialize oauth for the nonce and timestamp
                 const oauth = OAuth({
@@ -85,9 +86,9 @@ exports.handler = function (event, context, callback) {
                 var base_string_params = {
                     oauth_consumer_key: access.key,
                     oauth_nonce: nonce,
-                    oauth_signature_method: oauth.signature_method,
+                    oauth_signature_method: "HMAC-SHA1",
                     oauth_timestamp: timestamp,
-                    oauth_version: oauth.version,
+                    oauth_version: "1.0",
                     oauth_verifier: ver,
                     oauth_token: oauth_t
                 };
@@ -130,17 +131,44 @@ exports.handler = function (event, context, callback) {
                             },
                             "Secret": {
                                 S: body.split("&")[1].split("=")[1] //extract secret from string containing token and secret
+                            },
+                            "Mail": {
+                                S: mail
                             }
                         }
                     };
 
-                    //Token in die Datenbank speichern
+
                     ddb.putItem(params, function (err, data) {
                         if (err) {
-                            console.log("Error", err);
+                            console.log("Error with storing UAT", err);
                         } else {
-                            console.log("Success", data);
+                            console.log("UAT stored", data);
                         }
+                    });
+
+
+                    params = {
+                        TableName: "UserData",
+                        Key: {
+                            "Mail": {
+                                S: mail
+                            }
+                        },
+                        ExpressionAttributeNames: {
+                            "#UAT": "UAT",
+                        },
+                        ExpressionAttributeValues: {
+                            ":uat": {
+                                S: body.split("&")[0].split("=")[1] //extract token from string containing token and secret
+                            },
+                        },
+                        UpdateExpression: "SET #UAT = :uat"
+                    };
+
+                    ddb.updateItem(params, function (err, data) {
+                        if (err) console.log(err, err.stack); // an error occurred
+                        else console.log(data);           // successful response
                     });
 
                     console.log("===RESPONSE===");
