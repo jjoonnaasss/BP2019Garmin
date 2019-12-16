@@ -8,24 +8,37 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
 
     var AWS = require("aws-sdk");
-    AWS.config.update({region: "us-east-2"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //Datenbank-Objekt initialisieren
+    AWS.config.update({region: "eu-central-1"});
+    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
-    //Consumer-Key und -Secret einlesen
+    //read consumer-key and -secret
     const access_rawdata = fs.readFileSync("access.json");
     const access = JSON.parse(access_rawdata);
 
-    //Access-Control-Allow-Origin ermöglicht Zugriff auf das Response-Objekt
+
+    //initial values to be replaced with the actual parameters
+    var mail = "empty";
+    var pwhash = "empty";
+
+    //read and save the given parameters
+    if (event.queryStringParameters && event.queryStringParameters.mail) {
+        mail = event.queryStringParameters.mail;
+    }
+    if (event.queryStringParameters && event.queryStringParameters.pwhash) {
+        pwhash = event.queryStringParameters.pwhash;
+    }
+
+    //Access-Control-Allow-Origin enables access to the response-object
     const res = {
-        "statusCode": 200,
-        "headers": {
+        statusCode: 200,
+        headers: {
             "Content-Type": "text/plain",
             "Access-Control-Allow-Origin": "*"
         }
     };
 
 
-    // OAuth-Instanz initialisieren
+    // initialize OAuth
     const oauth = OAuth({
         consumer: access,
         signature_method: "HMAC-SHA1",
@@ -42,7 +55,7 @@ exports.handler = function (event, context, callback) {
         method: "POST",
     };
 
-    //HTTPS-Request, um ein Request-Token inklusive Secret anzufordern
+    //HTTPS-Request, to ask for a request-token with a secret
     request(
         {
             url: request_data.url,
@@ -52,7 +65,7 @@ exports.handler = function (event, context, callback) {
         function (error, response, body) {
             const req_data = qs.parse(body);
 
-            //Parameter, um das Token in die Datenbank zu speichern
+            //parameters to store token
             var params = {
                 TableName: "RequestToken",
                 Item: {
@@ -61,20 +74,48 @@ exports.handler = function (event, context, callback) {
                     },
                     "Secret": {
                         S: req_data.oauth_token_secret
+                    },
+                    "Mail": {
+                        S: mail
                     }
                 }
             };
 
-            //Token in die Datenbank speichern
+            //store token
             ddb.putItem(params, function (err, data) {
                 if (err) {
-                    console.log("Error", err);
+                    console.log("Error at storing token", err);
                 } else {
-                    console.log("Success", data);
+                    console.log("token stored", data);
                 }
             });
 
-            //Weiterleitung des Nutzers zur Bestätigungs-URL
+
+            if(mail != "empty" && pwhash != "empty") {
+                //parameters to store mail with password
+                params = {
+                    TableName: "UserData",
+                    Item: {
+                        "Mail": {
+                            S: mail
+                        },
+                        "PWHash": {
+                            S: pwhash
+                        }
+                    }
+                };
+
+                //store mail with password
+                ddb.putItem(params, function (err, data) {
+                    if (err) {
+                        console.log("Error at storing mail and pw", err);
+                    } else {
+                        console.log("mail and pw stored", data);
+                    }
+                });
+            }
+
+            //redirect user to the verification URL
             res.body = "https://connect.garmin.com/oauthConfirm" +
                 "?" + qs.stringify({oauth_token: req_data.oauth_token});
             callback(null, res);
