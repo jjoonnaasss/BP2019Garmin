@@ -11,6 +11,7 @@ deploy:
   role: "arn:aws:iam::240531394518:role/service-role/start_oauth-role-46j8pt3b"
   handler_name: "handler"
   zip: "start_oauth"
+  runtime: "nodejs10.x"
   on:
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^(master|develop)$
