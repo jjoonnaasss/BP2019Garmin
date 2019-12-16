@@ -1,6 +1,6 @@
 # BP Garmin
 
-[![Build Status](https://travis-ci.com/jjoonnaasss/BP2019Garmin.svg?branch=master)](https://travis-ci.com/jjoonnaasss/BP2019Garmin)
+[![Build Status](https://travis-ci.com/jjoonnaasss/BP2019Garmin.svg?branch=develop)](https://travis-ci.com/jjoonnaasss/BP2019Garmin)
 
 ## Setup
 

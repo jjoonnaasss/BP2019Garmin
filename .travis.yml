@@ -5,13 +5,33 @@ script:
   - npm run lint
   - npm test
 deploy:
-  provider: lambda
-  function_name: "start_oauth"
-  region: "eu-central-1"
-  role: "arn:aws:iam::240531394518:role/service-role/start_oauth-role-46j8pt3b"
-  handler_name: "handler"
-  zip: "start_oauth"
-  runtime: "nodejs10.x"
-  on:
-    all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^(master|develop)$
+  - provider: lambda
+    function_name: "start_oauth"
+    region: "eu-central-1"
+    role: "arn:aws:iam::240531394518:role/service-role/start_oauth-role-46j8pt3b"
+    handler_name: "handler"
+    zip: "start_oauth"
+    runtime: "nodejs10.x"
+    on:
+      all_branches: true
+      condition: $TRAVIS_BRANCH =~ ^(master|develop)$
+  - provider: lambda
+    function_name: "callback"
+    region: "eu-central-1"
+    role: "arn:aws:iam::240531394518:role/service-role/callback-role-e8853j7u"
+    handler_name: "handler"
+    zip: "callback"
+    runtime: "nodejs10.x"
+    on:
+      all_branches: true
+      condition: $TRAVIS_BRANCH =~ ^(master|develop)$
+  - provider: lambda
+    function_name: "ping"
+    region: "eu-central-1"
+    role: "arn:aws:iam::240531394518:role/service-role/ping_handler-role-11j47aph"
+    handler_name: "handler"
+    zip: "ping"
+    runtime: "nodejs10.x"
+    on:
+      all_branches: true
+      condition: $TRAVIS_BRANCH =~ ^(master|develop)$
