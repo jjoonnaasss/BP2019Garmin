@@ -6,7 +6,7 @@ all: clean packages/ping.zip packages/start_oauth.zip packages/callback.zip
 deploy: deploy-ping deploy-ouath deploy-callback
 
 deploy-ping: packages/ping.zip
-	aws lambda update-function-code --function-name ping --zip-file "fileb://packages/ping.zip" > /dev/null
+	aws lambda update-function-code --function-name ping_handler --zip-file "fileb://packages/ping.zip" > /dev/null
 	@echo "Deployed ping"
 
 deploy-ouath: packages/start_oauth.zip

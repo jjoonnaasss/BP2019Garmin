@@ -26,7 +26,7 @@ deploy:
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(master|develop)$
   - provider: lambda
-    function_name: "ping"
+    function_name: "ping_handler"
     region: "eu-central-1"
     role: "arn:aws:iam::240531394518:role/service-role/ping_handler-role-11j47aph"
     handler_name: "handler"
