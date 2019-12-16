@@ -1,5 +1,7 @@
 # BP Garmin
 
+[![Build Status](https://travis-ci.com/jjoonnaasss/BP2019Garmin.svg?branch=master)](https://travis-ci.com/jjoonnaasss/BP2019Garmin)
+
 ## Setup
 
 Install Node.js 10 and npm.
