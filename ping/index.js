@@ -3,17 +3,18 @@ exports.handler = function (event, context, callback) {
     const request = require("request");
     const OAuth = require("oauth-1.0a");
     const crypto = require("crypto");
+    const qs = require("querystring");
     const fs = require("fs");
 
-    //Consumer-Key und -Secret einlesen
+    //read consumer-key and -secret
     const access_rawdata = fs.readFileSync("access.json");
     const access = JSON.parse(access_rawdata);
 
     var AWS = require("aws-sdk");
-    AWS.config.update({region: "us-east-2"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //Datenbank-Objekt initialisieren
+    AWS.config.update({region: "eu-central-1"});
+    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
-    //Daten aus der Ping-Notification abspeichern
+    //read data from ping-notification
     var jsonBody = JSON.parse(event.body);
 
     var key = Object.keys(jsonBody)[0];
@@ -27,12 +28,12 @@ exports.handler = function (event, context, callback) {
     const res = {
         "statusCode": 200
     };
-    //Statuscode 200 antworten, damit der Ping nicht erneut gesendet wird
+    //respond statuscode 200, to prevent Garmin from resending the ping
     callback(null, res);
 
-    var uat_secret; //Variable für das Secret aus der Datenbank erstellen
+    var uat_secret; //variable to store user access token secret
 
-    //Parameter für den Datenbankzugriff
+    //parameters to read uat-secret from database
     var params = {
         TableName: "UserAccessTokens",
         Key: {
@@ -42,7 +43,7 @@ exports.handler = function (event, context, callback) {
         }
     };
 
-    // Secret zum vorhandenen UAT aus der Datenbank auslesen
+    //read uat-secret from database
     ddb.getItem(params, function (err, data) {
         if (err) {
             console.log("Error", err);
@@ -51,7 +52,7 @@ exports.handler = function (event, context, callback) {
             uat_secret = data.Item.Secret.S;
             console.log("UAT: " + uat + ", " + uat_secret);
 
-            // OAuth-Instanz initialisieren
+            //initialize oauth
             const oauth = OAuth({
                 consumer: access,
                 signature_method: "HMAC-SHA1",
@@ -78,7 +79,7 @@ exports.handler = function (event, context, callback) {
                 uploadStartTimeInSeconds: startTime
             };
 
-            //URL in zwei Teile trennen, um auf die URL ohne Upload-Zeiten zugreifen zu können
+            //split URL into two parts, in order to be able to access the URL without the upload-times
             var url_arr = url.split("?");
 
             //define URL and method for the HTTPS call
@@ -87,31 +88,17 @@ exports.handler = function (event, context, callback) {
                 method: "GET",
             };
 
-            //Signatur erstellen
-            //var sig = oauthSignature.generate("GET", url_arr[0], base_string_params, access.secret, uat_secret);
+            //create signature
             var sig = oauth.getSignature(request_data, uat_secret, base_string_params);
 
-            /*//OAuth-Daten erstellen lassen
-            var form = oauth.authorize({url: url, method: "GET"}, {
-                oauth_token: uat,
-                oauth_token_secret: uat_secret,
-                secret: uat_secret
-            });
-
-            //Signatur manuell abspeichern
-            form.oauth_signature = sig;
-
-            //Authorization-Header erstellen
-            var auth_header = oauth.toHeader(form);
-            auth_header.Authorization = auth_header.Authorization + ", oauth_token=" + "\"" + uat + "\""; //UAT in den Header einbauen*/
-
+            //create authorization-header
             var auth_header = {
-                "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_token=\"" + uat + "\", oauth_signature_method=\"HMAC-SHA1\"," + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_timestamp=\"" + timestamp + "\", oauth_nonce=\"" + nonce + "\", oauth_version=\"1.0\""
+                "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_token=\"" + uat + "\", oauth_signature_method=\"HMAC-SHA1\"" + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_timestamp=\"" + timestamp + "\", oauth_nonce=\"" + nonce + "\", oauth_version=\"1.0\""
             };
 
             console.log(auth_header);
 
-            //HTTPS-Request, um die tatsächlichen Daten anzufordern
+            //HTTPS-request, to receive the fitness data
             request(
                 {
                     headers: auth_header,
@@ -122,14 +109,9 @@ exports.handler = function (event, context, callback) {
                     console.log("===RESPONSE===");
                     console.log(body);
 
-                    //TODO: body kann aus mehreren Summaries zusammengesetzt sein -> foreach über das body-array?; zwischen verschiedenen Daten-Arten unterscheiden
+                    var userData;
 
-                    /*//Daten abspeichern, die neben dem UAT benötigt werden, um die Datenbankeinträge eindeutig identifizeren zu können
-                    var start = body.startTimeInSeconds;
-                    var end = body.startTimeOffsetInSeconds;
-                    var id = body.summaryId;
-
-                    //Parameter, um alle Einträge für das gegebene UAT auslesen zu können
+                    //parameters, to read all entries for the given uat from the database
                     var params = {
                         TableName: "FitnessData",
                         KeyConditionExpression: "UAT = :key",
@@ -138,63 +120,60 @@ exports.handler = function (event, context, callback) {
                         }
                     };
 
-                    //alle Einträge für das gegebene UAT auslesen
+                    //read all entries for the given uat
                     ddb.query(params, function (err, data) {
                         if (err) {
                             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                         } else {
                             console.log("Query succeeded.");
-                            data.Items.forEach(function (item) {
-                                if (item.startTime.S.equals(start) && item.endTime.S.equals(end)) { //existiert bereits ein Eintrag mit gleicher Start- und Endzeit, müssen keine neuen Daten gespeichert werden
-                                    return;
-                                } else if (item.startTime.S.equals(start)) {    //existiert ein Eintrag mit gleicher Start-, aber anderer Endzeit, wird er gelöscht, um eine aktuellere Version zu speichern
-                                    let parameters = {
-                                        Key: {
+                            userData = data;
+
+                            JSON.parse(body).forEach(function(item){
+                                var stored;
+                                if(userData){
+                                    userData.Items.forEach(function(entry){
+                                        console.log("comparing: " + item.summaryId + ", " + entry.ID.S);
+                                        if(item.summaryId == entry.ID.S){
+                                            stored = true; //the item is already stored in the database
+                                        }
+                                    });
+                                }
+
+                                if(!stored) {
+                                    //parameters, to store the new entry
+                                    var parameters = {
+                                        Item: {
                                             "UAT": {
-                                                S: item.UAT.S
+                                                S: uat
                                             },
                                             "ID": {
-                                                S: item.ID.S
+                                                S: item.summaryId
+                                            },
+                                            "startTime": {
+                                                N: item.startTimeInSeconds.toString()
+                                            },
+                                            "duration": {
+                                                N: item.durationInSeconds.toString()
+                                            },
+                                            "type": {
+                                                S: key
+                                            },
+                                            "data": {
+                                                S: qs.stringify(item) //maybe qs.stringify
                                             }
                                         },
                                         TableName: "FitnessData"
                                     };
-                                    ddb.deleteItem(parameters, function (err, data) {
-                                        if (err) console.log(err, err.stack);
-                                        else console.log(data);
+
+                                    //store the new entry
+                                    ddb.putItem(parameters, function (err, data) {
+                                        if (err) console.log("error at storing entry: " + err, err.stack);
+                                        else console.log("Successfully stored the entry " + data);
                                     });
                                 }
-
-                                //Parameter, um die neuen Daten abzuspeichern
-                                var parameters = {
-                                    Item: {
-                                        "UAT": {
-                                            S: uat
-                                        },
-                                        "ID": {
-                                            S: id
-                                        },
-                                        "startTime": {
-                                            S: start
-                                        },
-                                        "endTime": {
-                                            S: end
-                                        },
-                                        "data": {
-                                            S: JSON.stringify(body) //maybe qs.stringify
-                                        }
-                                    },
-                                    TableName: "FitnessData"
-                                };
-
-                                //Speichern der neuen Daten in der Datenbank
-                                ddb.putItem(parameters, function (err, data) {
-                                    if (err) console.log(err, err.stack);
-                                    else console.log("Success! " + data);
-                                });
                             });
                         }
-                    });*/
+                    });
                 }
             );
         }
