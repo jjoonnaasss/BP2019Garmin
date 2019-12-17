@@ -7,7 +7,7 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
 
     //read consumer-key and -secret
-    const access_rawdata = fs.readFileSync("access.json");
+    const access_rawdata = fs.readFileSync("/opt/access.json");
     const access = JSON.parse(access_rawdata);
 
     var AWS = require("aws-sdk");

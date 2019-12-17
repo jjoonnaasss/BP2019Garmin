@@ -22,7 +22,7 @@ exports.handler = function (event, context, callback) {
     }
 
     //read consumer-key and -secret
-    const access_rawdata = fs.readFileSync("access.json");
+    const access_rawdata = fs.readFileSync("/opt/access.json");
     const access = JSON.parse(access_rawdata);
 
     //create response object for the callback

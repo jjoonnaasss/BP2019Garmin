@@ -12,7 +12,7 @@ exports.handler = function (event, context, callback) {
     var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
     //read consumer-key and -secret
-    const access_rawdata = fs.readFileSync("access.json");
+    const access_rawdata = fs.readFileSync("/opt/access.json");
     const access = JSON.parse(access_rawdata);
 
 
