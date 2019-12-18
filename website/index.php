@@ -77,8 +77,17 @@ if ($_POST['submit']) {
         exit;
     }
 
-    //call lambda API, transferring mail and password hash, and retrieve redirect url from lambda function
-    $url = file_get_contents('https://link-to-api?mail=' . $emailAddress . '&pwhash=' . $pwHash);
+    //call lambda API with a post request, transferring mail and password hash, and retrieve redirect url from lambda function
+    $postfields = array('mail'=>'*'.$emailAddress.'*', 'pwhash'=>'*'.$pwHash.'*');
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'https://eu0kfjg03f.execute-api.eu-central-1.amazonaws.com/default/start_oauth');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
+    $url = curl_exec($ch);
+
+    //redirect user to Garmin website
     header("Location: $url");
 }
 

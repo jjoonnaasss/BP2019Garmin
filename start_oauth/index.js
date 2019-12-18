@@ -20,12 +20,12 @@ exports.handler = function (event, context, callback) {
     var mail = "empty";
     var pwhash = "empty";
 
-    //read and save the given parameters
-    if (event.queryStringParameters && event.queryStringParameters.mail) {
-        mail = event.queryStringParameters.mail;
-    }
-    if (event.queryStringParameters && event.queryStringParameters.pwhash) {
-        pwhash = event.queryStringParameters.pwhash;
+    if (event.body) {  //read and save the given parameters
+        var postData = event.body.split("*");
+        if (postData.length >= 3) {
+            mail = postData[1];
+            pwhash = postData[3];
+        }
     }
 
     //Access-Control-Allow-Origin enables access to the response-object
@@ -36,7 +36,6 @@ exports.handler = function (event, context, callback) {
             "Access-Control-Allow-Origin": "*"
         }
     };
-
 
     // initialize OAuth
     const oauth = OAuth({
@@ -90,8 +89,7 @@ exports.handler = function (event, context, callback) {
                 }
             });
 
-
-            if(mail != "empty" && pwhash != "empty") {
+            if (mail != "empty" && pwhash != "empty") {
                 //parameters to store mail with password
                 params = {
                     TableName: "UserData",
