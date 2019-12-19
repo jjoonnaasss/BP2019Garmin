@@ -1,0 +1,28 @@
+[ {
+    "summaryId": "EXAMPLE_67891",
+    "activityType": "WALKING",
+    "activeKilocalories": 1136,
+    "bmrKilocalories": 1736,
+    "steps": 11467,
+    "distanceInMeters": 14001.0,
+    "durationInSeconds": 86400,
+    "activeTimeInSeconds": 4680,
+    "startTimeInSeconds": 1472688000,
+    "startTimeOffsetInSeconds": 0,
+    "floorsClimbed": 12,
+    "source": "FITBIT"
+    },
+    {
+    "summaryId": "EXAMPLE_67892",
+    "activityType": "WALKING",
+    "activeKilocalories": 1708,
+    "bmrKilocalories": 1200,
+    "steps": 13986,
+    "distanceInMeters": 17091.0,
+    "durationInSeconds": 86400,
+    "activeTimeInSeconds": 8340,
+    "startTimeInSeconds": 1472774400,
+    "startTimeOffsetInSeconds": 0,
+    "floorsClimbed": 42,
+    "source": "FITBIT"
+} ]

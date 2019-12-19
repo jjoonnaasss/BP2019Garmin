@@ -1,0 +1,28 @@
+[
+    {
+        "summaryId": "EXAMPLE_1234",
+        "activityType": "SEDENTARY",
+        "activeKilocalories": 0,
+        "steps": 0,
+        "distanceInMeters": 0.0,
+        "durationInSeconds": 900,
+        "activeTimeInSeconds": 600,
+        "met": 1.0,
+        "intensity": "SEDENTARY",
+        "startTimeInSeconds": 1454418900,
+        "startTimeOffsetInSeconds": 3600
+    },
+    {
+        "summaryId": "EXAMPLE_5678",
+        "activityType": "RUNNING",
+        "activeKilocalories": 257,
+        "steps": 427,
+        "distanceInMeters": 222.07,
+        "durationInSeconds": 900,
+        "activeTimeInSeconds": 300,
+        "met": 9.894117,
+        "intensity": "HIGHLY_ACTIVE",
+        "startTimeInSeconds": 1454418900,
+        "startTimeOffsetInSeconds": 3600
+    }
+]
