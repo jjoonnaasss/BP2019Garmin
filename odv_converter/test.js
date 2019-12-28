@@ -1,4 +1,4 @@
-const fs = require("fs");
+/*const fs = require("fs");
 var test = require('./odv_converter');
 
 const rawdata = fs.readFileSync("daily_summaries.json");
@@ -63,4 +63,4 @@ if(bodyComSum != undefined) {
 console.log("==========ARRAY==========");
 for(var i = 0; i < array.length; i++) {
     console.log(array[i].Item.vaultEntry);
-}
+}*/

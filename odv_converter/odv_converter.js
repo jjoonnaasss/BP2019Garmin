@@ -1,4 +1,4 @@
-module.exports.odvConverter = function(dataJSON, type) {
+/*module.exports.odvConverter = function(dataJSON, type) {
 
     const fs = require("fs");
     var table = require('text-table');
@@ -16,14 +16,14 @@ module.exports.odvConverter = function(dataJSON, type) {
     duration = 0;
 
     // This is the array, which will be returned in the end. It contains all the Table items of the given summary.
-    var params = [];
-    /* If you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
+    var params = [];*/
+/* If you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
     *  type: The type of the summary, which is given as a parameter
     *  It's mostly the same procedure. Create a new Item for the Table FitnessData, which contains the summaryId, timestamp,
     *  type of the summary and vaultEntry data. Each vaultEntry is saved separately in a new Item.
     *  You can include a vaultEntry anytime by creating a new Item and saving it into the array params afterwards.
     */
-    switch(type) {
+/*switch(type) {
         // Daily Summaries Table
         case "dailySum":
             var daily1 = {
@@ -201,4 +201,4 @@ module.exports.odvConverter = function(dataJSON, type) {
         default:
             break;
     }
-};
+};*/

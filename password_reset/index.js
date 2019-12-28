@@ -2,7 +2,7 @@ exports.handler = function (event, context, callback) {
     // Test. Ignore
 
     //secret to verify, that the password-reset request is authorized
-    const secret = "***";
+    const secret = "1234";
 
     var AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
@@ -13,7 +13,7 @@ exports.handler = function (event, context, callback) {
     var pwhash = "empty";
     var random = "empty";
 
-    var timestamp = Date.now()/1000; //current timestamp
+    var timestamp = Date.now() / 1000; //current timestamp
     var res; //variable for the different possible responses to the website
 
     if (event.body) {  //check, if data was received at all
@@ -36,7 +36,7 @@ exports.handler = function (event, context, callback) {
                 },
                 ExpressionAttributeValues: {
                     ":ts": {
-                        N: timestamp
+                        N: timestamp.toString()
                     },
                     ":r": {
                         S: random
@@ -59,8 +59,7 @@ exports.handler = function (event, context, callback) {
                     };
 
 
-                }
-                else {
+                } else {
                     console.log(data); // successful response from database
                     //define response to website
                     res = {
@@ -77,7 +76,7 @@ exports.handler = function (event, context, callback) {
                 callback(null, res);
             });
 
-        } else if(postData.length == 9 && postData[7] == secret){ //check, if it is a request to end the reset by changing the password
+        } else if (postData.length == 9 && postData[7] == secret) { //check, if it is a request to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
             pwhash = postData[5];
@@ -103,17 +102,33 @@ exports.handler = function (event, context, callback) {
                             "Content-Type": "text/plain",
                             "Access-Control-Allow-Origin": "*"
                         },
-                        "body": "error with reading database"
+                        "body": "error"
                     };
+                    //send response to website
+                    callback(null, res);
                 } else {
                     console.log("Success", data);
-                    //read values received from the database
-                    var oldTStamp = data.Item.TimeStamp.N;
-                    var randVal = data.Item.RandomValue.S;
-                    var uat = data.Item.UAT.S;
+                    var oldTStamp, randVal, uat;
+                    if(data.Item.TimeStamp && data.Item.RandomValue) {
+                        //read values received from the database
+                        oldTStamp = data.Item.TimeStamp.N;
+                        randVal = data.Item.RandomValue.S;
+                        uat = data.Item.UAT.S;
+                    } else {
+                        res = {
+                            "statusCode": 200,
+                            "headers": {
+                                "Content-Type": "text/plain",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            "body": "request already used"
+                        };
+                        //send response to website
+                        callback(null, res);
+                    }
 
-                    if(timestamp - oldTStamp < 86400){ //check, if request to reset password is older than 24 hours
-                        if(random == randVal){ //check, if the random value is correct, to make sure, that the user is the correct one
+                    if (timestamp - oldTStamp < 86400) { //check, if request to reset password is older than 24 hours
+                        if (random == randVal) { //check, if the random value is correct, to make sure, that the user is the correct one
                             //parameters to store the users mail-address with the new password
                             params = {
                                 TableName: "UserData",
@@ -122,7 +137,7 @@ exports.handler = function (event, context, callback) {
                                         S: uat
                                     },
                                     "PWHash": {
-                                        pwhash
+                                        S: pwhash
                                     },
                                     "Mail": {
                                         S: mail
@@ -144,6 +159,8 @@ exports.handler = function (event, context, callback) {
                                         },
                                         "body": "success"
                                     };
+                                    //send response to website
+                                    callback(null, res);
                                 }
                             });
                         } else {
@@ -154,8 +171,10 @@ exports.handler = function (event, context, callback) {
                                     "Content-Type": "text/plain",
                                     "Access-Control-Allow-Origin": "*"
                                 },
-                                "body": "not authorized"
+                                "body": "error"
                             };
+                            //send response to website
+                            callback(null, res);
                         }
                     } else {
                         //define response to website
@@ -165,8 +184,10 @@ exports.handler = function (event, context, callback) {
                                 "Content-Type": "text/plain",
                                 "Access-Control-Allow-Origin": "*"
                             },
-                            "body": "password-reset request has expired"
+                            "body": "request already used"
                         };
+                        //send response to website
+                        callback(null, res);
                     }
                 }
             });
@@ -178,11 +199,10 @@ exports.handler = function (event, context, callback) {
                     "Content-Type": "text/plain",
                     "Access-Control-Allow-Origin": "*"
                 },
-                "body": "something went wrong"
+                "body": "error"
             };
+            //send response to website
+            callback(null, res);
         }
-
-        //send response to website
-        callback(null, res);
     }
 };
