@@ -6,6 +6,8 @@ use setasign\Fpdi\Fpdi;
 
 require_once "../vendor/autoload.php";
 
+include "../config.php";
+
 if ($_POST['submit']) {
     //check if input is valid
     checkUserInput();
@@ -19,7 +21,7 @@ if ($_POST['submit']) {
 
     //check that password and passwordRepeat are the same
     if (strcmp($password, $passwordRepeat) !== 0) {
-        header("Location: /index.php?pwerror=true");
+        header("Location: /index.php?pw_error=true");
         exit;
     }
 
@@ -76,19 +78,19 @@ if ($_POST['submit']) {
     $mail->Mailer = "smtp";
 
     //set required parameters for making an SMTP connection
-    $mail->SMTPAuth = TRUE;
-    $mail->SMTPSecure = "tls";
-    $mail->Port = 587;
-    $mail->Host = "smtp.gmail.com";
-    $mail->Username = "xxxxxx@gmail.com";
-    $mail->Password = 'xxxxxxxxxxx';
-    $mail->CharSet = 'UTF-8';
+    $mail->SMTPAuth = $SMTPAuth;
+    $mail->SMTPSecure = $SMTPSecure;
+    $mail->Port = $port;
+    $mail->Host = $host;
+    $mail->Username = $username;
+    $mail->Password = $password;
+    $mail->CharSet = $charSet;
 
     //set the required parameters for email header and body
     $mail->IsHTML(true);
-    $mail->AddAddress("email@receiver.com");
-    $mail->SetFrom("email@sender.com", "Garmin Demo-Anwendung");
-    $mail->Subject = "Privacy agreement";
+    $mail->AddAddress($reg_receiver);
+    $mail->SetFrom($reg_sender_mail, $reg_sender_name);
+    $mail->Subject = $reg_subject;
     $content = $_POST['firstName'] . ' ' . $_POST['lastName'] . ' has accepted the terms of use. <br>Email: ' . $_POST['email'] . '<br><br>';
     $mail->Body = $content;
 
@@ -97,7 +99,8 @@ if ($_POST['submit']) {
 
     //send the message, check for errors
     if (!$mail->send()) {
-        echo('Mailer Error: ' . $mail->ErrorInfo);
+        header("Location: /index.php?error=true");
+        unlink(__DIR__ . "/temp/$filename.pdf");
         exit;
     } else {
         unlink(__DIR__ . "/temp/$filename.pdf");
@@ -106,7 +109,7 @@ if ($_POST['submit']) {
     //call lambda API with a post request, transferring mail and password hash, and retrieve redirect url from lambda function
     $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*');
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://link-to-api.com');
+    curl_setopt($ch, CURLOPT_URL, $start_oauth_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_POST, 1);
@@ -120,27 +123,27 @@ function checkUserInput()
 {
     //checks whether values are empty
     if ($_POST['firstName'] == "") {
-        header("Location: /index.php?error=true");
+        header("Location: /index.php?input_error=true");
         exit;
     }
     if ($_POST['lastName'] == "") {
-        header("Location: /index.php?error=true");
+        header("Location: /index.php?input_error=true");
         exit;
     }
     if ($_POST['email'] == "") {
-        header("Location: /index.php?error=true");
+        header("Location: /index.php?input_error=true");
         exit;
     }
     if (!isset($_POST['password'])) {
-        header("Location: /index.php?error=true");
+        header("Location: /index.php?input_error=true");
         exit;
     }
     if (!isset($_POST['passwordRepeat'])) {
-        header("Location: /index.php?error=true");
+        header("Location: /index.php?input_error=true");
         exit;
     }
     if (!isset($_POST['accept'])) {
-        header("Location: /index.php?error=true");
+        header("Location: /index.php?input_error=true");
         exit;
     }
 }
@@ -148,24 +151,28 @@ function checkUserInput()
 ?>
 
 <html>
-<header>
+<head>
     <meta charset="utf-8">
-    <title>Registrierung für DiaBEATit</title>
+    <title><?php echo $reg_title?></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-</header>
+</head>
 <body>
 <div class="container">
     <br><br>
-    <h1>Registrierung für DiaBEATit</h1>
+    <h1><?php echo $reg_headline?></h1>
     <br><br>
 
     <!--show error message to user-->
     <?php
-    if (isset($_GET['error'])) {
-        echo '<div class="alert alert-danger" role="alert">Es ist ein Fehler aufgetreten. Bitte alle Felder ausfüllen</div>';
-    } elseif (isset($_GET['pwerror'])) {
-        echo '<div class="alert alert-danger" role="alert">Es ist ein Fehler aufgetreten. Die Passwörter müssen gleich sein</div>';
+    if (isset($_GET['input_error'])) {
+        echo '<div class="alert alert-danger" role="alert">'. $input_error . '</div>';
+    } elseif (isset($_GET['pw_error'])) {
+        echo '<div class="alert alert-danger" role="alert">'. $pw_error . '</div>';
+    } elseif (isset($_GET['registered'])) {
+        echo '<div class="alert alert-danger" role="alert">'. $registered . '</div>';
+    } elseif (isset($_GET['error'])) {
+        echo '<div class="alert alert-danger" role="alert">'. $mail_send_error . '</div>';
     }
     ?>
 
