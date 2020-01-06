@@ -1,5 +1,5 @@
 const fs = require("fs");
-var test = require('./odv_converter');
+var test = require("./odv_converter");
 
 const rawdata = fs.readFileSync("daily_summaries.json");
 const dailySum = JSON.parse(rawdata);
@@ -19,23 +19,23 @@ const bodyComSum = JSON.parse(rawdata6);
 var array = [];
 if(dailySum != undefined) {
     for(var i = 0; i < dailySum.length; i++) {
-        array.push(test.odvConverter(dailySum[i], 'dailySum')[0]);
-        array.push(test.odvConverter(dailySum[i], 'dailySum')[1]);
+        array.push(test.odvConverter(dailySum[i], "dailySum")[0]);
+        array.push(test.odvConverter(dailySum[i], "dailySum")[1]);
     }
 }
 if(thirdParty != undefined) {
     for(var i = 0; i < thirdParty.length; i++) {
-        array.push(test.odvConverter(thirdParty[i], 'thirdParty'));
+        array.push(test.odvConverter(thirdParty[i], "thirdParty"));
     }
 }
 if(manually != undefined) {
     for(var i = 0; i < manually.length; i++) {
-        array.push(test.odvConverter(manually[i], 'manually'));
+        array.push(test.odvConverter(manually[i], "manually"));
     }
 }
 if(actDetails != undefined) {
     for(var i = 0; i < actDetails.length; i++) {
-        var buffer = test.odvConverter(actDetails[i], 'actDetails');
+        var buffer = test.odvConverter(actDetails[i], "actDetails");
         for(var j = 0; j < buffer.length; j++) {
             array.push(buffer[j]);
         }
