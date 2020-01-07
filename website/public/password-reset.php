@@ -18,7 +18,7 @@ if ($_POST['submit']) {
     $randomValue = substr(str_shuffle($permitted_chars), 0, 16);
 
     //call lambda API with a post request, transferring mail and random value, and retrieve success or error code
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'randomValue' => '*' . $randomValue . '*', 'secret' => $secret);
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'randomValue' => '*' . $randomValue . '*', 'secret' => '*' .$secret .'*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $password_reset_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
