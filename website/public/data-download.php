@@ -8,7 +8,7 @@ if ($_POST['submit']) {
 
     //get input data
     $password = $_POST['password'];
-    $emailAddress = $_POST['email'];
+    $emailAddress = strtolower($_POST['email']);
 
     //hash the password
     $pwHash = hash('sha3-512', $password);
@@ -24,7 +24,7 @@ if ($_POST['submit']) {
     $response = curl_exec($ch);
 
     //show error message to user
-    if ($response == 'incorrect password!') {
+    if ($response == 'error with login') {
         header("Location: /data-download.php?loginError=true");
         exit;
     }

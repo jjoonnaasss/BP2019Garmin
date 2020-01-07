@@ -30,7 +30,7 @@ $SMTPSecure = "tls";
 $port = 587;
 $host = "smtp.provider.com";
 $username = "email@provider.com";
-$password = "****";
+$mail_password = "****";
 $charSet = "UTF-8";
 
 //registration email settings

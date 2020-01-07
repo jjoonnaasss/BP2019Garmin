@@ -14,7 +14,7 @@ if ($_POST['submit']) {
 
     //get input data
     $password = $_POST['password'];
-    $emailAddress = $_POST['email'];
+    $emailAddress = strtolower($_POST['email']);
     $passwordRepeat = $_POST['passwordRepeat'];
     $firstName = $_POST['firstName'];
     $lastName = $_POST['lastName'];
@@ -83,7 +83,7 @@ if ($_POST['submit']) {
     $mail->Port = $port;
     $mail->Host = $host;
     $mail->Username = $username;
-    $mail->Password = $password;
+    $mail->Password = $mail_password;
     $mail->CharSet = $charSet;
 
     //set the required parameters for email header and body
@@ -114,9 +114,14 @@ if ($_POST['submit']) {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
-    $url = curl_exec($ch);
+    $response = curl_exec($ch);
 
-    header("Location: $url");
+    if ($response == 'mail already registered') {
+        header("Location: /index.php?registered=true");
+        exit;
+    }
+
+    header("Location: $response");
 }
 
 function checkUserInput()
@@ -235,7 +240,7 @@ function checkUserInput()
                 </button>
             </div>
             <div class="modal-body">
-                <iframe style="width: 100%;height: 100%" src="template/privacy_protection.pdf" frameborder="0"></iframe>
+                <iframe style="width: 100%;height: 75vh" src="template/privacy_protection.pdf" frameborder="0"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

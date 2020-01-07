@@ -6,7 +6,7 @@ if ($_POST['submit']) {
 
     //get input data
     $password = $_POST['password'];
-    $emailAddress = $_GET['email'];
+    $emailAddress = strtolower($_GET['email']);
     $randomValue = $_GET['randomValue'];
     $passwordRepeat = $_POST['passwordRepeat'];
 

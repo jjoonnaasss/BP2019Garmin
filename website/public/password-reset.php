@@ -11,7 +11,7 @@ if ($_POST['submit']) {
     checkUserInput();
 
     //get input data
-    $emailAddress = $_POST['email'];
+    $emailAddress = strtolower($_POST['email']);
 
     //generate random value to identify the password reset request
     $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -43,7 +43,7 @@ if ($_POST['submit']) {
     $mail->Port = $port;
     $mail->Host = $host;
     $mail->Username = $username;
-    $mail->Password = $password;
+    $mail->Password = $mail_password;
     $mail->CharSet = $charSet;
 
     //set the required parameters for email header and body
