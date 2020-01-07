@@ -103,7 +103,7 @@ module.exports.odvConverter = function(dataJSON, type) {
 
         // The given sample data of the Activity Details Summaries.
         // Check if there are any sample data.
-        if(dataJSON.hasOwnProperty("samples")) {
+        if("samples" in dataJSON) {
             // Iterate through the sample data, which is saved inside an array.
             for(var j = 0; j < dataJSON.samples.length; j++) {
                 var actD3 = {

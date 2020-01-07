@@ -24,43 +24,45 @@ if(dailySum != undefined) {
     }
 }
 if(thirdParty != undefined) {
-    for(var i = 0; i < thirdParty.length; i++) {
-        array.push(test.odvConverter(thirdParty[i], "thirdParty"));
+    for(var j = 0; j < thirdParty.length; j++) {
+        array.push(test.odvConverter(thirdParty[j], "thirdParty"));
     }
 }
 if(manually != undefined) {
-    for(var i = 0; i < manually.length; i++) {
-        array.push(test.odvConverter(manually[i], "manually"));
+    for(var k = 0; k < manually.length; k++) {
+        array.push(test.odvConverter(manually[k], "manually"));
     }
 }
 if(actDetails != undefined) {
-    for(var i = 0; i < actDetails.length; i++) {
-        var buffer = test.odvConverter(actDetails[i], "actDetails");
-        for(var j = 0; j < buffer.length; j++) {
-            array.push(buffer[j]);
+    for(var l = 0; l < actDetails.length; l++) {
+        var buffer = test.odvConverter(actDetails[l], "actDetails");
+        for(var m = 0; m < buffer.length; m++) {
+            array.push(buffer[m]);
         }
     }
 }
 if(epochSum != undefined) {
-    for(var i = 0; i < epochSum.length; i++) {
-        array.push(test.odvConverter(epochSum[i], "epochSum"));
+    for(var n = 0; n < epochSum.length; n++) {
+        array.push(test.odvConverter(epochSum[n], "epochSum"));
     }
 }
 if(sleepSum != undefined) {
-    for(var i = 0; i < sleepSum.length; i++) {
-        var buffer = test.odvConverter(sleepSum[i], "sleepSum");
-        for(var j = 0; j < buffer.length; j++) {
-            array.push(buffer[j]);
+    for(var o = 0; o < sleepSum.length; o++) {
+        var buffer2 = test.odvConverter(sleepSum[o], "sleepSum");
+        for(var p = 0; p < buffer.length; p++) {
+            array.push(buffer2[p]);
         }
     }
 }
 if(bodyComSum != undefined) {
-    for(var i = 0; i < bodyComSum.length; i++) {
-        array.push(test.odvConverter(bodyComSum[i], "bodyComSum"));
+    for(var q = 0; q < bodyComSum.length; q++) {
+        array.push(test.odvConverter(bodyComSum[q], "bodyComSum"));
     }
 }
 
 console.log("==========ARRAY==========");
-for(var i = 0; i < array.length; i++) {
-    console.log(array[i].Item.vaultEntry);
+for(var r = 0; r < array.length; r++) {
+    if(array[r] != undefined) {
+        console.log(array[r].Item.vaultEntry);
+    }
 }
