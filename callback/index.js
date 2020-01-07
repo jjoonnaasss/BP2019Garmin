@@ -1,5 +1,5 @@
 exports.handler = function (event, context, callback) {
-
+    // Dependencies
     const request = require("request");
     const OAuth = require("oauth-1.0a");
     const crypto = require("crypto");
@@ -21,7 +21,7 @@ exports.handler = function (event, context, callback) {
         oauth_t = event.queryStringParameters.oauth_token;
     }
 
-    //read consumer-key and -secret
+    //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
     const access = JSON.parse(access_rawdata);
 

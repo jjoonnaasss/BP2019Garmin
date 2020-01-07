@@ -1,16 +1,30 @@
 exports.handler = function (event, context, callback) {
-
+    // Dependencies
     const fs = require("fs");
+
+    //read consumer-key, -secret and application secret
+    const access_rawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(access_rawdata);
 
     var AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
     var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
-    //read data from ping-notification
-    var jsonBody = JSON.parse(event.body);
+    //initial values to be replaced with the actual parameters
+    var mail = "empty";
+    var pwhash = "empty";
 
-    var mail = jsonBody.mail;
-    var pwhash = jsonBody.pwhash;
+    if (event.body) {  //check, if data was received at all
+        var postData = event.body.split("*");
+        if (postData.length >= 5) { //check, if there are enough parameters given, read parameters, check secret-value
+            mail = postData[1];
+            pwhash = postData[3];
+            if (postData[5] != access.app_secret) { //check secret-value
+                console.log("wrong secret");
+                return;
+            }
+        }
+    }
     console.log("received mail:  " + mail + " with password hash: " + pwhash);
 
     //parameters to read password hash and user access token from database
@@ -75,7 +89,7 @@ exports.handler = function (event, context, callback) {
                     "headers": {
                         "Content-Type": "text/plain",
                     },
-                    "body": "incorrect password!"
+                    "body": "error with login"
                 };
                 //send response
                 callback(null, res);

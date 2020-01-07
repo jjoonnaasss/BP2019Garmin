@@ -1,8 +1,11 @@
 exports.handler = function (event, context, callback) {
     // Test. Ignore
+    // Dependencies
+    const fs = require("fs");
 
-    //secret to verify, that the password-reset request is authorized
-    const secret = "1234";
+    //read consumer-key, -secret and application secret
+    const access_rawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(access_rawdata);
 
     var AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
@@ -18,7 +21,7 @@ exports.handler = function (event, context, callback) {
 
     if (event.body) {  //check, if data was received at all
         var postData = event.body.split("*");
-        if (postData.length == 7 && postData[5] == secret) { //check, if it is a request to start the password-reset, or to end the reset by changing the password
+        if (postData.length == 7 && postData[5] == access.app_secret) { //check, if it is a request to start the password-reset, or to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
 
@@ -76,7 +79,7 @@ exports.handler = function (event, context, callback) {
                 callback(null, res);
             });
 
-        } else if (postData.length == 9 && postData[7] == secret) { //check, if it is a request to end the reset by changing the password
+        } else if (postData.length == 9 && postData[7] == access.app_secret) { //check, if it is a request to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
             pwhash = postData[5];
