@@ -2,6 +2,13 @@
 //general
 $secret = "****";
 
+//navigation
+$nav_bar_title = "DiaBEATit";
+$nav_bar_reg = "Registrierung";
+$nav_bar_dd = "Daten Download";
+$nav_bar_pw = "Passwort zurücksetzen";
+$nav_bar_rec = "Neu Verbinden";
+
 //registration settings
 $reg_title = "Registrierung für DiaBEATit";
 $reg_headline = "Registrierung für DiaBEATit";

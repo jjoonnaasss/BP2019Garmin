@@ -64,13 +64,29 @@ function checkUserInput($email, $rand)
 ?>
 
 <html>
-<header>
+<head>
     <meta charset="utf-8">
     <title><?php echo $pw_title?></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-</header>
+</head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link" href="../"><?php echo $nav_bar_reg ?></a>
+            <a class="nav-item nav-link" href="../data-download.php"><?php echo $nav_bar_dd ?></a>
+            <a class="nav-item nav-link active" href="../password-reset.php"><?php echo $nav_bar_pw ?><span
+                        class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link" href="../reconnect.php"><?php echo $nav_bar_rec ?></a>
+        </div>
+    </div>
+</nav>
 <div class="container">
     <br><br>
     <h1<?php echo $pw_headline?></h1>
