@@ -19,7 +19,7 @@ exports.handler = function (event, context, callback) {
         if (postData.length >= 5) { //check, if there are enough parameters given, read parameters, check secret-value
             mail = postData[1];
             pwhash = postData[3];
-            if (postData[5] != access.app_secret) { //check secret-value
+            if (postData[5] !== access.app_secret) { //check secret-value
                 console.log("wrong secret");
                 return;
             }

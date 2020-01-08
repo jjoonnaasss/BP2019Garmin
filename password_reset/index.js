@@ -21,7 +21,7 @@ exports.handler = function (event, context, callback) {
 
     if (event.body) {  //check, if data was received at all
         var postData = event.body.split("*");
-        if (postData.length == 7 && postData[5] == access.app_secret) { //check, if it is a request to start the password-reset, or to end the reset by changing the password
+        if (postData.length == 7 && postData[5] === access.app_secret) { //check, if it is a request to start the password-reset, or to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
 

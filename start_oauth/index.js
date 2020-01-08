@@ -11,29 +11,115 @@ exports.handler = function (event, context, callback) {
     AWS.config.update({region: "eu-central-1"});
     var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
-    //read consumer-key and -secret
+    //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
     const access = JSON.parse(access_rawdata);
-
 
     //initial values to be replaced with the actual parameters
     var mail = "empty";
     var pwhash = "empty";
+    var secret = "empty";
 
     if (event.body) {  //read and save the given parameters
+
         var postData = event.body.split("*");
-        if (postData.length >= 3) {
+
+        if (postData.length == 7) {
             mail = postData[1];
             pwhash = postData[3];
+            secret = postData[5];
+
+            var parameters = {
+                TableName: "UserData",
+                Key: {
+                    "Mail": {
+                        S: postData[1]
+                    }
+                }
+            };
+
+            ddb.getItem(parameters, function (err, data) { //check, if mail is already registered
+                if (!err && data.Item) {
+                    console.log("already registered");
+                    let res = {
+                        "statusCode": 401,
+                        "headers": {
+                            "Content-Type": "text/plain",
+                        },
+                        "body": "mail already registered"
+                    };
+                    callback(null, res); //return error
+                } else {
+                    console.log(data);
+                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, "");
+                }
+            });
+        }
+
+        if (postData.length >= 8) { //read current password hash from database to reconnect existing account with garmin
+            mail = postData[1];
+            pwhash = postData[3];
+            secret = postData[5];
+            var params = {
+                TableName: "UserData",
+                Key: {
+                    "Mail": {
+                        S: mail
+                    }
+                }
+            };
+
+            //read password hash from database
+            ddb.getItem(params, function (err, data) {
+                if (err || (data.Item.PWHash.S !== pwhash)) {
+                    console.log("Error", err);
+                    let res = {
+                        "statusCode": 401,
+                        "headers": {
+                            "Content-Type": "text/plain",
+                        },
+                        "body": "error with login"
+                    };
+                    callback(null, res); //return error
+                    return;
+                } else {
+                    console.log("Success", data);
+
+                    let parameters = {
+                        TableName: "UserAccessTokens",
+                        Key: {
+                            "UAT": {S: data.Item.UAT.S}
+                        }
+                    };
+
+                    ddb.deleteItem(parameters, function (err, data) { //delete old user access token
+                        if (err) {
+                            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+                        } else {
+                            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
+                        }
+                    });
+
+                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, data.Item.UserID.S);
+                }
+            });
         }
     }
+};
 
-    //Access-Control-Allow-Origin enables access to the response-object
-    const res = {
+//function to contact the garmin api, receive a request-token and let user confirm connection
+var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, UserID) {
+
+    if (secret !== access.app_secret) { //check secret-value
+        console.log("wrong secret");
+        return;
+    }
+
+    const res = { //create response-object
         statusCode: 200,
         headers: {
             "Content-Type": "text/plain",
-            "Access-Control-Allow-Origin": "*"
+            "Access-Control-Allow-Origin": "*" //Access-Control-Allow-Origin enables access to the response-object
         }
     };
 
@@ -90,18 +176,36 @@ exports.handler = function (event, context, callback) {
             });
 
             if (mail != "empty" && pwhash != "empty") {
-                //parameters to store mail with password
-                params = {
-                    TableName: "UserData",
-                    Item: {
-                        "Mail": {
-                            S: mail
-                        },
-                        "PWHash": {
-                            S: pwhash
+                if(UserID === ""){
+                    //parameters to store mail with password
+                    params = {
+                        TableName: "UserData",
+                        Item: {
+                            "Mail": {
+                                S: mail
+                            },
+                            "PWHash": {
+                                S: pwhash
+                            }
                         }
-                    }
-                };
+                    };
+                } else {
+                    //parameters to store mail with password
+                    params = {
+                        TableName: "UserData",
+                        Item: {
+                            "Mail": {
+                                S: mail
+                            },
+                            "PWHash": {
+                                S: pwhash
+                            },
+                            "UserID": {
+                                S: UserID
+                            }
+                        }
+                    };
+                }
 
                 //store mail with password
                 ddb.putItem(params, function (err, data) {

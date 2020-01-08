@@ -23,7 +23,8 @@ exports.handler = function (event, context, callback) {
     var startTime = jsonBody[key][0].uploadStartTimeInSeconds;
     var endTime = jsonBody[key][0].uploadEndTimeInSeconds;
     var url = jsonBody[key][0].callbackURL;
-    console.log("\n uat: " + uat + "\n startTime: " + startTime + "\n endTime: " + endTime + "\n url:" + url);
+    var UserID = jsonBody[key][0].userId;
+    console.log("\n uat: " + uat + "\n startTime: " + startTime + "\n endTime: " + endTime + "\n url:" + url + "\n UserID: " + UserID);
 
     const res = {
         "statusCode": 200
@@ -51,6 +52,30 @@ exports.handler = function (event, context, callback) {
             console.log("Success", data);
             uat_secret = data.Item.Secret.S;
             console.log("UAT: " + uat + ", " + uat_secret);
+
+            let params = {
+                TableName: "UserData",
+                Key: {
+                    "Mail": {
+                        S: data.Item.Mail.S
+                    }
+                },
+                ExpressionAttributeNames: {
+                    "#UID": "UserID",
+                },
+                ExpressionAttributeValues: {
+                    ":uid": {
+                        S: UserID
+                    },
+                },
+                UpdateExpression: "SET #UID = :uid"
+            };
+
+            ddb.updateItem(params, function (err, data) { //update UserData table with the UserID
+                if (err) console.log(err, err.stack); // an error occurred
+                else console.log(data);           // successful response
+            });
+
 
             //initialize oauth
             const oauth = OAuth({
@@ -148,6 +173,9 @@ exports.handler = function (event, context, callback) {
                                             },
                                             "ID": {
                                                 S: item.summaryId
+                                            },
+                                            "UserID": {
+                                                S: UserID
                                             },
                                             "startTime": {
                                                 N: item.startTimeInSeconds.toString()
