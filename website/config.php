@@ -24,6 +24,10 @@ $dd_title = "Daten Download";
 $dd_headline = "Daten Download";
 $dd_link = "link-to-api";
 
+//reconnect settings
+$rec_title = "Neu Verbinden";
+$rec_headline = "Neu Verbinden";
+
 //email settings
 $SMTPAuth = TRUE;
 $SMTPSecure = "tls";
