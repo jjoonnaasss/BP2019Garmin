@@ -21,16 +21,18 @@ if(dailySum != undefined) {
     for(var i = 0; i < dailySum.length; i++) {
         array.push(test.odvConverter(dailySum[i], "dailySum")[0]);
         array.push(test.odvConverter(dailySum[i], "dailySum")[1]);
+        array.push(test.odvConverter(dailySum[i], "dailySum")[2]);
     }
 }
 if(thirdParty != undefined) {
     for(var j = 0; j < thirdParty.length; j++) {
-        array.push(test.odvConverter(thirdParty[j], "thirdParty"));
+        array.push(test.odvConverter(thirdParty[j], "thirdParty")[0]);
     }
 }
 if(manually != undefined) {
     for(var k = 0; k < manually.length; k++) {
-        array.push(test.odvConverter(manually[k], "manually"));
+        array.push(test.odvConverter(manually[k], "manually")[0]);
+        array.push(test.odvConverter(manually[k], "manually")[1]);
     }
 }
 if(actDetails != undefined) {
@@ -43,26 +45,26 @@ if(actDetails != undefined) {
 }
 if(epochSum != undefined) {
     for(var n = 0; n < epochSum.length; n++) {
-        array.push(test.odvConverter(epochSum[n], "epochSum"));
+        array.push(test.odvConverter(epochSum[n], "epochSum")[0]);
     }
 }
 if(sleepSum != undefined) {
     for(var o = 0; o < sleepSum.length; o++) {
         var buffer2 = test.odvConverter(sleepSum[o], "sleepSum");
-        for(var p = 0; p < buffer.length; p++) {
+        for(var p = 0; p < buffer2.length; p++) {
             array.push(buffer2[p]);
         }
     }
 }
 if(bodyComSum != undefined) {
     for(var q = 0; q < bodyComSum.length; q++) {
-        array.push(test.odvConverter(bodyComSum[q], "bodyComSum"));
+        array.push(test.odvConverter(bodyComSum[q], "bodyComSum")[0]);
     }
 }
 
 console.log("==========ARRAY==========");
 for(var r = 0; r < array.length; r++) {
     if(array[r] != undefined) {
-        console.log(array[r].Item.vaultEntry);
+        console.log(array[r].Item);
     }
 }

@@ -24,13 +24,22 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
+                timestamp: Date.now(),
+                type : type,
+                vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
+            }
+        };
+        var daily2 = {
+            TableName: "FitnessData",
+            Item: {
+                summaryId: dataJSON.summaryId,
                 // TODO: Find out the correct timestamp data.
                 timestamp: Date.now(),
                 type: type,
                 vaultEntry: { VaultEntryType: "HEART_RATE", Value: dataJSON.averageHeartRateInBeatsPerMinute, ValueExtension: null }
             }
         };
-        var daily2 = {
+        var daily3 = {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
@@ -42,6 +51,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         };
         params.push(daily1);
         params.push(daily2);
+        params.push(daily3);
         return params;
 
     // Third Party Daily Summaries Table
@@ -56,14 +66,27 @@ module.exports.odvConverter = function(dataJSON, type) {
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
             }
         };
-        console.log("==========THIRD PARTY==========");
-        console.log(third);
-
+        params.push(third);
         return third;
+
+    // Activity Summaries
+    case "activitySum":
+        var actSum = {
+            TabelName: "FitnessData",
+            Item: {
+                summaryId: dataJSON.summaryId,
+                timestamp: Date.now(),
+                activityType: dataJSON.activityType,
+                tyoe: type,
+                vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
+            }
+        };
+        params.push(actSum);
+        return params;
 
     // Manually Updated Activity Summaries
     case "manually":
-        var manu = {
+        var manu1 = {
             TableName: "FitnessData",
             Item:  {
                 summaryId: dataJSON.summaryId,
@@ -73,8 +96,19 @@ module.exports.odvConverter = function(dataJSON, type) {
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
             }
         };
-        //console.log("==========MANUALLY==========");
-        return manu;
+        var manu2 = {
+            TableName: "FitnessData",
+            Item: {
+                summaryId: dataJSON.summaryId,
+                timestamp: Date.now(),
+                activityType: dataJSON.activityType,
+                type: type,
+                vaultEntry: { VaultEntryTyoe: "HEART_RATE", Value: dataJSON.averageHeartRateInBeatsPerMinute, ValueExtension: null }
+            }
+        };
+        params.push(manu1);
+        params.push(manu2);
+        return params;
 
     // Activity Details Summaries
     case "actDetails":
@@ -133,7 +167,8 @@ module.exports.odvConverter = function(dataJSON, type) {
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
             }
         };
-        return epoch;
+        params.push(epoch);
+        return params;
 
     // Sleep Summaries
     case "sleepSum":
@@ -180,7 +215,8 @@ module.exports.odvConverter = function(dataJSON, type) {
                 vaultEntry: { VaultEntryType: "WEIGHT", Value: (dataJSON.weightInGrams/1000), ValueExtension: null }
             }
         };
-        return bodyC;
+        params.push(bodyC);
+        return params;
 
         // TODO: Maybe add Stress Details Summaries. Depends how we want to save the STRESS Values.
 
