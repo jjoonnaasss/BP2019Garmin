@@ -1,14 +1,5 @@
 module.exports.odvConverter = function(dataJSON, type) {
 
-    //const fs = require("fs");
-    //var table = require('text-table');
-
-    var AWS = require("aws-sdk");
-    AWS.config.update({region: "us-east-2"});
-    //var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); // Initialize data bank object
-
-    // heart frequency, stress, steps(?), weight, activities, sleep
-
     // This is the array, which will be returned in the end. It contains all the Table items of the given summary.
     var params = [];
     /* If you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
@@ -24,7 +15,9 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                // startTimeInSeconds: Start time of the activity in seconds since January 1, 1970, 00:00:00 UTC(Unix timestamp)
+                // startTimeOffsetInSeconds: derive the "local" time of the device that captured the data by adding it to startTimeInSeconds
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type : type,
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
             }
@@ -33,8 +26,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                // TODO: Find out the correct timestamp data.
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type: type,
                 vaultEntry: { VaultEntryType: "HEART_RATE", Value: dataJSON.averageHeartRateInBeatsPerMinute, ValueExtension: null }
             }
@@ -43,7 +35,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type: type,
                 // TODO: STRESS Value is not the right type. Needs to be adjusted.
                 vaultEntry: { VaultEntryType: "STRESS", Value: dataJSON.averageStressLevel, ValueExtension: null }
@@ -60,14 +52,14 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 activityType: dataJSON.activityType,
                 type: type,
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
             }
         };
         params.push(third);
-        return third;
+        return params;
 
     // Activity Summaries
     case "activitySum":
@@ -75,7 +67,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TabelName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 activityType: dataJSON.activityType,
                 tyoe: type,
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
@@ -90,7 +82,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item:  {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 activityType: dataJSON.activityType,
                 type: type,
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
@@ -100,7 +92,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 activityType: dataJSON.activityType,
                 type: type,
                 vaultEntry: { VaultEntryTyoe: "HEART_RATE", Value: dataJSON.averageHeartRateInBeatsPerMinute, ValueExtension: null }
@@ -116,23 +108,23 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.summary.startTimeInSeconds + dataJSON.summarystartTimeOffsetInSeconds,
                 activityType: dataJSON.summary.activityType,
                 type: type,
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.summary.durationInSeconds, ValueExtension: null }
             }
         };
-        params.push(actD1);
         var actD2 = {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds,
                 activityType: dataJSON.summary.activityType,
                 type: type,
                 vaultEntry: { VaultEntryType: "HEART_RATE", Value: dataJSON.summary.averageHeartRateInBeatsPerMinute, ValueExtension: null }
             }
         };
+        params.push(actD1);
         params.push(actD2);
 
         // The given sample data of the Activity Details Summaries.
@@ -144,7 +136,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     TableName: "FitnessData",
                     Item: {
                         summaryId: dataJSON.summaryId,
-                        timestamp: Date.now(),
+                        timestamp: dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds,
                         activityType: dataJSON.summary.activityType,
                         type: type,
                         vaultEntry: { VaultEntryType: "HEART_RATE", Value: dataJSON.samples[j].heartRate, ValueExtension: null }
@@ -161,7 +153,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 activityType: dataJSON.activityType,
                 type: type,
                 vaultEntry: { VaultEntryType: "EXERCISE_MID", Value: dataJSON.durationInSeconds, ValueExtension: null }
@@ -176,7 +168,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type: type,
                 vaultEntry: { VaultEntryType: "SLEEP_LIGHT", Value: dataJSON.lightSleepDurationInSeconds, ValueExtensions: null }
             }
@@ -185,7 +177,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type: type,
                 vaultEntry: { VaultEntryType: "SLEEP_REM", Value: dataJSON.remSleepInSeconds, ValueExtensions: null }
             }
@@ -194,7 +186,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type: type,
                 vaultEntry: { VaultEntryType: "SLEEP_DEEP", Value: dataJSON.deepSleepDurationInSeconds, ValueExtensions: null }
             }
@@ -210,7 +202,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             TableName: "FitnessData",
             Item: {
                 summaryId: dataJSON.summaryId,
-                timestamp: Date.now(),
+                timestamp: dataJSON.measurementTimeInSeconds + dataJSON.measurementTimeOffsetInSeconds,
                 type: type,
                 vaultEntry: { VaultEntryType: "WEIGHT", Value: (dataJSON.weightInGrams/1000), ValueExtension: null }
             }
