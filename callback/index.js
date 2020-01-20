@@ -4,6 +4,7 @@ exports.handler = function (event, context, callback) {
     const OAuth = require("oauth-1.0a");
     const crypto = require("crypto");
     const fs = require("fs");
+    const encryption = require("/opt/encryption");
 
     var AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
@@ -130,7 +131,7 @@ exports.handler = function (event, context, callback) {
                                 S: body.split("&")[0].split("=")[1] //extract token from string containing token and secret
                             },
                             "Secret": {
-                                S: body.split("&")[1].split("=")[1] //extract secret from string containing token and secret
+                                S: encryption.encryption(body.split("&")[1].split("=")[1], access.encPW, false) //extract secret from string containing token and secret and encrypt it
                             },
                             "Mail": {
                                 S: mail

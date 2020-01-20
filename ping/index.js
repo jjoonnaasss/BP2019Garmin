@@ -5,6 +5,7 @@ exports.handler = function (event, context, callback) {
     const crypto = require("crypto");
     const qs = require("querystring");
     const fs = require("fs");
+    const encryption = require("/opt/encryption");
 
     //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
@@ -50,7 +51,7 @@ exports.handler = function (event, context, callback) {
             console.log("Error", err);
         } else {
             console.log("Success", data);
-            uat_secret = data.Item.Secret.S;
+            uat_secret = encryption.encryption(data.Item.Secret.S, access.encPW, true);
             console.log("UAT: " + uat + ", " + uat_secret);
 
             let params = {
