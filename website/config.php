@@ -28,6 +28,10 @@ $dd_link = "link-to-api";
 $rec_title = "Neu Verbinden";
 $rec_headline = "Neu Verbinden";
 
+//callback settings
+$call_title = "Registrierung in Arbeit";
+$call_headline = "Registrierung in Arbeit";
+
 //email settings
 $SMTPAuth = TRUE;
 $SMTPSecure = "tls";

@@ -47,8 +47,8 @@ exports.handler = function (event, context, callback) {
             }
         };
 
-        //set response body
-        res.body = "Authorization in progress!";
+        //set response body with automatic redirection to applications callback website
+        res.body = "<meta http-equiv=\"refresh\" content=\"0; URL=http://192.168.178.5/callback.php\">";
 
         //callback to the user
         callback(null, res);
