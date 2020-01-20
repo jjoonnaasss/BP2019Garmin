@@ -2,7 +2,7 @@ module.exports.odvConverter = function(dataJSON, type) {
 
     // This is the array, which will be returned in the end. It contains all the Table items of the given summary.
     var params = [];
-    /* If you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
+    /* In case you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
     *  type: The type of the summary, which is given as a parameter
     *  It's mostly the same procedure. Create a new Item for the Table FitnessData, which contains the summaryId, timestamp,
     *  type of the summary and vaultEntry data. Each vaultEntry is saved separately in a new Item.
@@ -37,7 +37,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 summaryId: dataJSON.summaryId,
                 timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
                 type: type,
-                // TODO: STRESS Value is not the right type. Needs to be adjusted.
+                // TODO: STRESS Value is not the right type. Needs to be adjusted, but we don't know the unit for the amount yet.
                 vaultEntry: { VaultEntryType: "STRESS", Value: dataJSON.averageStressLevel, ValueExtension: null }
             }
         };
@@ -210,17 +210,17 @@ module.exports.odvConverter = function(dataJSON, type) {
         params.push(bodyC);
         return params;
 
-        // TODO: Maybe add Stress Details Summaries. Depends how we want to save the STRESS Values.
-
-        // TODO: User Metrics Summaries: Are there any important information for the .odv-format?
-
-        // TODO: Move IQ Summaries: Move IQ events are not considered a fitness activity
-
-        // TODO: Pulse Ox Summaries
-
-        // TODO: Respiration Summaries: Tracks breathing rate throughout the day.
+        /* TODO: Probably need add Stress Details Summaries. The way we save this summary depends on the unit of the 
+        *       amount of stress, which was not decided by the employer yet.
+        *
+        * "User Metric Summaries", "Menstrual Cycle Tracking(MCT) Summaries", "Pulse Ox Summaries" and "Respiration Summaries"
+        * don't contain any useful information for the bolus calculator.
+        *
+        * "Move IQ Summaries" doesn't contain any additional useful information, since the given data is already included in
+        * Daily and Epoch summaries.
+        */
 
     default:
-        break;
+        return params;
     }
 };

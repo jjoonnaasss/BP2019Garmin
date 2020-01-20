@@ -5,16 +5,18 @@ const rawdata = fs.readFileSync("daily_summaries.json");
 const dailySum = JSON.parse(rawdata);
 const rawdata1 = fs.readFileSync("third_party.json");
 const thirdParty = JSON.parse(rawdata1);
-const rawdata2 = fs.readFileSync("manually_updated_activity_summaries.json");
-const manually = JSON.parse(rawdata2);
-const rawdata3 = fs.readFileSync("activity_details_summaries.json");
-const actDetails = JSON.parse(rawdata3);
-const rawdata4 = fs.readFileSync("epoch_summaries.json");
-const epochSum = JSON.parse(rawdata4);
-const rawdata5 = fs.readFileSync("sleep_summaries.json");
-const sleepSum = JSON.parse(rawdata5);
-const rawdata6 = fs.readFileSync("body_composition_summaries.json");
-const bodyComSum = JSON.parse(rawdata6);
+const rawdata2 = fs.readFileSync("activity_summaries.json");
+const actSum = JSON.parse(rawdata2);
+const rawdata3 = fs.readFileSync("manually_updated_activity_summaries.json");
+const manually = JSON.parse(rawdata3);
+const rawdata4 = fs.readFileSync("activity_details_summaries.json");
+const actDetails = JSON.parse(rawdata4);
+const rawdata5 = fs.readFileSync("epoch_summaries.json");
+const epochSum = JSON.parse(rawdata5);
+const rawdata6 = fs.readFileSync("sleep_summaries.json");
+const sleepSum = JSON.parse(rawdata6);
+const rawdata7 = fs.readFileSync("body_composition_summaries.json");
+const bodyComSum = JSON.parse(rawdata7);
 
 var array = [];
 if(dailySum != undefined) {
@@ -27,6 +29,11 @@ if(dailySum != undefined) {
 if(thirdParty != undefined) {
     for(var j = 0; j < thirdParty.length; j++) {
         array.push(test.odvConverter(thirdParty[j], "thirdParty")[0]);
+    }
+}
+if(actSum != undefined) {
+    for (var z = 0; z < actSum.length; z++) {
+        array.push(test.odvConverter(actSum[z], "activitySum")[0]);
     }
 }
 if(manually != undefined) {
@@ -61,6 +68,9 @@ if(bodyComSum != undefined) {
         array.push(test.odvConverter(bodyComSum[q], "bodyComSum")[0]);
     }
 }
+
+// If it returns an empty array, throw an error.
+if(array.length == 0) throw "The given summary doesn't exist!";
 
 console.log("==========ARRAY==========");
 for(var r = 0; r < array.length; r++) {
