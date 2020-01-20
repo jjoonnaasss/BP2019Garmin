@@ -29,8 +29,11 @@ if ($_POST['submit']) {
         exit;
     }
 
-    //TODO User can download data
-    header("Location: /data-download.php?login=true");
+    //Create file DiaData from $response and let client download it
+    header('Content-disposition: attachment; filename=DiaData.json');
+    header('Content-type: application/json');
+    echo $response;
+    exit;
 }
 
 function checkUserInput()
