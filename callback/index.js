@@ -14,7 +14,7 @@ exports.handler = function (event, context, callback) {
     var ver = "no verifier received";
     var oauth_t = "no oauth_token received";
 
-    //read and save the given parameters
+    //read and save the verifier and the authentication token
     if (event.queryStringParameters && event.queryStringParameters.oauth_verifier) {
         ver = event.queryStringParameters.oauth_verifier;
     }
@@ -148,7 +148,7 @@ exports.handler = function (event, context, callback) {
                         }
                     });
 
-
+                    //add user access token to the entry with the fitting mail address in the UserData table
                     params = {
                         TableName: "UserData",
                         Key: {

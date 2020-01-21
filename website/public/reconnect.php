@@ -35,11 +35,7 @@ if ($_POST['submit']) {
 function checkUserInput()
 {
     //checks whether values are empty
-    if ($_POST['email'] == "") {
-        header("Location: /reconnect.php?input_error=true");
-        exit;
-    }
-    if (!isset($_POST['password'])) {
+    if ($_POST['email'] == "" or !isset($_POST['password'])) {
         header("Location: /reconnect.php?input_error=true");
         exit;
     }
@@ -55,6 +51,7 @@ function checkUserInput()
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body>
+<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"

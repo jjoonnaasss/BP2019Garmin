@@ -51,11 +51,7 @@ if ($_POST['submit']) {
 function checkUserInput($email, $rand)
 {
     //checks whether values are empty
-    if (!isset($_POST['password'])) {
-        header("Location: /password.php?input_error=true&email=$email&randomValue=$rand");
-        exit;
-    }
-    if (!isset($_POST['passwordRepeat'])) {
+    if (!isset($_POST['password']) or !isset($_POST['passwordRepeat'])) {
         header("Location: /password.php?input_error=true&email=$email&randomValue=$rand");
         exit;
     }
@@ -71,6 +67,7 @@ function checkUserInput($email, $rand)
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body>
+<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"

@@ -39,11 +39,7 @@ if ($_POST['submit']) {
 function checkUserInput()
 {
     //checks whether values are empty
-    if ($_POST['email'] == "") {
-        header("Location: /data-download.php?input_error=true");
-        exit;
-    }
-    if (!isset($_POST['password'])) {
+    if ($_POST['email'] == "" or !isset($_POST['password'])) {
         header("Location: /data-download.php?input_error=true");
         exit;
     }
@@ -58,6 +54,7 @@ function checkUserInput()
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
+<!--create a navbar to navigate across the different sites-->
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>

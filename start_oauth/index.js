@@ -20,7 +20,7 @@ exports.handler = function (event, context, callback) {
     var pwhash = "empty";
     var secret = "empty";
 
-    if (event.body) {  //read and save the given parameters
+    if (event.body) {   //save the given mail-address and given password
 
         var postData = event.body.split("*");
 
@@ -140,7 +140,7 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
         method: "POST",
     };
 
-    //HTTPS-Request, to ask for a request-token with a secret
+    //HTTPS-Request, to ask for a request-token with a request-token secret
     request(
         {
             url: request_data.url,
@@ -166,7 +166,7 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
                 }
             };
 
-            //store token
+            //store token into dynamoDB
             ddb.putItem(params, function (err, data) {
                 if (err) {
                     console.log("Error at storing token", err);

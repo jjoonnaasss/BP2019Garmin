@@ -53,7 +53,7 @@ $pw_sender_name = "Garmin Demo-Anwendung";
 $pw_subject = "Passwort zurücksetzen";
 $pw_mail_content_link = "link-to-website";
 
-//messages
+//messages sent to the user
 $input_error = "Es ist ein Fehler aufgetreten. Bitte alle Felder ausfüllen";
 $pw_error = "Es ist ein Fehler aufgetreten. Die Passwörter müssen gleich sein";
 $registered = "Die Email ist bereits registriert! Das <a href=\"../password-reset.php\">Passwort</a> kann geändert werden oder die <a href=\"../reconnect.php\">Verbindung</a> zu Garmin erneut erfolgen.";
