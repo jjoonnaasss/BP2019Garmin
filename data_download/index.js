@@ -1,6 +1,8 @@
 exports.handler = function (event, context, callback) {
     // Dependencies
     const fs = require("fs");
+    const converter = require("/opt/odv_converter");
+    //const JSZip = require("jszip");
 
     //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
@@ -43,10 +45,10 @@ exports.handler = function (event, context, callback) {
             console.log("Error", err);
         } else {
             console.log("Success", data);
-            if(data.Item.PWHash.S.equals(pwhash)){
+            if (data.Item.PWHash.S === pwhash) {
                 const uat = data.Item.UAT.S;
 
-                //parameters for searching the database for all fitness-data entries with the users uat
+                //parameters for searching the database for all fitness-data entries with the users user access token
                 var params = {
                     TableName: "FitnessData",
                     KeyConditionExpression: "UAT = :key",
@@ -60,24 +62,47 @@ exports.handler = function (event, context, callback) {
                     if (err) {
                         console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                     } else {
-                        console.log("Query succeeded.");
-                        const userData = data;
-                        var fileData = "insert information like title here"; //TODO
+                        console.log("Query succeeded." + data);
+                        console.log("items: " + data.Items);
+                        const userData = data.Items;
+                        console.log(data.Items[0].value1);
+                        var fileData = "{\"title\": \"ODV JSON export\", \"data\":["; //TODO
 
-                        if(userData) { //append all the entries to a string, in order to write that string in a file later
-                            JSON.parse(userData).forEach(function (item) {
-                                fileData += `{"type":${item.type.S},"value1":${item.value1.S}`;
-                                if (item.value2) {
-                                    fileData += `,"value2":${item.value2}},`;
-                                } else {
-                                    fileData += "},";
-                                }
+                        if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
+                            userData.forEach(function (item) {
+                                let entries = converter.odvConverter(JSON.parse(item.data.S), item.sumType.S);
+                                entries.forEach(function (entry) {
+                                    fileData += JSON.stringify((entry.Item.vaultEntry)) + ",";
+                                });
                             });
 
                             //cut off last ","
                             fileData = fileData.substring(0, fileData.length - 1);
+                            fileData += "]}";
 
-                            fs.writeFileSync("garmin_data.json", fileData);
+                            console.log(fileData);
+                            const res = {
+                                "statusCode": 200,
+                                "headers": {
+                                    "Content-Type": "text/plain",
+                                },
+                                "body": fileData
+                            };
+
+                            //send response
+                            callback(null, res);
+
+                            /*const zip = new JSZip();
+                            zip.file("data.json", fileData);
+                            zip.generateInternalStream({type:"nodebuffer"}).accumulate(function callback(err, content) {
+                                if(err) {
+                                    console.log(err);
+                                }
+                                fs.writeFile("data.zip", content, "binary", function (error) {
+
+                                });
+                            });*/
+                            //fs.writeFileSync("garmin_data.json", fileData);
                         }
                     }
                 });

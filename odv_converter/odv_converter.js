@@ -10,7 +10,7 @@ module.exports.odvConverter = function(dataJSON, type) {
     */
     switch(type) {
     // Daily Summaries Table
-    case "dailySum":
+    case "dailies":
         var daily1 = {
             TableName: "FitnessData",
             Item: {
@@ -62,7 +62,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         return params;
 
     // Activity Summaries
-    case "activitySum":
+    case "activities":
         var actSum = {
             TabelName: "FitnessData",
             Item: {

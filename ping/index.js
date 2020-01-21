@@ -184,7 +184,7 @@ exports.handler = function (event, context, callback) {
                                             "duration": {
                                                 N: item.durationInSeconds.toString()
                                             },
-                                            "type": {
+                                            "sumType": {
                                                 S: key
                                             },
                                             "data": {
