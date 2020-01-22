@@ -30,7 +30,7 @@ exports.handler = function (event, context, callback) {
     const res = {
         "statusCode": 200,
         "headers": {
-            "Content-Type": "text/plain",
+            "Content-Type": "text/html",
         }
     };
 
