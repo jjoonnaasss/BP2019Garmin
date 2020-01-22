@@ -2,7 +2,6 @@ exports.handler = function (event, context, callback) {
     // Dependencies
     const fs = require("fs");
     const converter = require("/opt/odv_converter");
-    //const JSZip = require("jszip");
 
     //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
@@ -91,18 +90,6 @@ exports.handler = function (event, context, callback) {
 
                             //send response
                             callback(null, res);
-
-                            /*const zip = new JSZip();
-                            zip.file("data.json", fileData);
-                            zip.generateInternalStream({type:"nodebuffer"}).accumulate(function callback(err, content) {
-                                if(err) {
-                                    console.log(err);
-                                }
-                                fs.writeFile("data.zip", content, "binary", function (error) {
-
-                                });
-                            });*/
-                            //fs.writeFileSync("garmin_data.json", fileData);
                         }
                     }
                 });
