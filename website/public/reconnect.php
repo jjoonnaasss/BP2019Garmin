@@ -71,7 +71,9 @@ function checkUserInput()
 <div class="container">
     <br><br>
     <h1><?php echo $rec_headline ?></h1>
-    <br><br>
+    <br>
+    <p><?php echo $rec_info_text ?></p>
+    <br>
 
     <!--show error message to user-->
     <?php

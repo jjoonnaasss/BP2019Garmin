@@ -166,7 +166,9 @@ function checkUserInput()
 <div class="container">
     <br><br>
     <h1><?php echo $reg_headline?></h1>
-    <br><br>
+    <br>
+    <p><?php echo $reg_info_text ?></p>
+    <br>
 
     <!--show error message to user-->
     <?php
