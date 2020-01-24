@@ -101,9 +101,9 @@ function checkUserInput()
 </nav>
 <div class="container">
     <br><br>
-    <h1><?php echo $pw_headline?></h1>
+    <h1><?php echo $pw_headline ?></h1>
     <br>
-    <?php echo $pw_info_text?>
+    <p><?php echo $pw_info_text ?></p>
     <br>
 
     <!--show error message to user-->

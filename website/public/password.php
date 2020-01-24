@@ -86,7 +86,9 @@ function checkUserInput($email, $rand)
 </nav>
 <div class="container">
     <br><br>
-    <h1<?php echo $pw_headline?></h1>
+    <h1><?php echo $pw_headline ?></h1>
+    <br>
+    <p><?php echo $pw_reset_info_text ?></p>
     <br>
 
     <!--show error message to user-->

@@ -30,7 +30,7 @@ include "../config.php";
     <br><br>
     <h1><?php echo $call_headline ?></h1>
     <br><br>
-    <p>Ihre Registrierung ist in circa 5 Minuten abgeschlossen. <br>Danach können Sie ihre Daten über den Menüpunkt "Daten Download" anfordern.</p>
+    <p><?php echo $call_info_text?></p>
 </div>
 
 <!--external libraries-->
