@@ -100,7 +100,11 @@ exports.handler = function (event, context, callback) {
                         }
                     });
 
-                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, data.Item.UserID.S);
+                    let uid = "";
+                    if(data.Item.UserID) {
+                        uid = data.Item.UserID.S;
+                    }
+                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, uid);
                 }
             });
         }

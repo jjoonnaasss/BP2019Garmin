@@ -3,7 +3,6 @@ exports.handler = function (event, context, callback) {
     const request = require("request");
     const OAuth = require("oauth-1.0a");
     const crypto = require("crypto");
-    const qs = require("querystring");
     const fs = require("fs");
     const encryption = require("/opt/encryption");
 
@@ -188,7 +187,7 @@ exports.handler = function (event, context, callback) {
                                                 S: key
                                             },
                                             "data": {
-                                                S: qs.stringify(item) //maybe qs.stringify
+                                                S: JSON.stringify(item) //maybe qs.stringify
                                             }
                                         },
                                         TableName: "FitnessData"

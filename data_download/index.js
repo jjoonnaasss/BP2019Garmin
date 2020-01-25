@@ -45,19 +45,36 @@ exports.handler = function (event, context, callback) {
         } else {
             console.log("Success", data);
             if (data.Item.PWHash.S === pwhash) {
-                const uat = data.Item.UAT.S;
 
-                //parameters for searching the database for all fitness-data entries with the users user access token
-                var params = {
-                    TableName: "FitnessData",
-                    KeyConditionExpression: "UAT = :key",
-                    ExpressionAttributeValues: {
-                        ":key": {"S": uat}
-                    }
-                };
+                var params;
+
+                if(data.Item.UserID) {
+                    const userId = data.Item.UserID.S;
+
+                    params = {
+                        TableName: "FitnessData",
+                        FilterExpression: "UserID = :key",
+                        ExpressionAttributeValues: {
+                            ":key": {"S": userId}
+                        }
+                    };
+                } else {
+                    const uat = data.Item.UAT.S;
+
+                    //parameters for searching the database for all fitness-data entries with the users user access token
+                    params = {
+                        TableName: "FitnessData",
+                        FilterExpression: "UAT = :key",
+                        ExpressionAttributeValues: {
+                            ":key": {"S": uat}
+                        }
+                    };
+                }
+
+
 
                 //read all entries for the given uat
-                ddb.query(params, function (err, data) {
+                ddb.scan(params, function (err, data) {
                     if (err) {
                         console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                     } else {
