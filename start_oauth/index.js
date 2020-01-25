@@ -24,7 +24,7 @@ exports.handler = function (event, context, callback) {
 
         var postData = event.body.split("*");
 
-        if (postData.length == 7) {
+        if (postData.length == 7) { //read values entered by the user to create a new account in the database and start connection with garmin
             mail = postData[1];
             pwhash = postData[3];
             secret = postData[5];
