@@ -21,7 +21,7 @@ exports.handler = function (event, context, callback) {
 
     if (event.body) {  //check, if data was received at all
         var postData = event.body.split("*");
-        if (postData.length == 7 && postData[5] === access.app_secret) { //check, if it is a request to start the password-reset, or to end the reset by changing the password
+        if (postData.length === 7 && postData[5] === access.app_secret) { //check, if it is a request to start the password-reset, or to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
 
@@ -78,7 +78,7 @@ exports.handler = function (event, context, callback) {
                 callback(null, res);
             });
 
-        } else if (postData.length == 9 && postData[7] == access.app_secret) { //check, if it is a request to end the reset by changing the password
+        } else if (postData.length === 9 && postData[7] === access.app_secret) { //check, if it is a request to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
             pwhash = postData[5];
@@ -129,7 +129,7 @@ exports.handler = function (event, context, callback) {
                     }
 
                     if (timestamp - oldTStamp < 86400) { //check, if request to reset password is older than 24 hours
-                        if (random == randVal) { //check, if the random value is correct, to make sure, that the user is the correct one
+                        if (random === randVal) { //check, if the random value is correct, to make sure, that the user is the correct one
                             //parameters to store the users mail-address with the new password
                             params = {
                                 TableName: "UserData",

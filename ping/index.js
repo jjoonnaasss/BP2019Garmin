@@ -150,7 +150,7 @@ exports.handler = function (event, context, callback) {
                                 var stored;
                                 if (userData) {
                                     userData.Items.forEach(function (entry) {
-                                        if (item.summaryId == entry.ID.S) {
+                                        if (item.summaryId === entry.ID.S) {
                                             stored = true; //the item is already stored in the database
                                         }
                                     });

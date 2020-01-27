@@ -35,7 +35,7 @@ exports.handler = function (event, context, callback) {
     };
 
     //check, if a token was received
-    if (oauth_t != "no oauth_token received") {
+    if (oauth_t !== "no oauth_token received") {
 
         //parameters for the database access
         var params = {
