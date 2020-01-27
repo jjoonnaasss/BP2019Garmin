@@ -158,7 +158,7 @@ exports.handler = function (event, context, callback) {
 
                                 if (!stored) {
                                     var parameters;
-                                    if(item.startTimeInSeconds != undefined) {
+                                    if(item.startTimeInSeconds) {
                                     //parameters, to store the new entry
                                         parameters = {
                                             Item: {
@@ -200,7 +200,7 @@ exports.handler = function (event, context, callback) {
                                                     S: UserID
                                                 },
                                                 "startTime": {
-                                                    N: item.measurementTimeInSeconds.toString()
+                                                    N: null
                                                 },
                                                 "duration": {
                                                     N: null
