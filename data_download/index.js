@@ -2,6 +2,7 @@ exports.handler = function (event, context, callback) {
     // Dependencies
     const fs = require("fs");
     const converter = require("/opt/odv_converter");
+    const rsa = require("node-rsa");
 
     //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
@@ -90,12 +91,18 @@ exports.handler = function (event, context, callback) {
                             fileData = fileData.substring(0, fileData.length - 1);
                             fileData += "]}";
 
+                            //initialize rsa and import the public key from access.json
+                            let key = new rsa();
+                            key.importKey(access.pubKey, "pkcs1-public");
+                            //encrypt the data to be sent to the website
+                            let encrypted = key.encrypt(fileData, "base64");
+
                             const res = {
                                 "statusCode": 200,
                                 "headers": {
                                     "Content-Type": "text/plain",
                                 },
-                                "body": fileData
+                                "body": encrypted
                             };
 
                             //send response

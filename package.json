@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "fs": "0.0.1-security",
+    "node-rsa": "^1.0.7",
     "oauth-1.0a": "^2.2.6",
     "querystring": "^0.2.0",
     "request": "^2.88.0"
