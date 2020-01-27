@@ -157,34 +157,64 @@ exports.handler = function (event, context, callback) {
                                 }
 
                                 if (!stored) {
+                                    var parameters;
+                                    if(item.startTimeInSeconds != undefined) {
                                     //parameters, to store the new entry
-                                    var parameters = {
-                                        Item: {
-                                            "UAT": {
-                                                S: uat
+                                        parameters = {
+                                            Item: {
+                                                "UAT": {
+                                                    S: uat
+                                                },
+                                                "ID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UserID": {
+                                                    S: UserID
+                                                },
+                                                "startTime": {
+                                                    N: item.startTimeInSeconds.toString()
+                                                },
+                                                "duration": {
+                                                    N: item.durationInSeconds.toString()
+                                                },
+                                                "sumType": {
+                                                    S: key
+                                                },
+                                                "data": {
+                                                    S: JSON.stringify(item) //maybe qs.stringify
+                                                }
                                             },
-                                            "ID": {
-                                                S: item.summaryId
+                                            TableName: "FitnessData"
+                                        };
+                                    }
+                                    else {
+                                        parameters = {
+                                            Item: {
+                                                "UAT": {
+                                                    S: uat
+                                                },
+                                                "ID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UserID": {
+                                                    S: UserID
+                                                },
+                                                "startTime": {
+                                                    N: item.measurementTimeInSeconds.toString()
+                                                },
+                                                "duration": {
+                                                    N: null
+                                                },
+                                                "sumType": {
+                                                    S: key
+                                                },
+                                                "data": {
+                                                    S: JSON.stringify(item) //maybe qs.stringify
+                                                }
                                             },
-                                            "UserID": {
-                                                S: UserID
-                                            },
-                                            "startTime": {
-                                                N: item.startTimeInSeconds.toString()
-                                            },
-                                            "duration": {
-                                                N: item.durationInSeconds.toString()
-                                            },
-                                            "sumType": {
-                                                S: key
-                                            },
-                                            "data": {
-                                                S: JSON.stringify(item) //maybe qs.stringify
-                                            }
-                                        },
-                                        TableName: "FitnessData"
-                                    };
-
+                                            TableName: "FitnessData"
+                                        };
+                                    }
                                     //store the new entry
                                     ddb.putItem(parameters, function (err) {
                                         if (err) {
