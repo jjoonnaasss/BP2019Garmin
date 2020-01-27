@@ -28,6 +28,21 @@ if ($_POST['submit']) {
     //hash the password
     $pwHash = hash('sha3-512', $password);
 
+    //call lambda API with a post request, transferring mail and password hash, and retrieve redirect url from lambda function
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' .$secret .'*');
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $start_oauth_link);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
+    $response = curl_exec($ch);
+
+    if ($response == 'mail already registered') {
+        header("Location: /index.php?registered=true");
+        exit;
+    }
+
     //get date
     $date = new \DateTime();
 
@@ -104,21 +119,6 @@ if ($_POST['submit']) {
         exit;
     } else {
         unlink(__DIR__ . "/temp/$filename.pdf");
-    }
-
-    //call lambda API with a post request, transferring mail and password hash, and retrieve redirect url from lambda function
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' .$secret .'*');
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $start_oauth_link);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
-    $response = curl_exec($ch);
-
-    if ($response == 'mail already registered') {
-        header("Location: /index.php?registered=true");
-        exit;
     }
 
     header("Location: $response");
@@ -244,12 +244,5 @@ function checkUserInput()
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
-
-<!--update button to loading button-->
-<script>
-    $('#authorize-plugin-form').on('submit', function () {
-        $('#authorize-plugin').button('loading');
-    });
-</script>
 </body>
 </html>
