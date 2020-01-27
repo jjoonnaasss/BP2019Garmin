@@ -26,7 +26,6 @@ exports.handler = function (event, context, callback) {
             }
         }
     }
-    console.log("received mail:  " + mail + " with password hash: " + pwhash);
 
     //parameters to read password hash and user access token from database
     var params = {
@@ -43,12 +42,11 @@ exports.handler = function (event, context, callback) {
         if (err) {
             console.log("Error", err);
         } else {
-            console.log("Success", data);
             if (data.Item.PWHash.S === pwhash) {
 
                 var params;
 
-                if(data.Item.UserID) {
+                if (data.Item.UserID) {
                     const userId = data.Item.UserID.S;
 
                     params = {
@@ -72,16 +70,12 @@ exports.handler = function (event, context, callback) {
                 }
 
 
-
                 //read all entries for the given uat
                 ddb.scan(params, function (err, data) {
                     if (err) {
                         console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                     } else {
-                        console.log("Query succeeded." + data);
-                        console.log("items: " + data.Items);
                         const userData = data.Items;
-                        console.log(data.Items[0].value1);
                         var fileData = "{\"title\": \"ODV JSON export\", \"data\":["; //TODO
 
                         if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
@@ -96,7 +90,6 @@ exports.handler = function (event, context, callback) {
                             fileData = fileData.substring(0, fileData.length - 1);
                             fileData += "]}";
 
-                            console.log(fileData);
                             const res = {
                                 "statusCode": 200,
                                 "headers": {

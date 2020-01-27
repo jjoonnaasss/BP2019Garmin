@@ -24,7 +24,6 @@ exports.handler = function (event, context, callback) {
     var endTime = jsonBody[key][0].uploadEndTimeInSeconds;
     var url = jsonBody[key][0].callbackURL;
     var UserID = jsonBody[key][0].userId;
-    console.log("\n uat: " + uat + "\n startTime: " + startTime + "\n endTime: " + endTime + "\n url:" + url + "\n UserID: " + UserID);
 
     const res = {
         "statusCode": 200
@@ -49,9 +48,7 @@ exports.handler = function (event, context, callback) {
         if (err) {
             console.log("Error", err);
         } else {
-            console.log("Success", data);
             uat_secret = encryption.encryption(data.Item.Secret.S, access.encPW, true);
-            console.log("UAT: " + uat + ", " + uat_secret);
 
             let params = {
                 TableName: "UserData",
@@ -71,9 +68,10 @@ exports.handler = function (event, context, callback) {
                 UpdateExpression: "SET #UID = :uid"
             };
 
-            ddb.updateItem(params, function (err, data) { //update UserData table with the UserID
-                if (err) console.log(err, err.stack); // an error occurred
-                else console.log(data);           // successful response
+            ddb.updateItem(params, function (err) { //update UserData table with the UserID
+                if (err) {
+                    console.log(err, err.stack); // an error occurred
+                }
             });
 
 
@@ -121,8 +119,6 @@ exports.handler = function (event, context, callback) {
                 "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_token=\"" + uat + "\", oauth_signature_method=\"HMAC-SHA1\"" + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_timestamp=\"" + timestamp + "\", oauth_nonce=\"" + nonce + "\", oauth_version=\"1.0\""
             };
 
-            console.log(auth_header);
-
             //HTTPS-request, to receive the fitness data
             request(
                 {
@@ -131,8 +127,6 @@ exports.handler = function (event, context, callback) {
                     method: "GET"
                 },
                 function (error, response, body) {
-                    console.log("===RESPONSE===");
-                    console.log(body);
 
                     var userData;
 
@@ -150,21 +144,19 @@ exports.handler = function (event, context, callback) {
                         if (err) {
                             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                         } else {
-                            console.log("Query succeeded.");
                             userData = data;
 
-                            JSON.parse(body).forEach(function(item){
+                            JSON.parse(body).forEach(function (item) {
                                 var stored;
-                                if(userData){
-                                    userData.Items.forEach(function(entry){
-                                        console.log("comparing: " + item.summaryId + ", " + entry.ID.S);
-                                        if(item.summaryId == entry.ID.S){
+                                if (userData) {
+                                    userData.Items.forEach(function (entry) {
+                                        if (item.summaryId == entry.ID.S) {
                                             stored = true; //the item is already stored in the database
                                         }
                                     });
                                 }
 
-                                if(!stored) {
+                                if (!stored) {
                                     //parameters, to store the new entry
                                     var parameters = {
                                         Item: {
@@ -194,9 +186,10 @@ exports.handler = function (event, context, callback) {
                                     };
 
                                     //store the new entry
-                                    ddb.putItem(parameters, function (err, data) {
-                                        if (err) console.log("error at storing entry: " + err, err.stack);
-                                        else console.log("Successfully stored the entry " + data);
+                                    ddb.putItem(parameters, function (err) {
+                                        if (err) {
+                                            console.log("error at storing entry: " + err, err.stack);
+                                        }
                                     });
                                 }
                             });

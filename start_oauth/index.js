@@ -40,7 +40,6 @@ exports.handler = function (event, context, callback) {
 
             ddb.getItem(parameters, function (err, data) { //check, if mail is already registered
                 if (!err && data.Item) {
-                    console.log("already registered");
                     let res = {
                         "statusCode": 401,
                         "headers": {
@@ -49,8 +48,8 @@ exports.handler = function (event, context, callback) {
                         "body": "mail already registered"
                     };
                     callback(null, res); //return error
+                    console.log("already registered");
                 } else {
-                    console.log(data);
                     contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, "");
                 }
             });
@@ -72,7 +71,6 @@ exports.handler = function (event, context, callback) {
             //read password hash from database
             ddb.getItem(params, function (err, data) {
                 if (err || (data.Item.PWHash.S !== pwhash)) {
-                    console.log("Error", err);
                     let res = {
                         "statusCode": 401,
                         "headers": {
@@ -81,10 +79,8 @@ exports.handler = function (event, context, callback) {
                         "body": "error with login"
                     };
                     callback(null, res); //return error
-                    return;
+                    console.log("Error", err);
                 } else {
-                    console.log("Success", data);
-
                     let parameters = {
                         TableName: "UserAccessTokens",
                         Key: {
@@ -92,16 +88,14 @@ exports.handler = function (event, context, callback) {
                         }
                     };
 
-                    ddb.deleteItem(parameters, function (err, data) { //delete old user access token
+                    ddb.deleteItem(parameters, function (err) { //delete old user access token
                         if (err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
-                        } else {
-                            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
                         }
                     });
 
                     let uid = "";
-                    if(data.Item.UserID) {
+                    if (data.Item.UserID) {
                         uid = data.Item.UserID.S;
                     }
                     contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, uid);
@@ -171,16 +165,14 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
             };
 
             //store token into dynamoDB
-            ddb.putItem(params, function (err, data) {
+            ddb.putItem(params, function (err) {
                 if (err) {
                     console.log("Error at storing token", err);
-                } else {
-                    console.log("token stored", data);
                 }
             });
 
             if (mail != "empty" && pwhash != "empty") {
-                if(UserID === ""){
+                if (UserID === "") {
                     //parameters to store mail with password
                     params = {
                         TableName: "UserData",
@@ -212,11 +204,9 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
                 }
 
                 //store mail with password
-                ddb.putItem(params, function (err, data) {
+                ddb.putItem(params, function (err) {
                     if (err) {
                         console.log("Error at storing mail and pw", err);
-                    } else {
-                        console.log("mail and pw stored", data);
                     }
                 });
             }

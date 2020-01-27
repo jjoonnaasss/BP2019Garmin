@@ -58,7 +58,6 @@ exports.handler = function (event, context, callback) {
             if (err) {
                 console.log("Error", err);
             } else {
-                console.log("Success", data);
                 var oauth_t_secret = data.Item.Secret.S;
                 var mail = data.Item.Mail.S;
 
@@ -115,11 +114,9 @@ exports.handler = function (event, context, callback) {
                         }
                     };
 
-                    ddb.deleteItem(params, function (err, data) {
+                    ddb.deleteItem(params, function (err) {
                         if (err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
-                        } else {
-                            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
                         }
                     });
 
@@ -140,11 +137,9 @@ exports.handler = function (event, context, callback) {
                     };
 
 
-                    ddb.putItem(params, function (err, data) {
+                    ddb.putItem(params, function (err) {
                         if (err) {
                             console.log("Error with storing UAT", err);
-                        } else {
-                            console.log("UAT stored", data);
                         }
                     });
 
@@ -167,13 +162,12 @@ exports.handler = function (event, context, callback) {
                         UpdateExpression: "SET #UAT = :uat"
                     };
 
-                    ddb.updateItem(params, function (err, data) {
-                        if (err) console.log(err, err.stack); // an error occurred
-                        else console.log(data);           // successful response
+                    ddb.updateItem(params, function (err) {
+                        if (err) {
+                            console.log(err, err.stack); // an error occurred
+                        }
                     });
 
-                    console.log("===RESPONSE===");
-                    console.log(body);
                     const newResponse = {
                         statusCode: 200,
                         body: JSON.stringify(body)

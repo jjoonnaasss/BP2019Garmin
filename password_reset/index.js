@@ -48,7 +48,7 @@ exports.handler = function (event, context, callback) {
                 UpdateExpression: "SET #TS = :ts, #R = :r"
             };
             //add the timestamp and random value to the users database entry
-            ddb.updateItem(params, function (err, data) {
+            ddb.updateItem(params, function (err) {
                 if (err) {
                     console.log(err, err.stack); // an error occurred
                     //define response to website
@@ -62,8 +62,7 @@ exports.handler = function (event, context, callback) {
                     };
 
 
-                } else {
-                    console.log(data); // successful response from database
+                } else {// successful response from database
                     //define response to website
                     res = {
                         "statusCode": 200,
@@ -110,9 +109,8 @@ exports.handler = function (event, context, callback) {
                     //send response to website
                     callback(null, res);
                 } else {
-                    console.log("Success", data);
                     var oldTStamp, randVal, uat;
-                    if(data.Item.TimeStamp && data.Item.RandomValue) {
+                    if (data.Item.TimeStamp && data.Item.RandomValue) {
                         //read values received from the database
                         oldTStamp = data.Item.TimeStamp.N;
                         randVal = data.Item.RandomValue.S;
@@ -148,11 +146,10 @@ exports.handler = function (event, context, callback) {
                                 }
                             };
                             //store the users mail-address with the new password
-                            ddb.putItem(params, function (err, data) {
+                            ddb.putItem(params, function (err) {
                                 if (err) {
                                     console.log("Error", err);
                                 } else {
-                                    console.log("Success", data);
                                     //define response to website
                                     res = {
                                         "statusCode": 200,
