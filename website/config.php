@@ -23,6 +23,8 @@ $password_reset_link = "link-to-password_reset";
 $dd_title = "Daten Download";
 $dd_headline = "Daten Download";
 $dd_link = "link-to-api";
+$dd_rsa_private_key = "-----BEGIN RSA PRIVATE KEY-----
+-----END RSA PRIVATE KEY-----";
 
 //reconnect settings
 $rec_title = "Neu Verbinden";

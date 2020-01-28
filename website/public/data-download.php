@@ -29,10 +29,15 @@ if ($_POST['submit']) {
         exit;
     }
 
-    //Create file DiaData from $response and let client download it
+    //initialize RSA module, load private key and decrypt the received data
+    $rsa = new RSA();
+    $rsa->loadKey($dd_rsa_private_key, RSA::PRIVATE_FORMAT_PKCS1);
+    $diaData = $rsa->decrypt(base64_decode($response));
+
+    //Create file DiaData from $diaData and let client download it
     header('Content-disposition: attachment; filename=DiaData.json');
     header('Content-type: application/json');
-    echo $response;
+    echo $diaData;
     exit;
 }
 
