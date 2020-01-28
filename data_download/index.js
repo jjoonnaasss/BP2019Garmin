@@ -3,6 +3,7 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
     const converter = require("/opt/odv_converter");
     const rsa = require("node-rsa");
+    const encryption = require("/opt/encryption");
 
     //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
@@ -81,7 +82,7 @@ exports.handler = function (event, context, callback) {
 
                         if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
                             userData.forEach(function (item) {
-                                let entries = converter.odvConverter(JSON.parse(item.data.S), item.sumType.S);
+                                let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
                                 entries.forEach(function (entry) {
                                     fileData += JSON.stringify((entry.Item.vaultEntry)) + ",";
                                 });
