@@ -148,7 +148,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         return params;
 
     // Epoch Summaries
-    case "epochSum":
+    case "epochs":
         var epoch = {
             TableName: "FitnessData",
             Item: {
@@ -163,7 +163,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         return params;
 
     // Sleep Summaries
-    case "sleepSum":
+    case "sleeps":
         var sleep1 = {
             TableName: "FitnessData",
             Item: {
@@ -197,7 +197,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         return params;
 
     // Body Composition Summaries
-    case "bodyComSum":
+    case "bodyComps":
         var bodyC = {
             TableName: "FitnessData",
             Item: {
@@ -210,13 +210,13 @@ module.exports.odvConverter = function(dataJSON, type) {
         params.push(bodyC);
         return params;
 
-        /* TODO: Probably need add Stress Details Summaries. The way we save this summary depends on the unit of the 
+        /* TODO: Probably need add Stress Details ("type" : "stressDetails") Summaries. The way we save this summary depends on the unit of the
         *       amount of stress, which was not decided by the employer yet.
         *
-        * "User Metric Summaries", "Menstrual Cycle Tracking(MCT) Summaries", "Pulse Ox Summaries" and "Respiration Summaries"
+        * "User Metric Summaries" ("type": "userMetrics"), "Menstrual Cycle Tracking(MCT) Summaries", "Pulse Ox Summaries" and "Respiration Summaries" ("type": "allDayRespiration")
         * don't contain any useful information for the bolus calculator.
         *
-        * "Move IQ Summaries" doesn't contain any additional useful information, since the given data is already included in
+        * "Move IQ Summaries" ("type": "moveIQActivities") doesn't contain any additional useful information, since the given data is already included in
         * Daily and Epoch summaries.
         */
 
