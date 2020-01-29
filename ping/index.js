@@ -130,16 +130,16 @@ exports.handler = function (event, context, callback) {
 
                     var userData;
 
-                    //parameters, to read all entries for the given uat from the database
+                    //parameters, to read all entries for the given userID from the database
                     var params = {
                         TableName: "FitnessData",
-                        KeyConditionExpression: "UAT = :key",
+                        KeyConditionExpression: "UserID = :key",
                         ExpressionAttributeValues: {
-                            ":key": {"S": uat}
+                            ":key": {"S": UserID}
                         }
                     };
 
-                    //read all entries for the given uat
+                    //read all entries for the given userID
                     ddb.query(params, function (err, data) {
                         if (err) {
                             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
@@ -150,7 +150,7 @@ exports.handler = function (event, context, callback) {
                                 var stored;
                                 if (userData) {
                                     userData.Items.forEach(function (entry) {
-                                        if (item.summaryId === entry.ID.S) {
+                                        if (item.summaryId === entry.SummaryID.S) {
                                             stored = true; //the item is already stored in the database
                                         }
                                     });
@@ -163,14 +163,14 @@ exports.handler = function (event, context, callback) {
                                     //parameters, to store the new entry
                                         parameters = {
                                             Item: {
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "ID": {
-                                                    S: item.summaryId
-                                                },
                                                 "UserID": {
                                                     S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
                                                 },
                                                 "startTime": {
                                                     N: item.startTimeInSeconds.toString()
@@ -191,14 +191,14 @@ exports.handler = function (event, context, callback) {
                                         //parameters, to store the new entry
                                         parameters = {
                                             Item: {
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "ID": {
-                                                    S: item.summaryId
-                                                },
                                                 "UserID": {
                                                     S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
                                                 },
                                                 "startTime": {
                                                     N: item.startTimeInSeconds.toString()
@@ -216,14 +216,14 @@ exports.handler = function (event, context, callback) {
                                         //parameters, to store the new entry
                                         parameters = {
                                             Item: {
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "ID": {
-                                                    S: item.summaryId
-                                                },
                                                 "UserID": {
                                                     S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
                                                 },
                                                 "duration": {
                                                     N: item.durationInSeconds.toString()
@@ -241,14 +241,14 @@ exports.handler = function (event, context, callback) {
                                         //parameters, to store the new entry
                                         parameters = {
                                             Item: {
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "ID": {
-                                                    S: item.summaryId
-                                                },
                                                 "UserID": {
                                                     S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
                                                 },
                                                 "sumType": {
                                                     S: key

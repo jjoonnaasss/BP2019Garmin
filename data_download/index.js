@@ -29,7 +29,7 @@ exports.handler = function (event, context, callback) {
         }
     }
 
-    //parameters to read password hash and user access token from database
+    //parameters to read password hash and userID from database
     var params = {
         TableName: "UserData",
         Key: {
@@ -48,70 +48,83 @@ exports.handler = function (event, context, callback) {
 
                 var params;
 
-                if (data.Item.UserID) {
+                if (data.Item.UserID) {//check if the user already has an userID to query for data
                     const userId = data.Item.UserID.S;
 
                     params = {
                         TableName: "FitnessData",
-                        FilterExpression: "UserID = :key",
+                        KeyConditionExpression: "UserID = :key",
                         ExpressionAttributeValues: {
                             ":key": {"S": userId}
                         }
                     };
-                } else {
-                    const uat = data.Item.UAT.S;
-
-                    //parameters for searching the database for all fitness-data entries with the users user access token
-                    params = {
-                        TableName: "FitnessData",
-                        FilterExpression: "UAT = :key",
-                        ExpressionAttributeValues: {
-                            ":key": {"S": uat}
-                        }
-                    };
-                }
 
 
-                //read all entries for the given uat
-                ddb.scan(params, function (err, data) {
-                    if (err) {
-                        console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
-                    } else {
-                        const userData = data.Items;
-                        var fileData = "{\"title\": \"ODV JSON export\", \"data\":["; //TODO
+                    //read all entries for the given userID
+                    ddb.query(params, function (err, data) {
+                        if (err) {
+                            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+                        } else {
+                            const userData = data.Items;
+                            var fileData = "{\"title\": \"ODV JSON export\", \"data\":["; //TODO
 
-                        if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
-                            userData.forEach(function (item) {
-                                let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
-                                entries.forEach(function (entry) {
-                                    fileData += JSON.stringify((entry.Item.vaultEntry)) + ",";
+                            if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
+                                userData.forEach(function (item) {
+                                    let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
+                                    entries.forEach(function (entry) {
+                                        fileData += JSON.stringify((entry.Item.vaultEntry)) + ",";
+                                    });
                                 });
-                            });
 
-                            //cut off last ","
-                            fileData = fileData.substring(0, fileData.length - 1);
-                            fileData += "]}";
+                                //cut off last ","
+                                fileData = fileData.substring(0, fileData.length - 1);
+                                fileData += "]}";
 
-                            //initialize rsa and import the public key from access.json
-                            let key = new rsa();
-                            key.importKey(access.pubKey, "pkcs1-public");
-                            //encrypt the data to be sent to the website
-                            let encrypted = key.encrypt(fileData, "base64");
+                                if (fileData === "{\"title\": \"ODV JSON export\", \"data\":]}") {//check, if no fitness data was found
+                                    //create response, telling the website that no data was found
+                                    const res = {
+                                        "statusCode": 401,
+                                        "headers": {
+                                            "Content-Type": "text/plain",
+                                        },
+                                        "body": "no data"
+                                    };
+                                    //send response
+                                    callback(null, res);
+                                } else {
 
-                            const res = {
-                                "statusCode": 200,
-                                "headers": {
-                                    "Content-Type": "text/plain",
-                                },
-                                "body": encrypted
-                            };
+                                    //initialize rsa and import the public key from access.json
+                                    let key = new rsa();
+                                    key.importKey(access.pubKey, "pkcs1-public");
+                                    //encrypt the data to be sent to the website
+                                    let encrypted = key.encrypt(fileData, "base64");
 
-                            //send response
-                            callback(null, res);
+                                    const res = {
+                                        "statusCode": 200,
+                                        "headers": {
+                                            "Content-Type": "text/plain",
+                                        },
+                                        "body": encrypted
+                                    };
+
+                                    //send response
+                                    callback(null, res);
+                                }
+                            }
                         }
-                    }
-                });
-
+                    });
+                } else {
+                    //create response, telling the website that no data was found
+                    const res = {
+                        "statusCode": 401,
+                        "headers": {
+                            "Content-Type": "text/plain",
+                        },
+                        "body": "no data"
+                    };
+                    //send response
+                    callback(null, res);
+                }
             } else {
                 //create response, telling the user that the given password is incorrect
                 const res = {
