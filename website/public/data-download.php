@@ -27,6 +27,9 @@ if ($_POST['submit']) {
     if ($response == 'error with login') {
         header("Location: /data-download.php?loginError=true");
         exit;
+    } elseif ($response == 'no data') {
+        header("Location: /data-download.php?data_error=true");
+        exit;
     }
 
     //initialize RSA module, load private key and decrypt the received data
@@ -92,6 +95,8 @@ function checkUserInput()
         echo '<div class="alert alert-danger" role="alert">' . $login_error . '</div>';
     } elseif (isset($_GET['login'])) {
         echo '<div class="alert alert-success" role="alert">' . $dd_login_success . '</div>';
+    } elseif (isset($_GET['data_error'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $dd_data_error . '</div>';
     }
     ?>
 

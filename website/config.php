@@ -80,4 +80,5 @@ $dd_info_text = "Hier können sie die gesammelten Fitnessdaten ihres DiaData Acc
 $pw_reset_success = "Passwort wurde erfolgreich geändert!";
 $login_error = "Es ist ein Fehler aufgetreten. Email und/oder Passwort falsch.";
 $dd_login_success = "Daten werden gedownloadet";
+$dd_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt";
 $pw_mail_text = "Klicken sie auf den folgenden Link, um ein neues Passwort festzulegen:";
