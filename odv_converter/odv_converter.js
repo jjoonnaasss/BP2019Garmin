@@ -173,15 +173,18 @@ module.exports.odvConverter = function(dataJSON, type) {
                 vaultEntry: { VaultEntryType: "SLEEP_LIGHT", Value: dataJSON.lightSleepDurationInSeconds, ValueExtensions: null }
             }
         };
-        var sleep2 = {
-            TableName: "FitnessData",
-            Item: {
-                summaryId: dataJSON.summaryId,
-                timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
-                type: type,
-                vaultEntry: { VaultEntryType: "SLEEP_REM", Value: dataJSON.remSleepInSeconds, ValueExtensions: null }
-            }
-        };
+        var sleep2 = null;
+        if(dataJSON.remSleepInSeconds) {
+            sleep2 = {
+                TableName: "FitnessData",
+                Item: {
+                    summaryId: dataJSON.summaryId,
+                    timestamp: dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds,
+                    type: type,
+                    vaultEntry: { VaultEntryType: "SLEEP_REM", Value: dataJSON.remSleepInSeconds, ValueExtensions: null }
+                }
+            };
+        }
         var sleep3 = {
             TableName: "FitnessData",
             Item: {
@@ -192,7 +195,9 @@ module.exports.odvConverter = function(dataJSON, type) {
             }
         };
         params.push(sleep1);
-        params.push(sleep2);
+        if(sleep2 != null) {
+            params.push(sleep2);
+        }
         params.push(sleep3);
         return params;
 
