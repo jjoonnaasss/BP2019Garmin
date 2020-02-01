@@ -5,6 +5,7 @@
         "ext-curl": "*",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi-fpdf": "^2.2",
-        "phpseclib/phpseclib": "~2.0"
+        "phpseclib/phpseclib": "~2.0",
+        "ext-zip": "*"
     }
 }

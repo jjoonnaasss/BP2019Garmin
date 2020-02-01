@@ -35,12 +35,34 @@ if ($_POST['submit']) {
     //initialize RSA module, load private key and decrypt the received data
     $rsa = new RSA();
     $rsa->loadKey($dd_rsa_private_key, RSA::PRIVATE_FORMAT_PKCS1);
-    $diaData = $rsa->decrypt(base64_decode($response));
+    $diaConvert = $rsa->decrypt(base64_decode($response));
 
-    //Create file DiaData from $diaData and let client download it
-    header('Content-disposition: attachment; filename=DiaData.json');
-    header('Content-type: application/json');
-    echo $diaData;
+    //save  JSON file in temp directory
+    $filenameJson = __DIR__ . "/temp/" . uniqid() . ".json";
+    file_put_contents($filenameJson, $diaConvert);
+
+    //initialize ZIP module
+    $zip = new ZipArchive();
+    //generate random filename
+    $filename = __DIR__ . "/temp/" . uniqid() . ".zip";
+
+    if ($zip->open($filename, ZipArchive::CREATE) !== TRUE) {
+        exit("cannot open <$filename>\n");
+    }
+
+    //add JSON file to zip
+    $zip->addFile($filenameJson, "DiaConvert.json");
+    $zip->close();
+
+    //read DiaConvert.zip from $zip and let client download it
+    header("Content-disposition: attachment; filename=DiaConvert.zip");
+    header('Content-type: application/zip');
+
+    readfile($filename);
+
+    //delete temp files
+    unlink($filenameJson);
+    unlink($filename);
     exit;
 }
 
