@@ -77,11 +77,7 @@ if ($_POST['submit']) {
 function checkUserInput()
 {
     //checks whether values are empty
-    if ($_POST['email'] == "") {
-        header("Location: /data-download.php?input_error=true&lang=$_GET[lang]");
-        exit;
-    }
-    if (!isset($_POST['password'])) {
+    if ($_POST['email'] == "" or !isset($_POST['password'])) {
         header("Location: /data-download.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
@@ -101,6 +97,7 @@ function checkUserInput()
 
 </head>
 <body>
+<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
@@ -126,7 +123,7 @@ function checkUserInput()
                 </div>
             </li>";
             } else {
-                echo "            <li class=\"nav-item dropdown\">
+                echo "<li class=\"nav-item dropdown\">
                 <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
                    aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
                 <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
@@ -138,10 +135,7 @@ function checkUserInput()
         </div>
     </div>
 </nav>
-<script>
-    $(function () {
-        $('.selectpicker').selectpicker();
-    });</script>
+
 <div class="container">
     <br><br>
     <h1><?php echo $dd_headline ?></h1>

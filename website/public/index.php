@@ -1,7 +1,6 @@
 <?php
 
 use PHPMailer\PHPMailer\PHPMailer;
-
 use setasign\Fpdi\Fpdi;
 
 require_once "../vendor/autoload.php";
@@ -135,27 +134,11 @@ if ($_POST['submit']) {
 function checkUserInput()
 {
     //checks whether values are empty
-    if ($_POST['firstName'] == "") {
+    if ($_POST['firstName'] == "" or $_POST['lastName'] == "" or $_POST['email'] == "") {
         header("Location: /index.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
-    if ($_POST['lastName'] == "") {
-        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
-        exit;
-    }
-    if ($_POST['email'] == "") {
-        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
-        exit;
-    }
-    if (!isset($_POST['password'])) {
-        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
-        exit;
-    }
-    if (!isset($_POST['passwordRepeat'])) {
-        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
-        exit;
-    }
-    if (!isset($_POST['accept'])) {
+    if (!isset($_POST['password']) or !isset($_POST['passwordRepeat']) or !isset($_POST['accept'])) {
         header("Location: /index.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
@@ -174,6 +157,7 @@ function checkUserInput()
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/css/flag-icon.min.css" rel="stylesheet">
 </head>
 <body>
+<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
@@ -183,8 +167,7 @@ function checkUserInput()
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
             <a class="nav-item nav-link active" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_reg ?>
-                <span
-                        class="sr-only">(current)</span></a>
+                <span class="sr-only">(current)</span></a>
             <a class="nav-item nav-link"
                href="../data-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_dd ?></a>
             <a class="nav-item nav-link"
@@ -200,7 +183,7 @@ function checkUserInput()
                 </div>
             </li>";
             } else {
-                echo "            <li class=\"nav-item dropdown\">
+                echo "<li class=\"nav-item dropdown\">
                 <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
                    aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
                 <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">

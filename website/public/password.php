@@ -57,11 +57,7 @@ if ($_POST['submit']) {
 function checkUserInput($email, $rand)
 {
     //checks whether values are empty
-    if (!isset($_POST['password'])) {
-        header("Location: /password.php?input_error=true&email=$email&randomValue=$rand&lang=$_GET[lang]");
-        exit;
-    }
-    if (!isset($_POST['passwordRepeat'])) {
+    if (!isset($_POST['password']) or !isset($_POST['passwordRepeat'])) {
         header("Location: /password.php?input_error=true&email=$email&randomValue=$rand&lang=$_GET[lang]");
         exit;
     }
@@ -80,6 +76,7 @@ function checkUserInput($email, $rand)
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/css/flag-icon.min.css" rel="stylesheet">
 </head>
 <body>
+<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
@@ -105,7 +102,7 @@ function checkUserInput($email, $rand)
                 </div>
             </li>";
             } else {
-                echo "            <li class=\"nav-item dropdown\">
+                echo "<li class=\"nav-item dropdown\">
                 <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
                    aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
                 <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
