@@ -8,6 +8,12 @@ require_once "../vendor/autoload.php";
 
 include "../config.php";
 
+if ($_GET['lang'] == "en") {
+    include "../en.php";
+} else {
+    include "../de.php";
+}
+
 if ($_POST['submit']) {
     //check if input is valid
     checkUserInput();
@@ -29,7 +35,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve redirect url from lambda function
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' .$secret .'*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $start_oauth_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -39,7 +45,7 @@ if ($_POST['submit']) {
     $response = curl_exec($ch);
 
     if ($response == 'mail already registered') {
-        header("Location: /index.php?registered=true");
+        header("Location: /index.php?registered=true&lang=$_GET[lang]");
         exit;
     }
 
@@ -114,7 +120,9 @@ if ($_POST['submit']) {
 
     //send the message, check for errors
     if (!$mail->send()) {
-        header("Location: /index.php?error=true");
+        echo('Auth: ' . $SMTPAuth . ' Secure: ' . $SMTPSecure . ' Port: ' . $port . ' Host: ' . $host . ' Name: ' . $username . ' PW: ' . $mail_password);
+        echo('Mailer Error: ' . $mail->ErrorInfo);
+        header("Location: /index.php?error=true&lang=$_GET[lang]");
         unlink(__DIR__ . "/temp/$filename.pdf");
         exit;
     } else {
@@ -127,12 +135,28 @@ if ($_POST['submit']) {
 function checkUserInput()
 {
     //checks whether values are empty
-    if ($_POST['firstName'] == "" or $_POST['lastName'] == "" or $_POST['email'] == "") {
-        header("Location: /index.php?input_error=true");
+    if ($_POST['firstName'] == "") {
+        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
-    if (!isset($_POST['password']) or !isset($_POST['passwordRepeat']) or !isset($_POST['accept'])) {
-        header("Location: /index.php?input_error=true");
+    if ($_POST['lastName'] == "") {
+        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
+        exit;
+    }
+    if ($_POST['email'] == "") {
+        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
+        exit;
+    }
+    if (!isset($_POST['password'])) {
+        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
+        exit;
+    }
+    if (!isset($_POST['passwordRepeat'])) {
+        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
+        exit;
+    }
+    if (!isset($_POST['accept'])) {
+        header("Location: /index.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
 }
@@ -142,99 +166,128 @@ function checkUserInput()
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?php echo $reg_title?></title>
+    <title><?php echo $reg_title ?></title>
+    <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/css/flag-icon.min.css" rel="stylesheet">
 </head>
 <body>
-<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>
+    <a class="navbar-brand" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-item nav-link active" href="../"><?php echo $nav_bar_reg ?><span class="sr-only">(current)</span></a>
-            <a class="nav-item nav-link" href="../data-download.php"><?php echo $nav_bar_dd ?></a>
-            <a class="nav-item nav-link" href="../password-reset.php"><?php echo $nav_bar_pw ?></a>
-            <a class="nav-item nav-link" href="../reconnect.php"><?php echo $nav_bar_rec ?></a>
+            <a class="nav-item nav-link active" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_reg ?>
+                <span
+                        class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link"
+               href="../data-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_dd ?></a>
+            <a class="nav-item nav-link"
+               href="../password-reset.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_pw ?></a>
+            <a class="nav-item nav-link"
+               href="../reconnect.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_rec ?></a>
+            <?php
+            if ($_GET['lang'] == "en") {
+                echo "<li class=\"nav-item dropdown\">
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
+                    <a class=\"dropdown-item\" href=\"?lang=de\"><span class=\"flag-icon flag-icon-de\"> </span>  Deutsch</a>
+                </div>
+            </li>";
+            } else {
+                echo "            <li class=\"nav-item dropdown\">
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
+                   aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
+                <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
+                    <a class=\"dropdown-item\" href=\"?lang=en\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                </div>
+            </li>";
+            }
+            ?>
         </div>
     </div>
 </nav>
 <div class="container">
     <br><br>
-    <h1><?php echo $reg_headline?></h1>
+    <h1><?php echo $reg_headline ?></h1>
     <br>
     <p><?php echo $reg_info_text ?></p>
     <br>
-
     <!--show error message to user-->
     <?php
     if (isset($_GET['input_error'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $input_error . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $input_error . '</div>';
     } elseif (isset($_GET['pw_error'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $pw_error . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $pw_error . '</div>';
     } elseif (isset($_GET['registered'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $registered . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $registered . '</div>';
     } elseif (isset($_GET['error'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $mail_send_error . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $mail_send_error . '</div>';
     }
     ?>
 
     <!--create input fields-->
     <form id="authorize-plugin-form" method="post">
         <div class="form-group">
-            <input name="firstName" class="form-control" type="text" placeholder="Vorname"
+            <input name="firstName" class="form-control" type="text" placeholder="<?php echo $first_name_input ?>"
                    value="<?php echo $_POST['firstName']; ?>" required>
         </div>
         <div class="form-group">
-            <input name="lastName" class="form-control" type="text" placeholder="Nachname"
+            <input name="lastName" class="form-control" type="text" placeholder="<?php echo $last_name_input ?>"
                    value="<?php echo $_POST['lastName']; ?>" required>
         </div>
         <div class="form-group">
-            <input name="email" class="form-control" type="email" placeholder="Email-Adresse"
+            <input name="email" class="form-control" type="email" placeholder="<?php echo $email_input ?>"
                    value="<?php echo $_POST['email']; ?>" required>
         </div>
         <div class="form-group">
-            <input name="password" type="password" class="form-control" placeholder="Passwort" required>
+            <input name="password" type="password" class="form-control" placeholder="<?php echo $password_input ?>"
+                   required>
         </div>
         <div class="form-group">
-            <input name="passwordRepeat" type="password" class="form-control" placeholder="Passwort wiederholen"
+            <input name="passwordRepeat" type="password" class="form-control"
+                   placeholder="<?php echo $repeat_password_input ?>"
                    required>
         </div>
         <label>
             <input name="accept" type="checkbox" required>
-            <a href="" data-toggle="modal" data-target="#modal">Nutzungsbedingungen und Datenschutz</a>
-            akzeptiert
+            <a href="" data-toggle="modal" data-target="#modal"><?php echo $term_of_use ?></a>
+            <?php echo $term_of_use_accept ?>
         </label>
         <br><br>
         <input data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" id="authorize-plugin"
-               name="submit" class="btn btn-primary" type="submit" value="Plugin autorisieren">
+               name="submit" class="btn btn-primary" type="submit" value="<?php echo $reg_button ?>"
+               data-loading-text="<i class='fa fa-spinner fa-spin '></i> Processing Order">
     </form>
 </div>
 
 <!--create pop-up with privacy protection document-->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
      aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Datenschutz</h5>
+                <h5 style="width: 100%" class="modal-title"><?php echo $reg_privacy_text ?></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <iframe style="width: 100%;height: 75vh" src="template/privacy_protection.pdf" frameborder="0"></iframe>
+                <iframe style="width: 100%;height: 75vh" src="<?php echo $reg_privacy_path ?>"></iframe>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal"><?php echo $reg_privacy_close ?></button>
             </div>
         </div>
     </div>
 </div>
+
 
 <!--external libraries-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>

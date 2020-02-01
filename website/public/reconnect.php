@@ -2,6 +2,12 @@
 
 include "../config.php";
 
+if ($_GET['lang'] == "en") {
+    include "../en.php";
+} else {
+    include "../de.php";
+}
+
 if ($_POST['submit']) {
     //check if input is valid
     checkUserInput();
@@ -14,7 +20,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve zip file
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*','secret' => '*' .$secret .'*', 'reconnect' .'*') ;
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*', 'reconnect' . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $start_oauth_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -25,7 +31,7 @@ if ($_POST['submit']) {
 
     //show error message to user
     if ($response == 'error with login') {
-        header("Location: /reconnect.php?loginError=true");
+        header("Location: /reconnect.php?loginError=true&lang=$_GET[lang]");
         exit;
     }
 
@@ -35,8 +41,12 @@ if ($_POST['submit']) {
 function checkUserInput()
 {
     //checks whether values are empty
-    if ($_POST['email'] == "" or !isset($_POST['password'])) {
-        header("Location: /reconnect.php?input_error=true");
+    if ($_POST['email'] == "") {
+        header("Location: /reconnect.php?input_error=true&lang=$_GET[lang]");
+        exit;
+    }
+    if (!isset($_POST['password'])) {
+        header("Location: /reconnect.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
 }
@@ -47,24 +57,47 @@ function checkUserInput()
 <head>
     <meta charset="utf-8">
     <title><?php echo $rec_title ?></title>
+    <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/css/flag-icon.min.css" rel="stylesheet">
 </head>
 <body>
-<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>
+    <a class="navbar-brand" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-item nav-link" href="../"><?php echo $nav_bar_reg ?></a>
-            <a class="nav-item nav-link" href="../data-download.php"><?php echo $nav_bar_dd ?></a>
-            <a class="nav-item nav-link" href="../password-reset.php"><?php echo $nav_bar_pw ?></a>
-            <a class="nav-item nav-link active" href="../reconnect.php"><?php echo $nav_bar_rec ?> <span
+            <a class="nav-item nav-link" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_reg ?></a>
+            <a class="nav-item nav-link"
+               href="../data-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_dd ?></a>
+            <a class="nav-item nav-link"
+               href="../password-reset.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_pw ?></a>
+            <a class="nav-item nav-link active"
+               href="../reconnect.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_rec ?> <span
                         class="sr-only">(current)</span></a>
+            <?php
+            if ($_GET['lang'] == "en") {
+                echo "<li class=\"nav-item dropdown\">
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
+                    <a class=\"dropdown-item\" href=\"?lang=de\"><span class=\"flag-icon flag-icon-de\"> </span>  Deutsch</a>
+                </div>
+            </li>";
+            } else {
+                echo "            <li class=\"nav-item dropdown\">
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
+                   aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
+                <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
+                    <a class=\"dropdown-item\" href=\"?lang=en\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                </div>
+            </li>";
+            }
+            ?>
         </div>
     </div>
 </nav>
@@ -87,15 +120,16 @@ function checkUserInput()
     <!--create input fields-->
     <form id="authorize-plugin-form" method="post">
         <div class="form-group">
-            <input name="email" class="form-control" type="email" placeholder="Email-Adresse"
+            <input name="email" class="form-control" type="email" placeholder="<?php echo $email_input ?>"
                    value="<?php echo $_POST['email']; ?>" required>
         </div>
         <div class="form-group">
-            <input name="password" type="password" class="form-control" placeholder="Passwort" required>
+            <input name="password" type="password" class="form-control" placeholder="<?php echo $password_input ?>"
+                   required>
         </div>
         <br><br>
         <input data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" id="authorize-plugin"
-               name="submit" class="btn btn-primary" type="submit" value="Account mit Garmin verbinden">
+               name="submit" class="btn btn-primary" type="submit" value="<?php echo $rec_button ?>">
     </form>
 </div>
 

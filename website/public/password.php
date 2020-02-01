@@ -2,6 +2,12 @@
 
 include "../config.php";
 
+if ($_GET['lang'] == "en") {
+    include "../en.php";
+} else {
+    include "../de.php";
+}
+
 if ($_POST['submit']) {
 
     //get input data
@@ -15,7 +21,7 @@ if ($_POST['submit']) {
 
     //check that password and passwordRepeat are the same
     if (strcmp($password, $passwordRepeat) !== 0) {
-        header("Location: /password.php?pw_error=true&email=$emailAddress&randomValue=$randomValue");
+        header("Location: /password.php?pw_error=true&email=$emailAddress&randomValue=$randomValue&lang=$_GET[lang]");
         exit;
     }
 
@@ -23,7 +29,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail, new password and random value, and retrieve success or error code
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'randomValue' => '*' . $randomValue . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' .$secret .'*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'randomValue' => '*' . $randomValue . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $password_reset_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -34,25 +40,29 @@ if ($_POST['submit']) {
 
     //show error message to user
     if ($response == 'error') {
-        header("Location: /password.php?apiError=true&email=$emailAddress&randomValue=$randomValue");
+        header("Location: /password.php?apiError=true&email=$emailAddress&randomValue=$randomValue&lang=$_GET[lang]");
         exit;
     } else if ($response == 'request already used') {
-        header("Location: /password-reset.php?expired=true");
+        header("Location: /password-reset.php?expired=true&lang=$_GET[lang]");
         exit;
-    } else if ($response == 'success'){
-        header("Location: /password.php?success=true");
+    } else if ($response == 'success') {
+        header("Location: /password.php?success=true&lang=$_GET[lang]");
         exit;
     }
 
     //show success message to user
-    header("Location: /password.php?apiError=true&email=$emailAddress&randomValue=$randomValue");
+    header("Location: /password.php?apiError=true&email=$emailAddress&randomValue=$randomValue&lang=$_GET[lang]");
 }
 
 function checkUserInput($email, $rand)
 {
     //checks whether values are empty
-    if (!isset($_POST['password']) or !isset($_POST['passwordRepeat'])) {
-        header("Location: /password.php?input_error=true&email=$email&randomValue=$rand");
+    if (!isset($_POST['password'])) {
+        header("Location: /password.php?input_error=true&email=$email&randomValue=$rand&lang=$_GET[lang]");
+        exit;
+    }
+    if (!isset($_POST['passwordRepeat'])) {
+        header("Location: /password.php?input_error=true&email=$email&randomValue=$rand&lang=$_GET[lang]");
         exit;
     }
 }
@@ -62,25 +72,48 @@ function checkUserInput($email, $rand)
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?php echo $pw_title?></title>
+    <title><?php echo $pw_title ?></title>
+    <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/css/flag-icon.min.css" rel="stylesheet">
 </head>
 <body>
-<!--create a navbar to navigate across the different sites-->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="../"><?php echo $nav_bar_title ?></a>
+    <a class="navbar-brand" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_title ?></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-item nav-link" href="../"><?php echo $nav_bar_reg ?></a>
-            <a class="nav-item nav-link" href="../data-download.php"><?php echo $nav_bar_dd ?></a>
-            <a class="nav-item nav-link active" href="../password-reset.php"><?php echo $nav_bar_pw ?><span
+            <a class="nav-item nav-link" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_reg ?></a>
+            <a class="nav-item nav-link"
+               href="../data-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_dd ?></a>
+            <a class="nav-item nav-link active"
+               href="../password-reset.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_pw ?><span
                         class="sr-only">(current)</span></a>
-            <a class="nav-item nav-link" href="../reconnect.php"><?php echo $nav_bar_rec ?></a>
+            <a class="nav-item nav-link"
+               href="../reconnect.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_rec ?></a>
+            <?php
+            if ($_GET['lang'] == "en") {
+                echo "<li class=\"nav-item dropdown\">
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
+                    <a class=\"dropdown-item\" href=\"?lang=de\"><span class=\"flag-icon flag-icon-de\"> </span>  Deutsch</a>
+                </div>
+            </li>";
+            } else {
+                echo "            <li class=\"nav-item dropdown\">
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
+                   aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
+                <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
+                    <a class=\"dropdown-item\" href=\"?lang=en\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                </div>
+            </li>";
+            }
+            ?>
         </div>
     </div>
 </nav>
@@ -90,34 +123,35 @@ function checkUserInput($email, $rand)
     <br>
     <p><?php echo $pw_reset_info_text ?></p>
     <br>
-
     <!--show error message to user-->
     <?php
     if (isset($_GET['input_error'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $input_error . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $input_error . '</div>';
     } elseif (isset($_GET['apiError'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $api_error . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $api_error . '</div>';
     } elseif (isset($_GET['pw_error'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $pw_error . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $pw_error . '</div>';
     } elseif (isset($_GET['expired'])) {
-        echo '<div class="alert alert-danger" role="alert">'. $password_reset_expired . '</div>';
-    }elseif (isset($_GET['success'])) {
-        echo '<div class="alert alert-success" role="alert">'. $pw_reset_success . '</div>';
+        echo '<div class="alert alert-danger" role="alert">' . $password_reset_expired . '</div>';
+    } elseif (isset($_GET['success'])) {
+        echo '<div class="alert alert-success" role="alert">' . $pw_reset_success . '</div>';
     }
     ?>
 
     <!--create input fields-->
     <form id="authorize-plugin-form" method="post">
         <div class="form-group">
-            <input name="password" type="password" class="form-control" placeholder="Passwort" required>
+            <input name="password" type="password" class="form-control" placeholder="<?php echo $password_input ?>"
+                   required>
         </div>
         <div class="form-group">
-            <input name="passwordRepeat" type="password" class="form-control" placeholder="Passwort wiederholen"
+            <input name="passwordRepeat" type="password" class="form-control"
+                   placeholder="<?php echo $repeat_password_input ?>"
                    required>
         </div>
         <br>
         <input data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" id="authorize-plugin"
-               name="submit" class="btn btn-primary" type="submit" value="Passwort ändern">
+               name="submit" class="btn btn-primary" type="submit" value="<?php echo $pw_reset_button ?>">
     </form>
 </div>
 
