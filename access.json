@@ -1,5 +1,8 @@
 {
   "key": "",
   "secret": "",
-  "app_secret": ""
+  "app_secret": "",
+  "encPW": "",
+  "dataEncPW": "",
+  "pubKey": ""
 }
