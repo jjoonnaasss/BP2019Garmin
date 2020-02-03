@@ -66,7 +66,7 @@ exports.handler = function (event, context, callback) {
                             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                         } else {
                             const userData = data.Items;
-                            var fileData = "{\"title\": \"ODV JSON export\", \"data\":["; //TODO
+                            var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {hour12: false, timeZone: "Europe/Berlin"}).replace(",","") + "\",\"data\":[";
 
                             if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
                                 userData.forEach(function (item) {
