@@ -21,9 +21,9 @@ const bodyComSum = JSON.parse(rawdata7);
 var array = [];
 if(dailySum != undefined) {
     for(var i = 0; i < dailySum.length; i++) {
-        array.push(test.odvConverter(dailySum[i], "dailySum")[0]);
-        array.push(test.odvConverter(dailySum[i], "dailySum")[1]);
-        array.push(test.odvConverter(dailySum[i], "dailySum")[2]);
+        for(var y = 0; y < test.odvConverter(dailySum[i], "dailies").length; y++) {
+            array.push(test.odvConverter(dailySum[i], "dailies")[y]);
+        }
     }
 }
 if(thirdParty != undefined) {
@@ -33,7 +33,7 @@ if(thirdParty != undefined) {
 }
 if(actSum != undefined) {
     for (var z = 0; z < actSum.length; z++) {
-        array.push(test.odvConverter(actSum[z], "activitySum")[0]);
+        array.push(test.odvConverter(actSum[z], "activities")[0]);
     }
 }
 if(manually != undefined) {
@@ -52,12 +52,12 @@ if(actDetails != undefined) {
 }
 if(epochSum != undefined) {
     for(var n = 0; n < epochSum.length; n++) {
-        array.push(test.odvConverter(epochSum[n], "epochSum")[0]);
+        array.push(test.odvConverter(epochSum[n], "epochs")[0]);
     }
 }
 if(sleepSum != undefined) {
     for(var o = 0; o < sleepSum.length; o++) {
-        var buffer2 = test.odvConverter(sleepSum[o], "sleepSum");
+        var buffer2 = test.odvConverter(sleepSum[o], "sleeps");
         for(var p = 0; p < buffer2.length; p++) {
             array.push(buffer2[p]);
         }
@@ -65,7 +65,7 @@ if(sleepSum != undefined) {
 }
 if(bodyComSum != undefined) {
     for(var q = 0; q < bodyComSum.length; q++) {
-        array.push(test.odvConverter(bodyComSum[q], "bodyComSum")[0]);
+        array.push(test.odvConverter(bodyComSum[q], "bodyComps")[0]);
     }
 }
 
