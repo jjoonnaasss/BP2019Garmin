@@ -19,7 +19,7 @@ const rawdata7 = fs.readFileSync("body_composition_summaries.json");
 const bodyComSum = JSON.parse(rawdata7);
 
 var array = [];
-/*if(dailySum != undefined) {
+if(dailySum != undefined) {
     for(var i = 0; i < dailySum.length; i++) {
         for(var y = 0; y < test.odvConverter(dailySum[i], "dailies").length; y++) {
             array.push(test.odvConverter(dailySum[i], "dailies")[y]);
@@ -62,7 +62,7 @@ if(sleepSum != undefined) {
             array.push(buffer2[p]);
         }
     }
-}*/
+}
 if(bodyComSum != undefined) {
     for(var q = 0; q < bodyComSum.length; q++) {
         array.push(test.odvConverter(bodyComSum[q], "bodyComps")[0]);
