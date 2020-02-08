@@ -6,7 +6,8 @@
     "node-rsa": "^1.0.7",
     "oauth-1.0a": "^2.2.6",
     "querystring": "^0.2.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "googleapis": "47.0.0"
   },
   "license": "AGPL-3.0-or-later",
   "repository": "github:jjoonnaasss/BP2019Garmin",
