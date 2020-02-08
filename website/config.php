@@ -1,12 +1,16 @@
 <?php
 //general
 $secret = "****";
+$google_secret = "****";
 
 //registration settings
 $start_oauth_link = "link-to-start_oauth";
 
 //password-reset settings
 $password_reset_link = "link-to-password_reset";
+
+//google settings
+$google_link = "link-to-google_oauth";
 
 //data download settings
 $dd_link = "link-to-api";

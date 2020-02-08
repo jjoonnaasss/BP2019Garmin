@@ -26,7 +26,7 @@ if ($_POST['submit']) {
 
     //check that password and passwordRepeat are the same
     if (strcmp($password, $passwordRepeat) !== 0) {
-        header("Location: /index.php?pw_error=true");
+        header("Location: /index.php?pw_error=true&lang=$_GET[lang]");
         exit;
     }
 
@@ -119,8 +119,6 @@ if ($_POST['submit']) {
 
     //send the message, check for errors
     if (!$mail->send()) {
-        echo('Auth: ' . $SMTPAuth . ' Secure: ' . $SMTPSecure . ' Port: ' . $port . ' Host: ' . $host . ' Name: ' . $username . ' PW: ' . $mail_password);
-        echo('Mailer Error: ' . $mail->ErrorInfo);
         header("Location: /index.php?error=true&lang=$_GET[lang]");
         unlink(__DIR__ . "/temp/$filename.pdf");
         exit;
@@ -174,6 +172,9 @@ function checkUserInput()
                href="../password-reset.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_pw ?></a>
             <a class="nav-item nav-link"
                href="../reconnect.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_rec ?></a>
+            <a class="nav-item nav-link"
+               href="../google.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_google ?></a>
             <?php
             if ($_GET['lang'] == "en") {
                 echo "<li class=\"nav-item dropdown\">

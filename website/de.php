@@ -14,6 +14,7 @@ $nav_bar_reg = "Registrierung";
 $nav_bar_dd = "Daten Download";
 $nav_bar_pw = "Passwort zurücksetzen";
 $nav_bar_rec = "Neu Verbinden";
+$nav_bar_google = "Mit Google Fit verbinden";
 
 //registration settings
 $reg_title = "Registrierung für DiaConvert";
@@ -42,6 +43,15 @@ $pw_reset_button = "Passwort ändern";
 $dd_title = "Daten Download";
 $dd_headline = "Daten Download";
 $dd_button = "Daten downloaden";
+
+//google settings
+$google_title = "Google Fit verknüpfen";
+$google_headline = "Google Fit verknüpfen";
+$google_button = "Google Fit verknüpfen";
+
+//google-callback settings
+$gcall_title = "Google Fit verknüpfen";
+$gcall_headline = "Google Fit verknüpfen";
 
 //password reset mail subject
 $pw_subject = "Passwort zurücksetzen";
@@ -73,3 +83,8 @@ $login_error = "Es ist ein Fehler aufgetreten. Email und/oder Passwort falsch.";
 $dd_login_success = "Daten werden gedownloadet";
 $dd_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt";
 $pw_mail_text = "Klicken sie auf den folgenden Link, um ein neues Passwort festzulegen:";
+$google_info_text  = "Erstellen sie ein neues DiaConvert Konto mit Google Fit Verknüpfung oder verknüpfen sie ihr vorhandenes DiaConvert Konto mit Google Fit.";
+$google_callback_info_text = "Melden sie sich mit ihrem DiaConvert Konto an oder erstellen sie ein neues, um die Google Fit Verbindung abzuschließen";
+$google_success = "Verbindung erfolgreich";
+$google_error = "Es gab leider einen Fehler, bitte versuchen sie es später erneut. Passiert dies öfters wenden sie sich bitte an ....";
+$google_reg_check = "Bitte auswählen, wenn sie noch kein DiaConvert Konto besitzen";

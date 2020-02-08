@@ -93,6 +93,9 @@ function checkUserInput($email, $rand)
                         class="sr-only">(current)</span></a>
             <a class="nav-item nav-link"
                href="../reconnect.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_rec ?></a>
+            <a class="nav-item nav-link"
+               href="../google.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_google ?></a>
             <?php
             if ($_GET['lang'] == "en") {
                 echo "<li class=\"nav-item dropdown\">
