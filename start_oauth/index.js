@@ -81,18 +81,20 @@ exports.handler = function (event, context, callback) {
                     callback(null, res); //return error
                     console.log("Error", err);
                 } else {
-                    let parameters = {
-                        TableName: "UserAccessTokens",
-                        Key: {
-                            "UAT": {S: data.Item.UAT.S}
-                        }
-                    };
+                    if(data.Item.UAT){
+                        let parameters = {
+                            TableName: "UserAccessTokens",
+                            Key: {
+                                "UAT": {S: data.Item.UAT.S}
+                            }
+                        };
 
-                    ddb.deleteItem(parameters, function (err) { //delete old user access token
-                        if (err) {
-                            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
-                        }
-                    });
+                        ddb.deleteItem(parameters, function (err) { //delete old user access token
+                            if (err) {
+                                console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+                            }
+                        });
+                    }
 
                     let uid = "";
                     if (data.Item.UserID) {
