@@ -10,7 +10,7 @@ $start_oauth_link = "link-to-start_oauth";
 $password_reset_link = "link-to-password_reset";
 
 //google settings
-$google_link = "link-to-google_oauth";
+$google_link = "link-to-google_registration";
 
 //data download settings
 $dd_link = "link-to-api";
