@@ -44,7 +44,18 @@ exports.handler = function (event, context, callback) {
         if (err) {
             console.log("Error", err);
         } else {
-            if (data.Item.PWHash.S === pwhash) {
+            if (!data.Item || data.Item.PWHash.S !== pwhash) {
+                //create response, telling the user that the given password is incorrect
+                const res = {
+                    "statusCode": 401,
+                    "headers": {
+                        "Content-Type": "text/plain",
+                    },
+                    "body": "error with login"
+                };
+                //send response
+                callback(null, res);
+            } else {
 
                 var params;
 
@@ -66,7 +77,10 @@ exports.handler = function (event, context, callback) {
                             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                         } else {
                             const userData = data.Items;
-                            var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {hour12: false, timeZone: "Europe/Berlin"}).replace(",","") + "\",\"data\":[";
+                            var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
+                                hour12: false,
+                                timeZone: "Europe/Berlin"
+                            }).replace(",", "") + "\",\"data\":[";
 
                             if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
                                 userData.forEach(function (item) {
@@ -125,17 +139,6 @@ exports.handler = function (event, context, callback) {
                     //send response
                     callback(null, res);
                 }
-            } else {
-                //create response, telling the user that the given password is incorrect
-                const res = {
-                    "statusCode": 401,
-                    "headers": {
-                        "Content-Type": "text/plain",
-                    },
-                    "body": "error with login"
-                };
-                //send response
-                callback(null, res);
             }
         }
     });

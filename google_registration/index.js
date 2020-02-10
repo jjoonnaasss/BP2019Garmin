@@ -158,7 +158,7 @@ exports.handler = function (event, context, callback) {
 
             //read password hash from database
             ddb.getItem(params, function (err, data) {
-                if (err || (data.Item.PWHash.S !== pwhash)) { //compare passwords
+                if (err || !data.Item ||(data.Item.PWHash.S !== pwhash)) { //compare passwords
                     let res = {
                         "statusCode": 401,
                         "headers": {

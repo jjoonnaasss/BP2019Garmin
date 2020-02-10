@@ -70,7 +70,7 @@ exports.handler = function (event, context, callback) {
 
             //read password hash from database
             ddb.getItem(params, function (err, data) {
-                if (err || (data.Item.PWHash.S !== pwhash)) {
+                if (err || !data.Item ||(data.Item.PWHash.S !== pwhash)) {
                     let res = {
                         "statusCode": 401,
                         "headers": {
