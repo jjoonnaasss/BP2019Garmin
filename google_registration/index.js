@@ -120,6 +120,9 @@ exports.handler = function (event, context, callback) {
                                     },
                                     "Google_token": {
                                         S: data.Item.Google_token.S
+                                    },
+                                    "GoogleTimestamp": {
+                                        S: Date.now().toString()
                                     }
                                 }
                             };
@@ -201,13 +204,17 @@ exports.handler = function (event, context, callback) {
                                 },
                                 ExpressionAttributeNames: {
                                     "#GT": "Google_token",
+                                    "#GTS": "GoogleTimestamp",
                                 },
                                 ExpressionAttributeValues: {
                                     ":gt": {
                                         S: data.Item.Google_token.S
                                     },
+                                    ":gts": {
+                                        S: Date.now().toString()
+                                    },
                                 },
-                                UpdateExpression: "SET #GT = :gt"
+                                UpdateExpression: "SET #GT = :gt, #GTS = :gts"
                             };
 
                             //add the google token to the existing database entry of the user
