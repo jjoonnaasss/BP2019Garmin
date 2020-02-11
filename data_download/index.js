@@ -4,6 +4,8 @@ exports.handler = function (event, context, callback) {
     const converter = require("/opt/odv_converter");
     const rsa = require("node-rsa");
     const encryption = require("/opt/encryption");
+    const crypto = require("crypto");
+    const buffer = require("buffer");
 
     //read consumer-key, -secret and application secret
     const access_rawdata = fs.readFileSync("/opt/access.json");
@@ -106,19 +108,28 @@ exports.handler = function (event, context, callback) {
                                     //send response
                                     callback(null, res);
                                 } else {
+                                    //create random key for the symmetric encryption
+                                    let symKey = buffer.Buffer.from(crypto.randomBytes(32));
+
+                                    //encrypt fileData symmetrically using the symkey
+                                    let encrypted = encryption.encryption(fileData, symKey, false);
 
                                     //initialize rsa and import the public key from access.json
                                     let key = new rsa();
                                     key.importKey(access.pubKey, "pkcs1-public");
-                                    //encrypt the data to be sent to the website
-                                    let encrypted = key.encrypt(fileData, "base64");
+                                    //use rsa to encrypt the key used to encrypt the fileData
+                                    let encryptedKey = key.encrypt(symKey, "base64");
 
+                                    //append the encrypted key and the encrypted data, divided by "===***==="
+                                    let response = encryptedKey + "===***===" + encrypted;
+
+                                    //create the response containing the encrypted data
                                     const res = {
                                         "statusCode": 200,
                                         "headers": {
                                             "Content-Type": "text/plain",
                                         },
-                                        "body": encrypted
+                                        "body": response
                                     };
 
                                     //send response
