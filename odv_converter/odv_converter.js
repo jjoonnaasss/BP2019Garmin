@@ -78,6 +78,16 @@ module.exports.odvConverter = function(dataJSON, type) {
             var daily4 = createTable(null, "STRESS", dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, new Date(dataJSON.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.stressDurationInSeconds);
             params.push(daily4);
         }
+        var daily5;
+        if("timeOffsetHeartRateSamples" in dataJSON) {
+            for (var key2 in dataJSON.timeOffsetHeartRateSamples) {
+                // Add the given additional seconds to the startTime.
+                var date = new Date(dataJSON.startTimeInSeconds * 1000);
+                date.setSeconds(date.getSeconds() + key2);
+                daily5 = createTable(null, "HEART_RATE", dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds + key2, date.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key2]);
+                params.push(daily5);
+            }
+        }
         return params;
 
     // Third Party Daily Summaries Table
@@ -98,6 +108,16 @@ module.exports.odvConverter = function(dataJSON, type) {
         if("averageHeartRateInBeatsPerMinute" in dataJSON) {
             var third3 = createTable(null, "HEART_RATE", dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, new Date(dataJSON.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.averageHeartRateInBeatsPerMinute);
             params.push(third3);
+        }
+        var third4;
+        if("timeOffsetHeartRateSamples" in dataJSON) {
+            for (var key in dataJSON.timeOffsetHeartRateSamples) {
+                // Add the given additional seconds to the startTime.
+                var date2 = new Date(dataJSON.startTimeInSeconds * 1000);
+                date2.setSeconds(date2.getSeconds() + key);
+                third4 = createTable(null, "HEART_RATE", dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds + key, date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key]);
+                params.push(third4);
+            }
         }
         return params;
 
