@@ -66,6 +66,9 @@ function checkUserInput()
             <a class="nav-item nav-link active"
                href="../google.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_google ?><span
                         class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link"
+               href="../google-download.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_google_d ?></a>
             <?php
             if ($_GET['lang'] == "en") {
                 echo "<li class=\"nav-item dropdown\">

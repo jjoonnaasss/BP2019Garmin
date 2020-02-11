@@ -39,6 +39,9 @@ if ($_GET['lang'] == "en") {
             <a class="nav-item nav-link"
                href="../google.php<?php echo "?lang=$_GET[lang]" ?>
             "><?php echo $nav_bar_google ?></a>
+            <a class="nav-item nav-link"
+               href="../google-download.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_google_d ?></a>
             <?php
             if ($_GET['lang'] == "en") {
                 echo "<li class=\"nav-item dropdown\">

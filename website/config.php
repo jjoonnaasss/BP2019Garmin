@@ -17,6 +17,13 @@ $dd_link = "link-to-api";
 $dd_rsa_private_key = "-----BEGIN RSA PRIVATE KEY-----
 -----END RSA PRIVATE KEY-----";
 
+//google settings
+$google_link = "link-to-api";
+$google_d_link = "link-to-api";
+$google_data_sync_link = "link-to-api";
+$google_rsa_private_key = "-----BEGIN RSA PRIVATE KEY-----
+-----END RSA PRIVATE KEY-----";
+
 //email settings
 $SMTPAuth = TRUE;
 $SMTPSecure = "tls";

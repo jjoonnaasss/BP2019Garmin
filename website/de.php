@@ -15,6 +15,7 @@ $nav_bar_dd = "Daten Download";
 $nav_bar_pw = "Passwort zurücksetzen";
 $nav_bar_rec = "Neu Verbinden";
 $nav_bar_google = "Mit Google Fit verbinden";
+$nav_bar_google_d = "Google Fit Daten Download";
 
 //registration settings
 $reg_title = "Registrierung für DiaConvert";
@@ -53,6 +54,10 @@ $google_button = "Google Fit verknüpfen";
 $gcall_title = "Google Fit verknüpfen";
 $gcall_headline = "Google Fit verknüpfen";
 
+//google-download settings
+$google_d_title = "Google Fit Daten Download";
+$google_d_headline = "Google Fit Daten Download";
+
 //password reset mail subject
 $pw_subject = "Passwort zurücksetzen";
 
@@ -83,8 +88,15 @@ $login_error = "Es ist ein Fehler aufgetreten. Email und/oder Passwort falsch.";
 $dd_login_success = "Daten werden gedownloadet";
 $dd_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt";
 $pw_mail_text = "Klicken sie auf den folgenden Link, um ein neues Passwort festzulegen:";
-$google_info_text  = "Erstellen sie ein neues DiaConvert Konto mit Google Fit Verknüpfung oder verknüpfen sie ihr vorhandenes DiaConvert Konto mit Google Fit.";
+$google_info_text = "Erstellen sie ein neues DiaConvert Konto mit Google Fit Verknüpfung oder verknüpfen sie ihr vorhandenes DiaConvert Konto mit Google Fit.";
 $google_callback_info_text = "Melden sie sich mit ihrem DiaConvert Konto an oder erstellen sie ein neues, um die Google Fit Verbindung abzuschließen";
 $google_success = "Verbindung erfolgreich";
 $google_error = "Es gab leider einen Fehler, bitte versuchen sie es später erneut. Passiert dies öfters wenden sie sich bitte an ....";
 $google_reg_check = "Bitte auswählen, wenn sie noch kein DiaConvert Konto besitzen";
+
+$google_d_info_text = "Hier können sie ihre Google Fit Daten synchronisieren und downloaden.";
+$google_d_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt";
+$google_sync_check = "Bitte auswählen, wenn sie die Daten downloaden möchten";
+$google_d_button = "Daten synchronisieren";
+$google_d_connect_error = "Ihr Account ist nicht mit Google Fit verbunden. Eine Verbindung mit Google Fit können sie <a href=\"../google.php\">hier</a> eingehen.";
+$google_d_login_success = "Login erfolgreich, Daten werden synchronisiert";

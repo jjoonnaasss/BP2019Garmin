@@ -22,9 +22,9 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve string
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $google_secret . '*');
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $dd_link);
+    curl_setopt($ch, CURLOPT_URL, $google_data_sync_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_POST, 1);
@@ -33,62 +33,82 @@ if ($_POST['submit']) {
 
     //show error message to user
     if ($response == 'error with login') {
-        header("Location: /data-download.php?loginError=true&lang=$_GET[lang]");
+        header("Location: /google-download.php?loginError=true&lang=$_GET[lang]&val=$_GET[val]");
         exit;
-    } elseif ($response == 'no data' or $response == "") {
-        header("Location: /data-download.php?data_error=true&lang=$_GET[lang]");
-        exit;
+    } else if ($response == 'no google connection') {
+        header("Location: /google-download.php?googleConnect=true&lang=$_GET[lang]&val=$_GET[val]");
+    } else if ($response == 'Internal server error') {
+        header("Location: /google-download.php?data_error=true&lang=$_GET[lang]&val=$_GET[val]");
     }
 
-    //split response in two strings, the rsa-encrypted symmetrical key and the encrypted Garmin fitness data
-    $responseData = explode("===***===", $response, 2);
+    if (isset($_POST['googleSyncCheckbox'])) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $google_d_link);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
+        $response = curl_exec($ch);
 
-    //initialize RSA module, decrypt symmetrical key
-    $rsa = new RSA();
-    $rsa->loadKey($google_rsa_private_key, RSA::PRIVATE_FORMAT_PKCS1);
-    $symKey = $rsa->decrypt(base64_decode($responseData[0]));
+        //show error message to user
+        if ($response == 'no data' or $response == "") {
+            header("Location: /google-download.php?data_error=true&lang=$_GET[lang]");
+            exit;
+        } else if ($response == 'Internal server error') {
+            header("Location: /google-download.php?data_error=true&lang=$_GET[lang]&val=$_GET[val]");
+        }
 
-    //decrypt Garmin fitness data
-    $iv_size = openssl_cipher_iv_length("aes-256-ctr");
-    $data = explode(":", $responseData[1]);
-    $iv = hex2bin($data[0]);
-    $cipherText = hex2bin($data[1]);
-    $diaConvert = openssl_decrypt($cipherText, "aes-256-ctr", $symKey, OPENSSL_RAW_DATA, $iv);
+        //split response in two strings, the rsa-encrypted symmetrical key and the encrypted Google Fit data
+        $responseData = explode("===***===", $response, 2);
 
-    //save JSON file in temp directory
-    $filenameJson = __DIR__ . "/temp/" . uniqid() . ".json";
-    file_put_contents($filenameJson, $diaConvert);
+        //initialize RSA module, decrypt symmetrical key
+        $rsa = new RSA();
+        $rsa->loadKey($google_rsa_private_key, RSA::PRIVATE_FORMAT_PKCS1);
+        $symKey = $rsa->decrypt(base64_decode($responseData[0]));
 
-    //initialize ZIP module
-    $zip = new ZipArchive();
-    //generate random filename
-    $filename = __DIR__ . "/temp/" . uniqid() . ".zip";
+        //decrypt Google Fit data
+        $iv_size = openssl_cipher_iv_length("aes-256-ctr");
+        $data = explode(":", $responseData[1]);
+        $iv = hex2bin($data[0]);
+        $cipherText = hex2bin($data[1]);
+        $diaConvert = openssl_decrypt($cipherText, "aes-256-ctr", $symKey, OPENSSL_RAW_DATA, $iv);
 
-    if ($zip->open($filename, ZipArchive::CREATE) !== TRUE) {
-        exit("cannot open <$filename>\n");
+        //save JSON file in temp directory
+        $filenameJson = __DIR__ . "/temp/" . uniqid() . ".json";
+        file_put_contents($filenameJson, $diaConvert);
+
+        //initialize ZIP module
+        $zip = new ZipArchive();
+        //generate random filename
+        $filename = __DIR__ . "/temp/" . uniqid() . ".zip";
+
+        if ($zip->open($filename, ZipArchive::CREATE) !== TRUE) {
+            exit("cannot open <$filename>\n");
+        }
+
+        //add JSON file to zip
+        $zip->addFile($filenameJson, "DiaConvert.json");
+        $zip->close();
+
+        //read DiaConvert.zip from $zip and let client download it
+        header("Content-disposition: attachment; filename=DiaConvert.zip");
+        header('Content-type: application/zip');
+
+        readfile($filename);
+
+        //delete temp files
+        unlink($filenameJson);
+        unlink($filename);
+        exit;
     }
-
-    //add JSON file to zip
-    $zip->addFile($filenameJson, "DiaConvert.json");
-    $zip->close();
-
-    //read DiaConvert.zip from $zip and let client download it
-    header("Content-disposition: attachment; filename=DiaConvert.zip");
-    header('Content-type: application/zip');
-
-    readfile($filename);
-
-    //delete temp files
-    unlink($filenameJson);
-    unlink($filename);
-    exit;
+    header("Location: /google-download.php?login=true&lang=$_GET[lang]");
 }
 
 function checkUserInput()
 {
     //checks whether values are empty
     if ($_POST['email'] == "" or !isset($_POST['password'])) {
-        header("Location: /data-download.php?input_error=true&lang=$_GET[lang]");
+        header("Location: /google-download.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
 }
@@ -98,7 +118,7 @@ function checkUserInput()
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?php echo $dd_title ?></title>
+    <title><?php echo $google_d_title ?></title>
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -117,9 +137,8 @@ function checkUserInput()
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
             <a class="nav-item nav-link" href="../<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_reg ?></a>
-            <a class="nav-item nav-link active"
-               href="../data-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_dd ?><span
-                        class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link"
+               href="../data-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_dd ?></a>
             <a class="nav-item nav-link"
                href="../password-reset.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_pw ?></a>
             <a class="nav-item nav-link"
@@ -127,9 +146,9 @@ function checkUserInput()
             <a class="nav-item nav-link"
                href="../google.php<?php echo "?lang=$_GET[lang]" ?>
             "><?php echo $nav_bar_google ?></a>
-            <a class="nav-item nav-link"
+            <a class="nav-item nav-link active"
                href="../google-download.php<?php echo "?lang=$_GET[lang]" ?>
-            "><?php echo $nav_bar_google_d ?></a>
+            "><?php echo $nav_bar_google_d ?><span class="sr-only">(current)</span></a>
             <?php
             if ($_GET['lang'] == "en") {
                 echo "<li class=\"nav-item dropdown\">
@@ -154,9 +173,9 @@ function checkUserInput()
 
 <div class="container">
     <br><br>
-    <h1><?php echo $dd_headline ?></h1>
+    <h1><?php echo $google_d_headline ?></h1>
     <br>
-    <p><?php echo $dd_info_text ?></p>
+    <p><?php echo $google_d_info_text ?></p>
     <br>
 
     <!--show error message to user-->
@@ -165,8 +184,12 @@ function checkUserInput()
         echo '<div class="alert alert-danger" role="alert">' . $input_error . '</div>';
     } elseif (isset($_GET['loginError'])) {
         echo '<div class="alert alert-danger" role="alert">' . $login_error . '</div>';
+    } elseif (isset($_GET['data_error'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $google_d_data_error . '</div>';
+    } elseif (isset($_GET['googleConnect'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $google_d_connect_error . '</div>';
     } elseif (isset($_GET['login'])) {
-        echo '<div class="alert alert-success" role="alert">' . $dd_login_success . '</div>';
+        echo '<div class="alert alert-success" role="alert">' . $google_d_login_success . '</div>';
     } elseif (isset($_GET['data_error'])) {
         echo '<div class="alert alert-danger" role="alert">' . $dd_data_error . '</div>';
     }
@@ -174,6 +197,11 @@ function checkUserInput()
 
     <!--create input fields-->
     <form id="authorize-plugin-form" method="post">
+        <!-- create checkbox which enable google data download -->
+        <input name="googleSyncCheckbox" type="checkbox" id="googleSyncCheckbox"
+               onclick="regCheck()"/> <?php echo $google_sync_check ?>
+        <br>
+        <br>
         <div class="form-group">
             <input name="email" class="form-control" type="email" placeholder="<?php echo $email_input ?>"
                    value="<?php echo $_POST['email']; ?>" required>
@@ -184,7 +212,7 @@ function checkUserInput()
         </div>
         <br><br>
         <input data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" id="authorize-plugin"
-               name="submit" class="btn btn-primary" type="submit" value="<?php echo $dd_button ?>">
+               name="submit" class="btn btn-primary" type="submit" value="<?php echo $google_d_button ?>">
     </form>
 </div>
 

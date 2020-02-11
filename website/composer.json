@@ -1,11 +1,12 @@
 {
-    "require": {
-        "phpmailer/phpmailer": "^6.1",
-        "ext-gd": "*",
-        "ext-curl": "*",
-        "setasign/fpdf": "^1.8",
-        "setasign/fpdi-fpdf": "^2.2",
-        "phpseclib/phpseclib": "~2.0",
-        "ext-zip": "*"
-    }
+  "require": {
+    "phpmailer/phpmailer": "^6.1",
+    "ext-gd": "*",
+    "ext-curl": "*",
+    "setasign/fpdf": "^1.8",
+    "setasign/fpdi-fpdf": "^2.2",
+    "phpseclib/phpseclib": "~2.0",
+    "ext-zip": "*",
+    "ext-openssl": "*"
+  }
 }
