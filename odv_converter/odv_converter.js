@@ -67,23 +67,23 @@ module.exports.odvConverter = function(dataJSON, type) {
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         // TODO: Which category shall we advice this exercise to? default "EXERCISE_LOW"
         if(!("moderateIntensityDurationInSeconds" in dataJSON) && !("vigorousIntensityDurationInSeconds" in dataJSON)) {
-            var daily = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+            var daily = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
             params.push(daily);
         }
         if("moderateIntensityDurationInSeconds" in dataJSON && dataJSON.moderateIntensityDurationInSeconds > 0) {
-            var daily1 = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.moderateIntensityDurationInSeconds);
+            var daily1 = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.moderateIntensityDurationInSeconds.toString());
             params.push(daily1);
         }
         if("vigorousIntensityDurationInSeconds" in dataJSON && dataJSON.vigorousIntensityDurationInSeconds > 0) {
-            var daily2 = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.vigorousIntensityDurationInSeconds);
+            var daily2 = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.vigorousIntensityDurationInSeconds.toString());
             params.push(daily2);
         }
         if("averageHeartRateInBeatsPerMinute" in dataJSON) {
-            var daily3 = createTable(null, "HEART_RATE", epoch, isoTime(dataJSON, timeOffset), dataJSON.averageHeartRateInBeatsPerMinute);
+            var daily3 = createTable(null, "HEART_RATE", epoch, isoTime(dataJSON, timeOffset), dataJSON.averageHeartRateInBeatsPerMinute.toString());
             params.push(daily3);
         }
         if("stressDurationInSeconds" in dataJSON) {
-            var daily4 = createTable(null, "STRESS", epoch, isoTime(dataJSON, timeOffset), dataJSON.stressDurationInSeconds);
+            var daily4 = createTable(null, "STRESS", epoch, isoTime(dataJSON, timeOffset), dataJSON.stressDurationInSeconds.toString());
             params.push(daily4);
         }
         var daily5;
@@ -92,7 +92,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 // Add the given additional seconds to the startTime.
                 var date = new Date(dataJSON.startTimeInSeconds * 1000);
                 date.setSeconds(date.getSeconds() + key2);
-                daily5 = createTable(null, "HEART_RATE", epoch + parseInt(key2, 10), date.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key2]);
+                daily5 = createTable(null, "HEART_RATE", epoch + parseInt(key2, 10), date.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key2].toString());
                 params.push(daily5);
             }
         }
@@ -102,19 +102,19 @@ module.exports.odvConverter = function(dataJSON, type) {
     case "thirdParty":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if(!("moderateIntensityDurationInSeconds" in dataJSON) && !("vigorousIntensityDurationInSeconds" in dataJSON)) {
-            var third = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+            var third = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
             params.push(third);
         }
         if("moderateIntensityDurationInSeconds" in dataJSON && dataJSON.moderateIntensityDurationInSeconds > 0) {
-            var third1 = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.moderateIntensityDurationInSeconds);
+            var third1 = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.moderateIntensityDurationInSeconds.toString());
             params.push(third1);
         }
         if("vigorousIntensityDurationInSeconds" in dataJSON && dataJSON.vigorousIntensityDurationInSeconds > 0) {
-            var third2 = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.vigorousIntensityDurationInSeconds);
+            var third2 = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.vigorousIntensityDurationInSeconds.toString());
             params.push(third2);
         }
         if("averageHeartRateInBeatsPerMinute" in dataJSON) {
-            var third3 = createTable(null, "HEART_RATE", epoch, isoTime(dataJSON, timeOffset), dataJSON.averageHeartRateInBeatsPerMinute);
+            var third3 = createTable(null, "HEART_RATE", epoch, isoTime(dataJSON, timeOffset), dataJSON.averageHeartRateInBeatsPerMinute.toString());
             params.push(third3);
         }
         var third4;
@@ -123,7 +123,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 // Add the given additional seconds to the startTime.
                 var date2 = new Date(dataJSON.startTimeInSeconds * 1000);
                 date2.setSeconds(date2.getSeconds() + key);
-                third4 = createTable(null, "HEART_RATE", epoch + parseInt(key, 10), date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key]);
+                third4 = createTable(null, "HEART_RATE", epoch + parseInt(key, 10), date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key].toString());
                 params.push(third4);
             }
         }
@@ -137,7 +137,7 @@ module.exports.odvConverter = function(dataJSON, type) {
     */
     case "activities":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        var actSum = createTable(dataJSON.deviceName, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+        var actSum = createTable(dataJSON.deviceName, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
         params.push(actSum);
         return params;
 
@@ -146,7 +146,7 @@ module.exports.odvConverter = function(dataJSON, type) {
     // TODO: Do we really need this data?
     case "manually":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        var manu = createTable(dataJSON.deviceName, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+        var manu = createTable(dataJSON.deviceName, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
         params.push(manu);
         return params;
 
@@ -154,11 +154,11 @@ module.exports.odvConverter = function(dataJSON, type) {
     case "actDetails":
         timeOffset = timeOff(dataJSON.summary.startTimeOffsetInSeconds);
         if("durationInSeconds" in dataJSON.summary) {
-            var actD1 = createTable(dataJSON.summary.deviceName, "EXERCISE_MID", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.durationInSeconds);
+            var actD1 = createTable(dataJSON.summary.deviceName, "EXERCISE_MID", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.durationInSeconds.toString());
             params.push(actD1);
         }
         if("averageHeartRateInBeatsPerMinute" in dataJSON.summary) {
-            var actD2 = createTable(dataJSON.summary.deviceName, "HEART_RATE", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.averageHeartRateInBeatsPerMinute);
+            var actD2 = createTable(dataJSON.summary.deviceName, "HEART_RATE", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.averageHeartRateInBeatsPerMinute.toString());
             params.push(actD2);
         }
 
@@ -168,7 +168,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             // Iterate through the sample data, which is saved inside an array.
             for(var j = 0; j < dataJSON.samples.length; j++) {
                 if("heartRate" in dataJSON.samples[j]) {
-                    var actD3 = createTable(dataJSON.summary.deviceName, "HEART_RATE", dataJSON.samples[j].startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.samples[j].startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.samples[j].heartRate);
+                    var actD3 = createTable(dataJSON.summary.deviceName, "HEART_RATE", dataJSON.samples[j].startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.samples[j].startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.samples[j].heartRate.toString());
                     params.push(actD3);
                 }
             }
@@ -181,13 +181,13 @@ module.exports.odvConverter = function(dataJSON, type) {
         if("intensity" in dataJSON) {
             var epochTable;
             if(dataJSON.intensity == "SEDENTARY") {
-                epochTable = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+                epochTable = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
             }
             else if(dataJSON.intensity == "ACTIVE") {
-                epochTable = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+                epochTable = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
             }
             else if(dataJSON.intensity == "HIGHLY_ACTIVE") {
-                epochTable = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds);
+                epochTable = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
             }
             params.push(epochTable);
         }
@@ -197,15 +197,15 @@ module.exports.odvConverter = function(dataJSON, type) {
     case "sleeps":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if("lightSleepDurationInSeconds" in dataJSON) {
-            var sleep1 = createTable(null, "SLEEP_LIGHT", epoch, isoTime(dataJSON, timeOffset), dataJSON.lightSleepDurationInSeconds);
+            var sleep1 = createTable(null, "SLEEP_LIGHT", epoch, isoTime(dataJSON, timeOffset), dataJSON.lightSleepDurationInSeconds.toString());
             params.push(sleep1);
         }
         if("remSleepInSeconds" in dataJSON) {
-            var sleep2 = createTable(null, "SLEEP_REM", epoch, isoTime(dataJSON, timeOffset), dataJSON.remSleepInSeconds);
+            var sleep2 = createTable(null, "SLEEP_REM", epoch, isoTime(dataJSON, timeOffset), dataJSON.remSleepInSeconds.toString());
             params.push(sleep2);
         }
         if("deepSleepDurationInSeconds" in dataJSON) {
-            var sleep3 = createTable(null, "SLEEP_DEEP", epoch, isoTime(dataJSON, timeOffset), dataJSON.deepSleepDurationInSeconds);
+            var sleep3 = createTable(null, "SLEEP_DEEP", epoch, isoTime(dataJSON, timeOffset), dataJSON.deepSleepDurationInSeconds.toString());
             params.push(sleep3);
         }
         return params;
@@ -214,7 +214,7 @@ module.exports.odvConverter = function(dataJSON, type) {
     case "bodyComps":
         timeOffset = timeOff(dataJSON.measurementTimeOffsetInSeconds);
         if("weightInGrams" in dataJSON) {
-            var bodyC = createTable(null, "WEIGHT", dataJSON.measurementTimeInSeconds + dataJSON.measurementTimeOffsetInSeconds, new Date(dataJSON.measurementTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), (dataJSON.weightInGrams/1000));
+            var bodyC = createTable(null, "WEIGHT", dataJSON.measurementTimeInSeconds + dataJSON.measurementTimeOffsetInSeconds, new Date(dataJSON.measurementTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), (dataJSON.weightInGrams/1000).toString());
             params.push(bodyC);
         }
         return params;
