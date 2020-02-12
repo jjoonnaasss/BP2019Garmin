@@ -88,7 +88,7 @@ exports.handler = function (event, context, callback) {
                                 userData.forEach(function (item) {
                                     let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
                                     entries.forEach(function (entry) {
-                                        fileData += JSON.stringify((entry.Item.vaultEntry)) + ",";
+                                        fileData += JSON.stringify((entry.Item)) + ",";
                                     });
                                 });
 
