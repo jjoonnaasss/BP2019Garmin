@@ -92,7 +92,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 // Add the given additional seconds to the startTime.
                 var date = new Date(dataJSON.startTimeInSeconds * 1000);
                 date.setSeconds(date.getSeconds() + key2);
-                daily5 = createTable(null, "HEART_RATE", epoch + key2, date.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key2]);
+                daily5 = createTable(null, "HEART_RATE", epoch + parseInt(key2, 10), date.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key2]);
                 params.push(daily5);
             }
         }
@@ -123,7 +123,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 // Add the given additional seconds to the startTime.
                 var date2 = new Date(dataJSON.startTimeInSeconds * 1000);
                 date2.setSeconds(date2.getSeconds() + key);
-                third4 = createTable(null, "HEART_RATE", epoch + key, date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key]);
+                third4 = createTable(null, "HEART_RATE", epoch + parseInt(key, 10), date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key]);
                 params.push(third4);
             }
         }
