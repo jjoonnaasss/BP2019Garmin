@@ -55,6 +55,8 @@ module.exports.odvConverter = function(dataJSON, type) {
 
     let epoch = dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds;
 
+    let device = null;
+
     /* In case you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
     *  type: The type of the summary, which is given as a parameter
     *  It's mostly the same procedure. Create a new Item for the Table FitnessData, which contains the summaryId, epoch,
@@ -100,21 +102,24 @@ module.exports.odvConverter = function(dataJSON, type) {
 
     // Third Party Daily Summaries Table
     case "thirdParty":
+        if("source" in dataJSON) {
+            device = dataJSON.source;
+        }
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if(!("moderateIntensityDurationInSeconds" in dataJSON) && !("vigorousIntensityDurationInSeconds" in dataJSON)) {
-            var third = createTable(null, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
+            var third = createTable(device, "EXERCISE_LOW", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
             params.push(third);
         }
         if("moderateIntensityDurationInSeconds" in dataJSON && dataJSON.moderateIntensityDurationInSeconds > 0) {
-            var third1 = createTable(null, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.moderateIntensityDurationInSeconds.toString());
+            var third1 = createTable(device, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.moderateIntensityDurationInSeconds.toString());
             params.push(third1);
         }
         if("vigorousIntensityDurationInSeconds" in dataJSON && dataJSON.vigorousIntensityDurationInSeconds > 0) {
-            var third2 = createTable(null, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.vigorousIntensityDurationInSeconds.toString());
+            var third2 = createTable(device, "EXERCISE_HIGH", epoch, isoTime(dataJSON, timeOffset), dataJSON.vigorousIntensityDurationInSeconds.toString());
             params.push(third2);
         }
         if("averageHeartRateInBeatsPerMinute" in dataJSON) {
-            var third3 = createTable(null, "HEART_RATE", epoch, isoTime(dataJSON, timeOffset), dataJSON.averageHeartRateInBeatsPerMinute.toString());
+            var third3 = createTable(device, "HEART_RATE", epoch, isoTime(dataJSON, timeOffset), dataJSON.averageHeartRateInBeatsPerMinute.toString());
             params.push(third3);
         }
         var third4;
@@ -123,7 +128,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 // Add the given additional seconds to the startTime.
                 var date2 = new Date(dataJSON.startTimeInSeconds * 1000);
                 date2.setSeconds(date2.getSeconds() + key);
-                third4 = createTable(null, "HEART_RATE", epoch + parseInt(key, 10), date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key].toString());
+                third4 = createTable(device, "HEART_RATE", epoch + parseInt(key, 10), date2.toISOString().split(".")[0].concat(timeOffset), dataJSON.timeOffsetHeartRateSamples[key].toString());
                 params.push(third4);
             }
         }
@@ -136,8 +141,11 @@ module.exports.odvConverter = function(dataJSON, type) {
     *  TODO: Do we really need activities?
     */
     case "activities":
+        if("deviceName" in dataJSON) {
+            device = dataJSON.deviceName;
+        }
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        var actSum = createTable(dataJSON.deviceName, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
+        var actSum = createTable(device, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
         params.push(actSum);
         return params;
 
@@ -145,20 +153,26 @@ module.exports.odvConverter = function(dataJSON, type) {
     // This is practically the same as activities except that it is manually created.
     // TODO: Do we really need this data?
     case "manually":
+        if("deviceName" in dataJSON) {
+            device = dataJSON.deviceName;
+        }
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        var manu = createTable(dataJSON.deviceName, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
+        var manu = createTable(device, "EXERCISE_MID", epoch, isoTime(dataJSON, timeOffset), dataJSON.durationInSeconds.toString());
         params.push(manu);
         return params;
 
     // Activity Details Summaries
     case "actDetails":
+        if("deviceName" in dataJSON.summary) {
+            device = dataJSON.summary.deviceName;
+        }
         timeOffset = timeOff(dataJSON.summary.startTimeOffsetInSeconds);
         if("durationInSeconds" in dataJSON.summary) {
-            var actD1 = createTable(dataJSON.summary.deviceName, "EXERCISE_MID", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.durationInSeconds.toString());
+            var actD1 = createTable(device, "EXERCISE_MID", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.durationInSeconds.toString());
             params.push(actD1);
         }
         if("averageHeartRateInBeatsPerMinute" in dataJSON.summary) {
-            var actD2 = createTable(dataJSON.summary.deviceName, "HEART_RATE", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.averageHeartRateInBeatsPerMinute.toString());
+            var actD2 = createTable(device, "HEART_RATE", dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.summary.startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.summary.averageHeartRateInBeatsPerMinute.toString());
             params.push(actD2);
         }
 
@@ -168,7 +182,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             // Iterate through the sample data, which is saved inside an array.
             for(var j = 0; j < dataJSON.samples.length; j++) {
                 if("heartRate" in dataJSON.samples[j]) {
-                    var actD3 = createTable(dataJSON.summary.deviceName, "HEART_RATE", dataJSON.samples[j].startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.samples[j].startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.samples[j].heartRate.toString());
+                    var actD3 = createTable(device, "HEART_RATE", dataJSON.samples[j].startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, new Date(dataJSON.samples[j].startTimeInSeconds * 1000).toISOString().split(".")[0].concat(timeOffset), dataJSON.samples[j].heartRate.toString());
                     params.push(actD3);
                 }
             }
