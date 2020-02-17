@@ -32,6 +32,8 @@ const rawdata6 = fs.readFileSync("sleep_summaries.json");
 const sleepSum = JSON.parse(rawdata6);
 const rawdata7 = fs.readFileSync("body_composition_summaries.json");
 const bodyComSum = JSON.parse(rawdata7);
+const rawdata8 = fs.readFileSync("stress_details_summaries.json");
+const strDetSum = JSON.parse(rawdata8);
 
 var array = [];
 if(dailySum != undefined) {
@@ -83,13 +85,20 @@ if(bodyComSum != undefined) {
         array.push(test.odvConverter(bodyComSum[q], "bodyComps")[0]);
     }
 }
+if(strDetSum != undefined) {
+    for(var r = 0; r < strDetSum.length; r++) {
+        for(var s = 0; s < test.odvConverter(strDetSum[r], "stress").length; s++) {
+            array.push(test.odvConverter(strDetSum[r], "stress")[s]);
+        }
+    }
+}
 
 // If it returns an empty array, throw an error.
 if(array.length == 0) throw "The given summary doesn't exist!";
 
 console.log("==========ARRAY==========");
-for(var r = 0; r < array.length; r++) {
-    if(array[r] != undefined) {
-        console.log(array[r].Item);
+for(var t = 0; t < array.length; t++) {
+    if(array[t] != undefined) {
+        console.log(array[t].Item);
     }
 }

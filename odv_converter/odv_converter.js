@@ -83,7 +83,7 @@ module.exports.odvConverter = function(dataJSON, type) {
     case "dailies":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         // TODO: Which category shall we advice this exercise to? default "EXERCISE_LOW"
-        if(!("moderateIntensityDurationInSeconds" in dataJSON) &&
+        /*if(!("moderateIntensityDurationInSeconds" in dataJSON) &&
            !("vigorousIntensityDurationInSeconds" in dataJSON)) {
             var daily = createTable(
                 "unknown",
@@ -93,7 +93,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 dataJSON.durationInSeconds.toString());
             params.push(daily);
         }
-        /*if("moderateIntensityDurationInSeconds" in dataJSON &&
+        if("moderateIntensityDurationInSeconds" in dataJSON &&
            dataJSON.moderateIntensityDurationInSeconds > 0) {
             var daily1 = createTable(
                 "unknown",
@@ -122,15 +122,6 @@ module.exports.odvConverter = function(dataJSON, type) {
                 dataJSON.averageHeartRateInBeatsPerMinute.toString());
             params.push(daily3);
         }*/
-        if("stressDurationInSeconds" in dataJSON) {
-            var daily4 = createTable(
-                "unknown",
-                "STRESS",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.stressDurationInSeconds.toString());
-            params.push(daily4);
-        }
         var daily5;
         if("timeOffsetHeartRateSamples" in dataJSON) {
             for (var key2 in dataJSON.timeOffsetHeartRateSamples) {
@@ -183,7 +174,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 isoTime(dataJSON.startTimeInSeconds, timeOffset),
                 dataJSON.vigorousIntensityDurationInSeconds.toString());
             params.push(third2);
-        }*/
+        }
         if("averageHeartRateInBeatsPerMinute" in dataJSON) {
             var third3 = createTable(
                 device,
@@ -192,7 +183,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 isoTime(dataJSON.startTimeInSeconds, timeOffset),
                 dataJSON.averageHeartRateInBeatsPerMinute.toString());
             params.push(third3);
-        }
+        }*/
         var third4;
         if("timeOffsetHeartRateSamples" in dataJSON) {
             for (var key in dataJSON.timeOffsetHeartRateSamples) {
@@ -297,9 +288,8 @@ module.exports.odvConverter = function(dataJSON, type) {
             // filter this one out.
             if(dataJSON.durationInSeconds == 900) {
                 var epochTable;
-
-                // TODO: Need to categorize exercises through the value MET.
-                if(dataJSON.intensity == "SEDENTARY") {
+                // met == 1.0 -> sitting -> no exercise(everything which takes more energy than sitting is an exercise)
+                if(dataJSON.intensity == "SEDENTARY" && dataJSON.met > 1.0) {
                     epochTable = createTable(
                         "unknown",
                         "EXERCISE_LOW",
@@ -383,10 +373,26 @@ module.exports.odvConverter = function(dataJSON, type) {
         }
         return params;
 
-        /* TODO: Probably need add Stress Details ("type" : "stressDetails") Summaries. The way we save this summary depends on the unit of the
-        *       amount of stress, which was not decided by the employer yet.
-        *
-        * "User Metric Summaries" ("type": "userMetrics"), "Menstrual Cycle Tracking(MCT) Summaries", "Pulse Ox Summaries" and "Respiration Summaries" ("type": "allDayRespiration")
+    // Stress Details Summaries
+    case "stress":
+        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
+        if("timeOffsetStressLevelValues" in dataJSON) {
+            var str_table;
+            for(var keyStr in dataJSON.timeOffsetStressLevelValues) {
+                var dateStr = new Date(dataJSON.startTimeInSeconds * 1000);
+                dateStr.setSeconds(dateStr.getSeconds() + keyStr);
+                str_table = createTable(
+                    "unknown",
+                    "STRESS",
+                    ((epoch/1000) + parseInt(keyStr, 10)) * 1000,
+                    dateStr.toISOString().split(".")[0].concat(timeOffset),
+                    dataJSON.timeOffsetStressLevelValues[keyStr].toString());
+                params.push(str_table);
+            }
+        }
+        return params;
+
+        /* "User Metric Summaries" ("type": "userMetrics"), "Menstrual Cycle Tracking(MCT) Summaries", "Pulse Ox Summaries" and "Respiration Summaries" ("type": "allDayRespiration")
         * don't contain any useful information for the bolus calculator.
         *
         * "Move IQ Summaries" ("type": "moveIQActivities") doesn't contain any additional useful information, since the given data is already included in
