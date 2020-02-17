@@ -78,7 +78,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 dataJSON.durationInSeconds.toString());
             params.push(daily);
         }
-        if("moderateIntensityDurationInSeconds" in dataJSON &&
+        /*if("moderateIntensityDurationInSeconds" in dataJSON &&
            dataJSON.moderateIntensityDurationInSeconds > 0) {
             var daily1 = createTable(
                 "unknown",
@@ -106,7 +106,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 isoTime(dataJSON.startTimeInSeconds, timeOffset),
                 dataJSON.averageHeartRateInBeatsPerMinute.toString());
             params.push(daily3);
-        }
+        }*/
         if("stressDurationInSeconds" in dataJSON) {
             var daily4 = createTable(
                 "unknown",
@@ -138,7 +138,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         if("source" in dataJSON) {
             device = dataJSON.source;
         }
-        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
+        /*timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if(!("moderateIntensityDurationInSeconds" in dataJSON) && 
            !("vigorousIntensityDurationInSeconds" in dataJSON)) {
             var third = createTable(
@@ -168,7 +168,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 isoTime(dataJSON.startTimeInSeconds, timeOffset),
                 dataJSON.vigorousIntensityDurationInSeconds.toString());
             params.push(third2);
-        }
+        }*/
         if("averageHeartRateInBeatsPerMinute" in dataJSON) {
             var third3 = createTable(
                 device,
@@ -238,7 +238,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             device = dataJSON.summary.deviceName;
         }
         timeOffset = timeOff(dataJSON.summary.startTimeOffsetInSeconds);
-        if("durationInSeconds" in dataJSON.summary) {
+        /*if("durationInSeconds" in dataJSON.summary) {
             var actD1 = createTable(
                 device,
                 "EXERCISE_MID",
@@ -255,7 +255,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 isoTime(dataJSON.summary.startTimeInSeconds, timeOffset),
                 dataJSON.summary.averageHeartRateInBeatsPerMinute.toString());
             params.push(actD2);
-        }
+        }*/
 
         // The given sample data of the Activity Details Summaries.
         // Check if there are any sample data.
@@ -278,64 +278,79 @@ module.exports.odvConverter = function(dataJSON, type) {
     case "epochs":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if("intensity" in dataJSON) {
-            var epochTable;
-            if(dataJSON.intensity == "SEDENTARY") {
-                epochTable = createTable(
-                    "unknown",
-                    "EXERCISE_LOW",
-                    epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                    dataJSON.durationInSeconds.toString());
+            // If the duration is under 900 the epoch will be replaced by a new one with a duration of 900, so
+            // filter this one out.
+            if(dataJSON.durationInSeconds == 900) {
+                var epochTable;
+
+                // TODO: Need to categorize exercises through the value MET.
+                if(dataJSON.intensity == "SEDENTARY") {
+                    epochTable = createTable(
+                        "unknown",
+                        "EXERCISE_LOW",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.activeTimeInSeconds.toString());
+                }
+                else if(dataJSON.intensity == "ACTIVE") {
+                    epochTable = createTable(
+                        "unknown",
+                        "EXERCISE_MID",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.activeTimeInSeconds.toString());
+                }
+                else if(dataJSON.intensity == "HIGHLY_ACTIVE") {
+                    epochTable = createTable(
+                        "unknown",
+                        "EXERCISE_HIGH",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.activeTimeInSeconds.toString());
+                }
+                params.push(epochTable);
             }
-            else if(dataJSON.intensity == "ACTIVE") {
-                epochTable = createTable(
-                    "unknown",
-                    "EXERCISE_MID",
-                    epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                    dataJSON.durationInSeconds.toString());
-            }
-            else if(dataJSON.intensity == "HIGHLY_ACTIVE") {
-                epochTable = createTable(
-                    "unknown",
-                    "EXERCISE_HIGH",
-                    epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                    dataJSON.durationInSeconds.toString());
-            }
-            params.push(epochTable);
         }
         return params;
 
     // Sleep Summaries
     case "sleeps":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        if("lightSleepDurationInSeconds" in dataJSON) {
-            var sleep1 = createTable(
-                "unknown",
-                "SLEEP_LIGHT",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.lightSleepDurationInSeconds.toString());
-            params.push(sleep1);
+        if("light" in dataJSON.sleepLevelsMap) {
+            var sleepLight;
+            for(var li = 0; li < dataJSON.sleepLevelsMap.light.length; li++) {
+                sleepLight = createTable(
+                    "unknown",
+                    "SLEEP_LIGHT",
+                    (dataJSON.sleepLevelsMap.light[li].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000,
+                    isoTime(dataJSON.sleepLevelsMap.light[li].startTimeInSeconds, timeOffset),
+                    (dataJSON.sleepLevelsMap.light[li].endTimeInSeconds - dataJSON.sleepLevelsMap.light[li].startTimeInSeconds).toString());
+                params.push(sleepLight);
+            }
         }
-        if("remSleepInSeconds" in dataJSON) {
-            var sleep2 = createTable(
-                "unknown",
-                "SLEEP_REM",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.remSleepInSeconds.toString());
-            params.push(sleep2);
+        if("rem" in dataJSON.sleepLevelsMap) {
+            var sleepRem;
+            for(var re = 0; re < dataJSON.sleepLevelsMap.rem.length; re++) {
+                sleepRem = createTable(
+                    "unknown",
+                    "SLEEP_REM",
+                    (dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000,
+                    isoTime(dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds, timeOffset),
+                    (dataJSON.sleepLevelsMap.rem[re].endTimeInSeconds - dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds).toString());
+                params.push(sleepRem);
+            }
         }
-        if("deepSleepDurationInSeconds" in dataJSON) {
-            var sleep3 = createTable(
-                "unknown",
-                "SLEEP_DEEP",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.deepSleepDurationInSeconds.toString());
-            params.push(sleep3);
+        if("deep" in dataJSON.sleepLevelsMap) {
+            var sleepDeep;
+            for(var de = 0; de < dataJSON.sleepLevelsMap.deep.length; de++) {
+                sleepDeep = createTable (
+                    "unknown",
+                    "SLEEP_DEEP",
+                    (dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000,
+                    isoTime(dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds, timeOffset),
+                    (dataJSON.sleepLevelsMap.deep[de].endTimeInSeconds - dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds).toString());
+                params.push(sleepDeep);
+            }
         }
         return params;
 
