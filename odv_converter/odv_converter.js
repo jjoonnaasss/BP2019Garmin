@@ -72,170 +72,204 @@ module.exports.odvConverter = function(dataJSON, type) {
 
     let device = "unknown";
 
-    /* In case you need a String instead of an JSON object, just use JSON.stringify() before the initialized JSON object
-    *  type: The type of the summary, which is given as a parameter
-    *  It's mostly the same procedure. Create a new Item for the Table FitnessData, which contains the summaryId, epoch,
-    *  type of the summary and vaultEntry data. Each vaultEntry is saved separately in a new Item.
-    *  You can include a vaultEntry anytime by creating a new Item and saving it into the array params afterwards.
-    */
     switch(type) {
     // Daily Summaries Table
     case "dailies":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        // TODO: Which category shall we advice this exercise to? default "EXERCISE_LOW"
-        /*if(!("moderateIntensityDurationInSeconds" in dataJSON) &&
-           !("vigorousIntensityDurationInSeconds" in dataJSON)) {
-            var daily = createTable(
-                "unknown",
-                "EXERCISE_LOW",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.durationInSeconds.toString());
-            params.push(daily);
-        }
-        if("moderateIntensityDurationInSeconds" in dataJSON &&
-           dataJSON.moderateIntensityDurationInSeconds > 0) {
-            var daily1 = createTable(
-                "unknown",
-                "EXERCISE_MID",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.moderateIntensityDurationInSeconds.toString());
-            params.push(daily1);
-        }
-        if("vigorousIntensityDurationInSeconds" in dataJSON &&
-           dataJSON.vigorousIntensityDurationInSeconds > 0) {
-            var daily2 = createTable(
-                "unknown",
-                "EXERCISE_HIGH",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.vigorousIntensityDurationInSeconds.toString());
-            params.push(daily2);
-        }
-        if("averageHeartRateInBeatsPerMinute" in dataJSON) {
-            var daily3 = createTable(
-                "unknown",
-                "HEART_RATE",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.averageHeartRateInBeatsPerMinute.toString());
-            params.push(daily3);
-        }*/
-        var daily5;
+        var daily;
         if("timeOffsetHeartRateSamples" in dataJSON) {
             for (var key2 in dataJSON.timeOffsetHeartRateSamples) {
                 // Add the given additional seconds to the startTime.
-                var date = new Date(dataJSON.startTimeInSeconds * 1000);
-                date.setSeconds(date.getSeconds() + key2);
-                daily5 = createTable(
+                var dateDaily = new Date(dataJSON.startTimeInSeconds * 1000);
+                dateDaily.setSeconds(dateDaily.getSeconds() + key2);
+                daily = createTable(
                     "unknown",
                     "HEART_RATE",
                     ((epoch / 1000) + parseInt(key2, 10)) * 1000,
-                    date.toISOString().split(".")[0].concat(timeOffset),
+                    dateDaily.toISOString().split(".")[0].concat(timeOffset),
                     dataJSON.timeOffsetHeartRateSamples[key2].toString());
-                params.push(daily5);
+                params.push(daily);
             }
         }
         return params;
 
     // Third Party Daily Summaries Table
     case "thirdParty":
+        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if("source" in dataJSON) {
             device = dataJSON.source;
         }
-        /*timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        if(!("moderateIntensityDurationInSeconds" in dataJSON) && 
-           !("vigorousIntensityDurationInSeconds" in dataJSON)) {
-            var third = createTable(
-                device,
-                "EXERCISE_LOW",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.durationInSeconds.toString());
-            params.push(third);
-        }
-        if("moderateIntensityDurationInSeconds" in dataJSON &&
-           dataJSON.moderateIntensityDurationInSeconds > 0) {
-            var third1 = createTable(
-                device,
-                "EXERCISE_MID",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.moderateIntensityDurationInSeconds.toString());
-            params.push(third1);
-        }
-        if("vigorousIntensityDurationInSeconds" in dataJSON &&
-           dataJSON.vigorousIntensityDurationInSeconds > 0) {
-            var third2 = createTable(
-                device,
-                "EXERCISE_HIGH",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.vigorousIntensityDurationInSeconds.toString());
-            params.push(third2);
-        }
-        if("averageHeartRateInBeatsPerMinute" in dataJSON) {
-            var third3 = createTable(
-                device,
-                "HEART_RATE",
-                epoch,
-                isoTime(dataJSON.startTimeInSeconds, timeOffset),
-                dataJSON.averageHeartRateInBeatsPerMinute.toString());
-            params.push(third3);
-        }*/
-        var third4;
+        var third;
         if("timeOffsetHeartRateSamples" in dataJSON) {
             for (var key in dataJSON.timeOffsetHeartRateSamples) {
                 // Add the given additional seconds to the startTime.
-                var date2 = new Date(dataJSON.startTimeInSeconds * 1000);
-                date2.setSeconds(date2.getSeconds() + key);
-                third4 = createTable(
+                var dateThird = new Date(dataJSON.startTimeInSeconds * 1000);
+                dateThird.setSeconds(dateThird.getSeconds() + key);
+                third = createTable(
                     device,
                     "HEART_RATE",
                     ((epoch / 1000) + parseInt(key, 10)) * 1000,
-                    date2.toISOString().split(".")[0].concat(timeOffset),
+                    dateThird.toISOString().split(".")[0].concat(timeOffset),
                     dataJSON.timeOffsetHeartRateSamples[key].toString());
-                params.push(third4);
+                params.push(third);
             }
         }
         return params;
 
-    /* Activity Summaries
-    *  All wellness data, like steps and distance contained in the Activity are already represented in the Daily summary and
-    *  in the corresponding Epoch sumarries, so Activity summaries should only be used for programs that wish to treat specific
-    *  activity types in different ways, such as giving the iser extra cresit for going swimming three times in the same week.
-    *  TODO: Do we really need activities?
-    */
+    // Activity Summaries
     case "activities":
+        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
+        var actSum;
         if("deviceName" in dataJSON) {
             device = dataJSON.deviceName;
         }
-        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        var actSum = createTable(
-            device,
-            "EXERCISE_MID",
-            epoch,
-            isoTime(dataJSON.startTimeInSeconds, timeOffset),
-            dataJSON.durationInSeconds.toString());
+        if("manual" in dataJSON) {
+            if(dataJSON.manual) {
+                actSum = createTable(
+                    device,
+                    "EXERCISE_MANUAL",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+            else {
+                /*  kcal/minute < 3.5               light exercise
+                *   3.5 <= kcal/minute <= 7.0       moderate exercise
+                *   7.0 < kcal/minute               vigorous exercise
+                */
+                var kcalPerMinute = dataJSON.activeKilocalories / (dataJSON.durationInSeconds / 60);
+                if(kcalPerMinute < 3.5) {
+                    actSum = createTable(
+                        device,
+                        "EXERCISE_LOW",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.durationInSeconds.toString());
+                }
+                else if(kcalPerMinute >= 3.5 && kcalPerMinute <= 7.0) {
+                    actSum = createTable(
+                        device,
+                        "EXERCISE_MID",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.durationInSeconds.toString());
+                }
+                else {
+                    actSum = createTable(
+                        device,
+                        "EXERCISE_HIGH",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.durationInSeconds.toString());
+                }
+            }
+        }
+        else {
+            var kcalPerMinute = dataJSON.activeKilocalories / (dataJSON.durationInSeconds / 60);
+            if(kcalPerMinute < 3.5) {
+                actSum = createTable(
+                    device,
+                    "EXERCISE_LOW",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+            else if(kcalPerMinute >= 3.5 && kcalPerMinute <= 7.0) {
+                actSum = createTable(
+                    device,
+                    "EXERCISE_MID",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+            else {
+                actSum = createTable(
+                    device,
+                    "EXERCISE_HIGH",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+        }
         params.push(actSum);
         return params;
 
     // Manually Updated Activity Summaries
-    // This is practically the same as activities except that it is manually created.
-    // TODO: Do we really need this data?
     case "manually":
+        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
+        var manuelSum;
         if("deviceName" in dataJSON) {
             device = dataJSON.deviceName;
         }
-        timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
-        var manu = createTable(
-            device,
-            "EXERCISE_MID",
-            epoch,
-            isoTime(dataJSON.startTimeInSeconds, timeOffset),
-            dataJSON.durationInSeconds.toString());
-        params.push(manu);
+        if("manual" in dataJSON) {
+            if(dataJSON.manual) {
+                manuelSum = createTable(
+                    device,
+                    "EXERCISE_MANUAL",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+            else {
+                /*  kcal/minute < 3.5               light exercise
+                *   3.5 <= kcal/minute <= 7.0       moderate exercise
+                *   7.0 < kcal/minute               vigorous exercise
+                */
+                var kcalPerMinute = dataJSON.activeKilocalories / (dataJSON.durationInSeconds / 60);
+                if(kcalPerMinute < 3.5) {
+                    manuelSum = createTable(
+                        device,
+                        "EXERCISE_LOW",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.durationInSeconds.toString());
+                }
+                else if(kcalPerMinute >= 3.5 && kcalPerMinute <= 7.0) {
+                    manuelSum = createTable(
+                        device,
+                        "EXERCISE_MID",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.durationInSeconds.toString());
+                }
+                else {
+                    manuelSum = createTable(
+                        device,
+                        "EXERCISE_HIGH",
+                        epoch,
+                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        dataJSON.durationInSeconds.toString());
+                }
+            }
+        }
+        else {
+            var kcalPerMinute = dataJSON.activeKilocalories / (dataJSON.durationInSeconds / 60);
+            if(kcalPerMinute < 3.5) {
+                manuelSum = createTable(
+                    device,
+                    "EXERCISE_LOW",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+            else if(kcalPerMinute >= 3.5 && kcalPerMinute <= 7.0) {
+                manuelSum = createTable(
+                    device,
+                    "EXERCISE_MID",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+            else {
+                manuelSum = createTable(
+                    device,
+                    "EXERCISE_HIGH",
+                    epoch,
+                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    dataJSON.durationInSeconds.toString());
+            }
+        }
+        params.push(manuelSum);
         return params;
 
     // Activity Details Summaries
@@ -244,25 +278,6 @@ module.exports.odvConverter = function(dataJSON, type) {
             device = dataJSON.summary.deviceName;
         }
         timeOffset = timeOff(dataJSON.summary.startTimeOffsetInSeconds);
-        /*if("durationInSeconds" in dataJSON.summary) {
-            var actD1 = createTable(
-                device,
-                "EXERCISE_MID",
-                dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds,
-                isoTime(dataJSON.summary.startTimeInSeconds, timeOffset),
-                dataJSON.summary.durationInSeconds.toString());
-            params.push(actD1);
-        }
-        if("averageHeartRateInBeatsPerMinute" in dataJSON.summary) {
-            var actD2 = createTable(
-                device,
-                "HEART_RATE",
-                (dataJSON.summary.startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds) * 1000,
-                isoTime(dataJSON.summary.startTimeInSeconds, timeOffset),
-                dataJSON.summary.averageHeartRateInBeatsPerMinute.toString());
-            params.push(actD2);
-        }*/
-
         // The given sample data of the Activity Details Summaries.
         // Check if there are any sample data.
         if("samples" in dataJSON) {
@@ -374,7 +389,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         return params;
 
     // Stress Details Summaries
-    case "stress":
+    case "stressDetails":
         timeOffset = timeOff(dataJSON.startTimeOffsetInSeconds);
         if("timeOffsetStressLevelValues" in dataJSON) {
             var str_table;
@@ -391,13 +406,6 @@ module.exports.odvConverter = function(dataJSON, type) {
             }
         }
         return params;
-
-        /* "User Metric Summaries" ("type": "userMetrics"), "Menstrual Cycle Tracking(MCT) Summaries", "Pulse Ox Summaries" and "Respiration Summaries" ("type": "allDayRespiration")
-        * don't contain any useful information for the bolus calculator.
-        *
-        * "Move IQ Summaries" ("type": "moveIQActivities") doesn't contain any additional useful information, since the given data is already included in
-        * Daily and Epoch summaries.
-        */
 
     default:
         return params;

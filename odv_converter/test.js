@@ -87,8 +87,8 @@ if(bodyComSum != undefined) {
 }
 if(strDetSum != undefined) {
     for(var r = 0; r < strDetSum.length; r++) {
-        for(var s = 0; s < test.odvConverter(strDetSum[r], "stress").length; s++) {
-            array.push(test.odvConverter(strDetSum[r], "stress")[s]);
+        for(var s = 0; s < test.odvConverter(strDetSum[r], "stressDetails").length; s++) {
+            array.push(test.odvConverter(strDetSum[r], "stressDetails")[s]);
         }
     }
 }

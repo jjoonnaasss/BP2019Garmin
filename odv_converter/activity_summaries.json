@@ -21,5 +21,44 @@
         "distanceInMeters": 4322.357,
         "activeKilocalories": 360,
         "deviceName": "Forerunner 910XT"
-    }
+    },
+    {
+        "summaryId" : "14520848",
+        "durationInSeconds" : 4596,
+        "startTimeInSeconds" : 1581944833,
+        "startTimeOffsetInSeconds" : -21600,
+        "activityType" : "WALKING",
+        "averageHeartRateInBeatsPerMinute" : 84,
+        "averageRunCadenceInStepsPerMinute" : 39.0,
+        "averageSpeedInMetersPerSecond" : 0.9981445,
+        "averagePaceInMinutesPerKilometer" : 18.466492,
+        "activeKilocalories" : 152,
+        "distanceInMeters" : 4385.41,
+        "maxHeartRateInBeatsPerMinute" : 128,
+        "maxPaceInMinutesPerKilometer" : 3.4322743,
+        "maxRunCadenceInStepsPerMinute" : 118.0,
+        "maxSpeedInMetersPerSecond" : 4.1642942,
+        "steps" : 1623,
+        "totalElevationGainInMeters" : 20.88
+      }, 
+      {
+        "summaryId" : "14149166",
+        "durationInSeconds" : 4352,
+        "startTimeInSeconds" : 1582031233,
+        "startTimeOffsetInSeconds" : -21600,
+        "activityType" : "WALKING",
+        "averageHeartRateInBeatsPerMinute" : 85,
+        "averageRunCadenceInStepsPerMinute" : 38.0,
+        "averageSpeedInMetersPerSecond" : 0.6289263,
+        "averagePaceInMinutesPerKilometer" : 18.110329,
+        "activeKilocalories" : 227,
+        "distanceInMeters" : 4595.39,
+        "maxHeartRateInBeatsPerMinute" : 130,
+        "maxPaceInMinutesPerKilometer" : 3.478932,
+        "maxRunCadenceInStepsPerMinute" : 119.0,
+        "maxSpeedInMetersPerSecond" : 4.782374,
+        "steps" : 1623,
+        "totalElevationGainInMeters" : 22.52,
+        "manual": true
+      }
 ]

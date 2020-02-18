@@ -24,5 +24,8 @@
     "startTimeInSeconds": 1472774400,
     "startTimeOffsetInSeconds": 0,
     "floorsClimbed": 42,
-    "source": "FITBIT"
+    "source": "FITBIT",
+    "timeOffsetHeartRateSamples": {
+        "15": 75
+    }
 } ]
