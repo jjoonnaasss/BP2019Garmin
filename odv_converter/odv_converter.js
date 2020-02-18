@@ -226,7 +226,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         isoTime(dataJSON.startTimeInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
-                else if(kcalPerMin >= 3.5 && kcalPerMin <= 7.0) {
+                else if(kcalPerMin >= 3.5 && kcalPerMinute <= 7.0) {
                     manuelSum = createTable(
                         device,
                         "EXERCISE_MID",
@@ -245,8 +245,8 @@ module.exports.odvConverter = function(dataJSON, type) {
             }
         }
         else {
-            var kcalPerMin = dataJSON.activeKilocalories / (dataJSON.durationInSeconds / 60);
-            if(kcalPerMin < 3.5) {
+            kcalPerMin = dataJSON.activeKilocalories / (dataJSON.durationInSeconds / 60);
+            if(kcalPerMinute < 3.5) {
                 manuelSum = createTable(
                     device,
                     "EXERCISE_LOW",
@@ -254,7 +254,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     isoTime(dataJSON.startTimeInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
-            else if(kcalPerMin >= 3.5 && kcalPerMin <= 7.0) {
+            else if(kcalPerMin >= 3.5 && kcalPerMinute <= 7.0) {
                 manuelSum = createTable(
                     device,
                     "EXERCISE_MID",
