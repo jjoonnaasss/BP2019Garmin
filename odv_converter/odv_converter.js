@@ -396,15 +396,17 @@ module.exports.odvConverter = function(dataJSON, type) {
         if("timeOffsetStressLevelValues" in dataJSON) {
             var str_table;
             for(var keyStr in dataJSON.timeOffsetStressLevelValues) {
-                var dateStr = new Date(dataJSON.startTimeInSeconds * 1000);
-                dateStr.setSeconds(dateStr.getSeconds() + keyStr);
-                str_table = createTable(
-                    "unknown",
-                    "STRESS",
-                    ((epoch/1000) + parseInt(keyStr, 10)) * 1000,
-                    dateStr.toISOString().split(".")[0].concat(timeOffset),
-                    dataJSON.timeOffsetStressLevelValues[keyStr].toString());
-                params.push(str_table);
+                if((dataJSON.timeOffsetStressLevelValues[keyStr] != -1) && (dataJSON.timeOffsetStressLevelValues[keyStr]) != -2) {
+                    var dateStr = new Date(dataJSON.startTimeInSeconds * 1000);
+                    dateStr.setSeconds(dateStr.getSeconds() + keyStr);
+                    str_table = createTable(
+                        "unknown",
+                        "STRESS",
+                        ((epoch/1000) + parseInt(keyStr, 10)) * 1000,
+                        dateStr.toISOString().split(".")[0].concat(timeOffset),
+                        dataJSON.timeOffsetStressLevelValues[keyStr].toString());
+                    params.push(str_table);
+                }
             }
         }
         return params;
