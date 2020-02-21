@@ -80,7 +80,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         if("timeOffsetHeartRateSamples" in dataJSON) {
             for (var key2 in dataJSON.timeOffsetHeartRateSamples) {
                 // Add the given additional seconds to the startTime.
-                var dateDaily = new Date(dataJSON.startTimeInSeconds * 1000);
+                var dateDaily = new Date((dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000);
                 dateDaily.setSeconds(dateDaily.getSeconds() + key2);
                 daily = createTable(
                     "unknown",
@@ -103,7 +103,7 @@ module.exports.odvConverter = function(dataJSON, type) {
         if("timeOffsetHeartRateSamples" in dataJSON) {
             for (var key in dataJSON.timeOffsetHeartRateSamples) {
                 // Add the given additional seconds to the startTime.
-                var dateThird = new Date(dataJSON.startTimeInSeconds * 1000);
+                var dateThird = new Date((dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000);
                 dateThird.setSeconds(dateThird.getSeconds() + key);
                 third = createTable(
                     device,
@@ -130,7 +130,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_MANUAL",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
             else {
@@ -144,7 +144,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         device,
                         "EXERCISE_LOW",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
                 else if(kcalPerMinute >= 3.5 && kcalPerMinute <= 7.0) {
@@ -152,7 +152,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         device,
                         "EXERCISE_MID",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
                 else {
@@ -160,7 +160,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         device,
                         "EXERCISE_HIGH",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
             }
@@ -172,7 +172,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_LOW",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
             else if(kcalPerMinute >= 3.5 && kcalPerMinute <= 7.0) {
@@ -180,7 +180,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_MID",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
             else {
@@ -188,7 +188,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_HIGH",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
         }
@@ -209,7 +209,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_MANUAL",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
             else {
@@ -223,7 +223,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         device,
                         "EXERCISE_LOW",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
                 else if(kcalPerMin >= 3.5 && kcalPerMinute <= 7.0) {
@@ -231,7 +231,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         device,
                         "EXERCISE_MID",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
                 else {
@@ -239,7 +239,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         device,
                         "EXERCISE_HIGH",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.durationInSeconds.toString());
                 }
             }
@@ -251,7 +251,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_LOW",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
             else if(kcalPerMin >= 3.5 && kcalPerMinute <= 7.0) {
@@ -259,7 +259,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_MID",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
             else {
@@ -267,7 +267,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     device,
                     "EXERCISE_HIGH",
                     epoch,
-                    isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     dataJSON.durationInSeconds.toString());
             }
         }
@@ -289,7 +289,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     var actD3 = createTable(device,
                         "HEART_RATE",
                         (dataJSON.samples[j].startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds) * 1000,
-                        isoTime(dataJSON.samples[j].startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.samples[j].startTimeInSeconds + dataJSON.summary.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.samples[j].heartRate.toString());
                     params.push(actD3);
                 }
@@ -311,7 +311,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         "unknown",
                         "EXERCISE_LOW",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.activeTimeInSeconds.toString());
                 }
                 else if(dataJSON.intensity == "ACTIVE") {
@@ -319,7 +319,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         "unknown",
                         "EXERCISE_MID",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.activeTimeInSeconds.toString());
                 }
                 else if(dataJSON.intensity == "HIGHLY_ACTIVE") {
@@ -327,7 +327,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         "unknown",
                         "EXERCISE_HIGH",
                         epoch,
-                        isoTime(dataJSON.startTimeInSeconds, timeOffset),
+                        isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.activeTimeInSeconds.toString());
                 }
                 params.push(epochTable);
@@ -345,7 +345,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     "unknown",
                     "SLEEP_LIGHT",
                     (dataJSON.sleepLevelsMap.light[li].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000,
-                    isoTime(dataJSON.sleepLevelsMap.light[li].startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.sleepLevelsMap.light[li].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     (dataJSON.sleepLevelsMap.light[li].endTimeInSeconds - dataJSON.sleepLevelsMap.light[li].startTimeInSeconds).toString());
                 params.push(sleepLight);
             }
@@ -357,7 +357,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     "unknown",
                     "SLEEP_REM",
                     (dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000,
-                    isoTime(dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     (dataJSON.sleepLevelsMap.rem[re].endTimeInSeconds - dataJSON.sleepLevelsMap.rem[re].startTimeInSeconds).toString());
                 params.push(sleepRem);
             }
@@ -369,7 +369,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                     "unknown",
                     "SLEEP_DEEP",
                     (dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000,
-                    isoTime(dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds, timeOffset),
+                    isoTime(dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                     (dataJSON.sleepLevelsMap.deep[de].endTimeInSeconds - dataJSON.sleepLevelsMap.deep[de].startTimeInSeconds).toString());
                 params.push(sleepDeep);
             }
@@ -384,7 +384,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                 "unknown",
                 "WEIGHT",
                 (dataJSON.measurementTimeInSeconds + dataJSON.measurementTimeOffsetInSeconds) * 1000,
-                isoTime(dataJSON.measurementTimeInSeconds, timeOffset),
+                isoTime(dataJSON.measurementTimeInSeconds + dataJSON.measurementTimeOffsetInSeconds, timeOffset),
                 (dataJSON.weightInGrams/1000).toString());
             params.push(bodyC);
         }
@@ -397,7 +397,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             var str_table;
             for(var keyStr in dataJSON.timeOffsetStressLevelValues) {
                 if((dataJSON.timeOffsetStressLevelValues[keyStr] != -1) && (dataJSON.timeOffsetStressLevelValues[keyStr]) != -2) {
-                    var dateStr = new Date(dataJSON.startTimeInSeconds * 1000);
+                    var dateStr = new Date((dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds) * 1000);
                     dateStr.setSeconds(dateStr.getSeconds() + keyStr);
                     str_table = createTable(
                         "unknown",
