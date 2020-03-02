@@ -100,12 +100,46 @@ exports.handler = function (event, context, callback) {
                             }).replace(",", "") + "\",\"data\":[";
 
                             if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
-                                userData.forEach(function (item) {
+                                let daily;
+                                let entries;
+                                userData.forEach(function (item){
+                                    if(item.sumType.S == "dailies") {
+                                        daily.push(item.data.S);
+                                    }
+                                    else {
+                                        entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
+                                        entries.forEach(function (entry) {
+                                            fileData += JSON.stringify((entry.Item)) + ",";
+                                        });
+                                    }
+                                });
+                                for(var i = 0; i < daily.length; i++) {
+                                    for(var j = 0; j < daily.length; j++) {
+                                        if(i != j) {
+                                            if(daily[i].startTimeInSeconds == daily[j].startTimeInSeconds && daily[i].startTimeOffsetInSeconds == daily[j].startTimeOffsetInSeconds) {
+                                                if(daily[i].durationInSeconds >= daily[j].durationInSeconds) {
+                                                    entries = converter.odvConverter(JSON.parse(encryption.encryption(daily[i], access.dataEncPW, true)), "dailies"); //decrypt the fitness data and give it to the odv_converter
+                                                    entries.forEach(function (entry) {
+                                                        fileData += JSON.stringify((entry.Item)) + ",";
+                                                    });
+                                                }
+                                                else {
+                                                    entries = converter.odvConverter(JSON.parse(encryption.encryption(daily[j], access.dataEncPW, true)), "dailies"); //decrypt the fitness data and give it to the odv_converter
+                                                    entries.forEach(function (entry) {
+                                                        fileData += JSON.stringify((entry.Item)) + ",";
+                                                    });
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                /*userData.forEach(function (item) {
                                     let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
                                     entries.forEach(function (entry) {
                                         fileData += JSON.stringify((entry.Item)) + ",";
                                     });
-                                });
+                                });*/
 
                                 //cut off last ","
                                 fileData = fileData.substring(0, fileData.length - 1);
