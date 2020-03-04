@@ -178,7 +178,7 @@ exports.handler = function (event, context, callback) {
                                                     UAT: entry.uat.S,
                                                     startTime: entry.startTimeInSeconds.toString(),
                                                     duration: entry.durationInSeconds.toString()
-                                                }
+                                                };
                                                 ddb.delete(deleteItem, function(err) {
                                                     if (err) {
                                                         console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
