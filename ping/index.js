@@ -162,124 +162,146 @@ exports.handler = function (event, context, callback) {
                             userData = data;
 
                             JSON.parse(body).forEach(function (item) {
+                                var boolVal = false;    //true = new data is the one we need so we deleted the other redundant data in the database
                                 if (userData) {
                                     userData.Items.every(function (entry) {
                                         if (item.summaryId === entry.SummaryID.S && key !== entry.sumType.S) {//check if there already exists an entry with the same summary ID but a different type
                                             item.summaryId = item.summaryId + "_" + key; //append type to the summary ID
                                             return false;
                                         }
+                                        if (key == "dailies") {
+                                            if (item.startTimeInSeconds == entry.startTime.N && item.durationInSeconds > entry.duration.N) {
+                                                var deleteItem = {
+                                                    TableName: "FitnessData",
+                                                    UserID: entry.UserID.S,
+                                                    SummaryID: entry.summaryId.S,
+                                                    UAT: entry.uat.S,
+                                                    startTime: entry.startTimeInSeconds.toString(),
+                                                    duration: entry.durationInSeconds.toString()
+                                                    sumType: entry.key
+                                                }
+                                                ddb.delete(deleteItem, function(err) {
+                                                    if (err) {
+                                                        console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
+                                                    }
+                                                });
+                                                boolVal = true;
+                                            }
+                                        }
                                     });
                                 }
 
                                 var parameters;
 
-                                if (item.startTimeInSeconds && item.durationInSeconds) { //check, which of the attributes exist and build the parameters according to that
-                                    //parameters, to store the new entry
-                                    parameters = {
-                                        Item: {
-                                            "UserID": {
-                                                S: UserID
+                                if (boolVal == true) {
+                                    if (item.startTimeInSeconds && item.durationInSeconds) { //check, which of the attributes exist and build the parameters according to that
+                                        //parameters, to store the new entry
+                                        parameters = {
+                                            Item: {
+                                                "UserID": {
+                                                    S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
+                                                },
+                                                "startTime": {
+                                                    N: item.startTimeInSeconds.toString()
+                                                },
+                                                "duration": {
+                                                    N: item.durationInSeconds.toString()
+                                                },
+                                                "sumType": {
+                                                    S: key
+                                                },
+                                                "data": {
+                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                                }
                                             },
-                                            "SummaryID": {
-                                                S: item.summaryId
+                                            TableName: "FitnessData"
+                                        };
+                                    } else if (item.startTimeInSeconds) {
+                                        //parameters, to store the new entry
+                                        parameters = {
+                                            Item: {
+                                                "UserID": {
+                                                    S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
+                                                },
+                                                "startTime": {
+                                                    N: item.startTimeInSeconds.toString()
+                                                },
+                                                "sumType": {
+                                                    S: key
+                                                },
+                                                "data": {
+                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                                }
                                             },
-                                            "UAT": {
-                                                S: uat
+                                            TableName: "FitnessData"
+                                        };
+                                    } else if (item.durationInSeconds) {
+                                        //parameters, to store the new entry
+                                        parameters = {
+                                            Item: {
+                                                "UserID": {
+                                                    S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
+                                                },
+                                                "duration": {
+                                                    N: item.durationInSeconds.toString()
+                                                },
+                                                "sumType": {
+                                                    S: key
+                                                },
+                                                "data": {
+                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                                }
                                             },
-                                            "startTime": {
-                                                N: item.startTimeInSeconds.toString()
+                                            TableName: "FitnessData"
+                                        };
+                                    } else {
+                                        //parameters, to store the new entry
+                                        parameters = {
+                                            Item: {
+                                                "UserID": {
+                                                    S: UserID
+                                                },
+                                                "SummaryID": {
+                                                    S: item.summaryId
+                                                },
+                                                "UAT": {
+                                                    S: uat
+                                                },
+                                                "sumType": {
+                                                    S: key
+                                                },
+                                                "data": {
+                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                                }
                                             },
-                                            "duration": {
-                                                N: item.durationInSeconds.toString()
-                                            },
-                                            "sumType": {
-                                                S: key
-                                            },
-                                            "data": {
-                                                S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                            }
-                                        },
-                                        TableName: "FitnessData"
-                                    };
-                                } else if (item.startTimeInSeconds) {
-                                    //parameters, to store the new entry
-                                    parameters = {
-                                        Item: {
-                                            "UserID": {
-                                                S: UserID
-                                            },
-                                            "SummaryID": {
-                                                S: item.summaryId
-                                            },
-                                            "UAT": {
-                                                S: uat
-                                            },
-                                            "startTime": {
-                                                N: item.startTimeInSeconds.toString()
-                                            },
-                                            "sumType": {
-                                                S: key
-                                            },
-                                            "data": {
-                                                S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                            }
-                                        },
-                                        TableName: "FitnessData"
-                                    };
-                                } else if (item.durationInSeconds) {
-                                    //parameters, to store the new entry
-                                    parameters = {
-                                        Item: {
-                                            "UserID": {
-                                                S: UserID
-                                            },
-                                            "SummaryID": {
-                                                S: item.summaryId
-                                            },
-                                            "UAT": {
-                                                S: uat
-                                            },
-                                            "duration": {
-                                                N: item.durationInSeconds.toString()
-                                            },
-                                            "sumType": {
-                                                S: key
-                                            },
-                                            "data": {
-                                                S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                            }
-                                        },
-                                        TableName: "FitnessData"
-                                    };
-                                } else {
-                                    //parameters, to store the new entry
-                                    parameters = {
-                                        Item: {
-                                            "UserID": {
-                                                S: UserID
-                                            },
-                                            "SummaryID": {
-                                                S: item.summaryId
-                                            },
-                                            "UAT": {
-                                                S: uat
-                                            },
-                                            "sumType": {
-                                                S: key
-                                            },
-                                            "data": {
-                                                S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                            }
-                                        },
-                                        TableName: "FitnessData"
-                                    };
-                                }
-                                //store the new entry
-                                ddb.putItem(parameters, function (err) {
-                                    if (err) {
-                                        console.log("error at storing entry: " + err, err.stack);
+                                            TableName: "FitnessData"
+                                        };
                                     }
-                                });
+                                    //store the new entry
+                                    ddb.putItem(parameters, function (err) {
+                                        if (err) {
+                                            console.log("error at storing entry: " + err, err.stack);
+                                        }
+                                    });
+                                }
                             });
                         }
                     });
