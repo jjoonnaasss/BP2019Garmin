@@ -178,7 +178,6 @@ exports.handler = function (event, context, callback) {
                                                     UAT: entry.uat.S,
                                                     startTime: entry.startTimeInSeconds.toString(),
                                                     duration: entry.durationInSeconds.toString()
-                                                    sumType: entry.key
                                                 }
                                                 ddb.delete(deleteItem, function(err) {
                                                     if (err) {
