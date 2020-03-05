@@ -82,4 +82,4 @@ module.exports.filter = function(data) {
         }
     }
     return odvData;
-}
+};
