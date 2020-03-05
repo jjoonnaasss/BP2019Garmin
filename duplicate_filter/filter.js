@@ -17,12 +17,13 @@ module.exports.filter = function(data) {
 
     var odvData = data;
 
+    //Function created to avoid redundant code.
     function check(vaultType, var1, var2) {
         if(odvData.data[var1].type == odvData.data[var2].type) {
             if(odvData.data[var1].epoch == odvData.data[var2].epoch) {
                 if(odvData.data[var1].value != odvData.data[var2].value) {
                     if(odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
-                        odvData.data.splice(var2, 1);
+                        odvData.data.splice(var2, 1); //data.splice(index, number of deleting data)
                     } else {
                         odvData.data.splice(var1, 1);
                     }
