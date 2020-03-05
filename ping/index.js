@@ -162,29 +162,37 @@ exports.handler = function (event, context, callback) {
                             userData = data;
 
                             JSON.parse(body).forEach(function (item) {
-                                var boolVal = false;    //true = new data is the one we need so we deleted the other redundant data in the database
+                                var boolVal = true; //true = either new data is the one we need so we delete the other redundant data in the database or this data is unique
                                 if (userData) {
                                     userData.Items.every(function (entry) {
                                         if (item.summaryId === entry.SummaryID.S && key !== entry.sumType.S) {//check if there already exists an entry with the same summary ID but a different type
                                             item.summaryId = item.summaryId + "_" + key; //append type to the summary ID
                                             return false;
                                         }
-                                        if (key == "dailies") {
-                                            if (item.startTimeInSeconds == entry.startTime.N && item.durationInSeconds > entry.duration.N) {
-                                                var deleteItem = {
-                                                    TableName: "FitnessData",
-                                                    UserID: entry.UserID.S,
-                                                    SummaryID: entry.summaryId.S,
-                                                    UAT: entry.uat.S,
-                                                    startTime: entry.startTimeInSeconds.toString(),
-                                                    duration: entry.durationInSeconds.toString()
-                                                };
-                                                ddb.delete(deleteItem, function(err) {
-                                                    if (err) {
-                                                        console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
-                                                    }
-                                                });
-                                                boolVal = true;
+                                        var deleteItem;
+                                        if (key == ("dailies" || "thirdParty" || "activities" || "manually" || "actDetails" || "epochs" || "sleeps" || "stressDetails")) {
+                                            if (item.startTimeInSeconds == entry.startTime.N) {
+                                                if(item.durationInSeconds > entry.duration.N) {
+                                                    deleteItem = {
+                                                        TableName: "FitnessData",
+                                                        UserID: entry.UserID.S,
+                                                        SummaryID: entry.summaryId.S,
+                                                        UAT: entry.uat.S,
+                                                        startTime: entry.startTimeInSeconds.toString(),
+                                                        duration: entry.durationInSeconds.toString()
+                                                    };
+                                                    ddb.delete(deleteItem, function(err) {
+                                                        if (err) {
+                                                            console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
+                                                        }
+                                                    });
+                                                } else {
+                                                    boolVal = false;
+                                                }
+                                            }
+                                        } else if (key == "bodyComps") {
+                                            if (item.startTimeInSeconds == entry.startTime.N) {
+                                                boolVal = false;
                                             }
                                         }
                                     });
