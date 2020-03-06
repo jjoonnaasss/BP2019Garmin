@@ -34,16 +34,16 @@ exports.handler = function (event, context, callback) {
     function duplicateFilter(odvData) {
         //This function helps to avoid redundant code.
         function check(vaultType, var1, var2) {
-            if((odvData.data[var1].type == vaultType) && (odvData.data[var2].type) == vaultType) { //data has to be the same type to be redundant
-                if(odvData.data[var1].epoch == odvData.data[var2].epoch) {
-                    if(odvData.data[var1].value != odvData.data[var2].value) {
-                        if(odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
+            if ((odvData.data[var1].type === vaultType) && (odvData.data[var2].type) === vaultType) { //data has to be the same type to be redundant
+                if (odvData.data[var1].epoch === odvData.data[var2].epoch) {
+                    if (odvData.data[var1].value !== odvData.data[var2].value) {
+                        if (odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
                             odvData.data.splice(var2, 1); //data.splice(index, number of deleting data)
                         } else {
                             odvData.data.splice(var1, 1);
                         }
                     } else {
-                        if(odvData.data[var2].origin == "unknown") { //Delete the data which has no given device.
+                        if (odvData.data[var2].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(var2, 1);
                         } else {
                             odvData.data.splice(var1, 1);
@@ -53,27 +53,27 @@ exports.handler = function (event, context, callback) {
             }
         }
 
-        for(var i = 0; i < odvData.data.length; i++) {
-            for(var j = i+1; j < odvData.data.length; j++) {
-                if((odvData.data[i].type == "HEART_RATE") && (odvData.data[j].type == "HEART_RATE")) {
-                    if(odvData.data[i].epoch == odvData.data[j].epoch) {
-                        if(odvData.data[j].origin == "unknown") { //Delete the data which has no given device.
+        for (var i = 0; i < odvData.data.length; i++) {
+            for (var j = i + 1; j < odvData.data.length; j++) {
+                if ((odvData.data[i].type === "HEART_RATE") && (odvData.data[j].type === "HEART_RATE")) {
+                    if (odvData.data[i].epoch === odvData.data[j].epoch) {
+                        if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                         } else {
                             odvData.data.splice(i, 1);
                         }
                     }
-                } else if((odvData.data[i].type == "WEIGHT") && (odvData.data[j].type == "WEIGHT")) {
-                    if(odvData.data[i].epoch == odvData.data[j].epoch) {
-                        if(odvData.data[j].origin == "unknown") { //Delete the data which has no given device.
+                } else if ((odvData.data[i].type === "WEIGHT") && (odvData.data[j].type === "WEIGHT")) {
+                    if (odvData.data[i].epoch === odvData.data[j].epoch) {
+                        if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                         } else {
                             odvData.data.splice(i, 1);
                         }
                     }
-                } else if((odvData.data[i].type == "STRESS") && (odvData.data[j].type == "STRESS")) {
-                    if(odvData.data[i].epoch == odvData.data[j].epoch) {
-                        if(odvData.data[j].origin == "unknown") { //Delete the data which has no given device.
+                } else if ((odvData.data[i].type === "STRESS") && (odvData.data[j].type === "STRESS")) {
+                    if (odvData.data[i].epoch === odvData.data[j].epoch) {
+                        if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                         } else {
                             odvData.data.splice(i, 1);
@@ -165,12 +165,12 @@ exports.handler = function (event, context, callback) {
                             if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
                                 userData.forEach(function (item) {
                                     if (item && item.sumType.S && item.data.S) {
-                                        if(item.sumType.S == ("dailies" || "thirdParty" || "activities" || "manually" || "actDetails" || "epochs" || "sleeps" || "bodyComps" || "stressDetails")) {
-                                            let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
-                                            entries.forEach(function (entry) {
+                                        let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
+                                        entries.forEach(function (entry) {
+                                            if (entry && entry.Item) {
                                                 fileData += JSON.stringify((entry.Item)) + ",";
-                                            });
-                                        }
+                                            }
+                                        });
                                     }
                                 });
 
