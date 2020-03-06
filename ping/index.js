@@ -172,7 +172,7 @@ exports.handler = function (event, context, callback) {
                                             return false;
                                         }
                                         var deleteItem;
-                                        if (key == ("dailies" || "thirdParty" || "activities" || "manually" || "actDetails" || "epochs" || "sleeps" || "stressDetails")) {
+                                        if ((key == "dailies") || (key == "thirdParty") || (key == "activities") || (key == "manually") || (key == "actDetails") || (key == "epochs") || (key == "sleeps") || (key == "stressDetails")) {
                                             if (item.startTimeInSeconds == entry.startTime.N) {
                                                 if(item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
                                                     deleteItem = { //parameters, to search for redundant data
