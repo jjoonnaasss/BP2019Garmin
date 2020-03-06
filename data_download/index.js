@@ -164,10 +164,12 @@ exports.handler = function (event, context, callback) {
 
                             if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
                                 userData.forEach(function (item) {
-                                    let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
-                                    entries.forEach(function (entry) {
-                                        fileData += JSON.stringify((entry.Item)) + ",";
-                                    });
+                                    if(item.sumType.S == ("dailies" || "thirdParty" || "activities" || "manually" || "actDetails" || "epochs" || "sleeps" || "bodyComps" || "stressDetails")) {
+                                        let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
+                                        entries.forEach(function (entry) {
+                                            fileData += JSON.stringify((entry.Item)) + ",";
+                                        });
+                                    }
                                 });
 
                                 //cut off last ","
