@@ -172,9 +172,9 @@ exports.handler = function (event, context, callback) {
                                             return false;
                                         }
                                         var deleteItem;
-                                        if ((key == "dailies") || (key == "thirdParty") || (key == "activities") || (key == "manually") || (key == "actDetails") || (key == "epochs") || (key == "sleeps") || (key == "stressDetails")) {
-                                            if (item.startTimeInSeconds == entry.startTime.N) {
-                                                if(item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
+                                        if ((key === "dailies") || (key === "thirdParty") || (key === "activities") || (key === "manually") || (key === "actDetails") || (key === "epochs") || (key === "sleeps") || (key === "stressDetails")) {
+                                            if (item.startTimeInSeconds === entry.startTime.N) {
+                                                if (item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
                                                     deleteItem = { //parameters, to search for redundant data
                                                         TableName: "FitnessData",
                                                         UserID: entry.UserID.S,
@@ -183,7 +183,7 @@ exports.handler = function (event, context, callback) {
                                                         startTime: entry.startTimeInSeconds.toString(),
                                                         duration: entry.durationInSeconds.toString()
                                                     };
-                                                    ddb.delete(deleteItem, function(err) { //delete the redundant data
+                                                    ddb.delete(deleteItem, function (err) { //delete the redundant data
                                                         if (err) {
                                                             console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
                                                         }
@@ -192,8 +192,8 @@ exports.handler = function (event, context, callback) {
                                                     boolVal = false;
                                                 }
                                             }
-                                        } else if (key == "bodyComps") {
-                                            if (item.startTimeInSeconds == entry.startTime.N) { //bodyComps contains no duration data
+                                        } else if (key === "bodyComps") {
+                                            if (item.startTimeInSeconds === entry.startTime.N) { //bodyComps contains no duration data
                                                 boolVal = false;
                                             }
                                         }
@@ -202,7 +202,7 @@ exports.handler = function (event, context, callback) {
 
                                 var parameters;
 
-                                if (boolVal == true) {
+                                if (boolVal) {
                                     if (item.startTimeInSeconds && item.durationInSeconds) { //check, which of the attributes exist and build the parameters according to that
                                         //parameters, to store the new entry
                                         parameters = {
