@@ -34,7 +34,7 @@ exports.handler = function (event, context, callback) {
     function duplicateFilter(odvData) {
         //This function helps to avoid redundant code.
         function check(vaultType, var1, var2) {
-            if((odvData.data[var1].type == vaultType) && (odvData.data[var2].type) == vaultType) {
+            if((odvData.data[var1].type == vaultType) && (odvData.data[var2].type) == vaultType) { //data has to be the same type to be redundant
                 if(odvData.data[var1].epoch == odvData.data[var2].epoch) {
                     if(odvData.data[var1].value != odvData.data[var2].value) {
                         if(odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
@@ -43,7 +43,7 @@ exports.handler = function (event, context, callback) {
                             odvData.data.splice(var1, 1);
                         }
                     } else {
-                        if(odvData.data[var2].origin == "unknown") { //Delete the data without a given device.
+                        if(odvData.data[var2].origin == "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(var2, 1);
                         } else {
                             odvData.data.splice(var1, 1);
@@ -57,7 +57,7 @@ exports.handler = function (event, context, callback) {
             for(var j = i+1; j < odvData.data.length; j++) {
                 if((odvData.data[i].type == "HEART_RATE") && (odvData.data[j].type == "HEART_RATE")) {
                     if(odvData.data[i].epoch == odvData.data[j].epoch) {
-                        if(odvData.data[j].origin == "unknown") { //Delete the data without a given device.
+                        if(odvData.data[j].origin == "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                         } else {
                             odvData.data.splice(i, 1);
@@ -65,7 +65,7 @@ exports.handler = function (event, context, callback) {
                     }
                 } else if((odvData.data[i].type == "WEIGHT") && (odvData.data[j].type == "WEIGHT")) {
                     if(odvData.data[i].epoch == odvData.data[j].epoch) {
-                        if(odvData.data[j].origin == "unknown") { //Delete the data without a given device.
+                        if(odvData.data[j].origin == "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                         } else {
                             odvData.data.splice(i, 1);
@@ -73,7 +73,7 @@ exports.handler = function (event, context, callback) {
                     }
                 } else if((odvData.data[i].type == "STRESS") && (odvData.data[j].type == "STRESS")) {
                     if(odvData.data[i].epoch == odvData.data[j].epoch) {
-                        if(odvData.data[j].origin == "unknown") { //Delete the data without a given device.
+                        if(odvData.data[j].origin == "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                         } else {
                             odvData.data.splice(i, 1);
