@@ -162,7 +162,9 @@ exports.handler = function (event, context, callback) {
                             userData = data;
 
                             JSON.parse(body).forEach(function (item) {
-                                var boolVal = true; //true = either new data is the one we need so we delete the other redundant data in the database or this data is unique
+                                //true = either new data is the one we need so we delete the other redundant data in the database or this data is unique
+                                //false = redundant data with exact same or longer duration already exists in the database
+                                var boolVal = true;
                                 if (userData) {
                                     userData.Items.every(function (entry) {
                                         if (item.summaryId === entry.SummaryID.S && key !== entry.sumType.S) {//check if there already exists an entry with the same summary ID but a different type
@@ -172,8 +174,8 @@ exports.handler = function (event, context, callback) {
                                         var deleteItem;
                                         if (key == ("dailies" || "thirdParty" || "activities" || "manually" || "actDetails" || "epochs" || "sleeps" || "stressDetails")) {
                                             if (item.startTimeInSeconds == entry.startTime.N) {
-                                                if(item.durationInSeconds > entry.duration.N) {
-                                                    deleteItem = {
+                                                if(item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
+                                                    deleteItem = { //parameters, to search for redundant data
                                                         TableName: "FitnessData",
                                                         UserID: entry.UserID.S,
                                                         SummaryID: entry.summaryId.S,
@@ -181,7 +183,7 @@ exports.handler = function (event, context, callback) {
                                                         startTime: entry.startTimeInSeconds.toString(),
                                                         duration: entry.durationInSeconds.toString()
                                                     };
-                                                    ddb.delete(deleteItem, function(err) {
+                                                    ddb.delete(deleteItem, function(err) { //delete the redundant data
                                                         if (err) {
                                                             console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
                                                         }
@@ -191,7 +193,7 @@ exports.handler = function (event, context, callback) {
                                                 }
                                             }
                                         } else if (key == "bodyComps") {
-                                            if (item.startTimeInSeconds == entry.startTime.N) {
+                                            if (item.startTimeInSeconds == entry.startTime.N) { //bodyComps contains no duration data
                                                 boolVal = false;
                                             }
                                         }
