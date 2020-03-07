@@ -13,9 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+//This code snippet is only used for test purposes. You can used this code to test if the given JSON files are converted correctly to the odv format.
+
 const fs = require("fs");
 var test = require("./odv_converter");
 
+//Save the content of the JSON files into a constant.
 const rawdata = fs.readFileSync("daily_summaries.json");
 const dailySum = JSON.parse(rawdata);
 const rawdata1 = fs.readFileSync("third_party.json");
@@ -35,6 +38,7 @@ const bodyComSum = JSON.parse(rawdata7);
 const rawdata8 = fs.readFileSync("stress_details_summaries.json");
 const strDetSum = JSON.parse(rawdata8);
 
+//Use the odv-converter on each JSON file and save the converted data into an array.
 var array = [];
 if(dailySum != undefined) {
     for(var i = 0; i < dailySum.length; i++) {
@@ -96,6 +100,7 @@ if(strDetSum != undefined) {
 // If it returns an empty array, throw an error.
 if(array.length == 0) throw "The given summary doesn't exist!";
 
+//Output the converted data on the console.
 console.log("==========ARRAY==========");
 for(var t = 0; t < array.length; t++) {
     if(array[t] != undefined) {
