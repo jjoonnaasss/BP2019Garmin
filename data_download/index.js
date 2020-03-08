@@ -34,10 +34,10 @@ exports.handler = function (event, context, callback) {
     function duplicateFilter(odvData) {
         //This function helps to avoid redundant code.
         function check(vaultType, var1, var2, iorj) {
-            if((odvData.data[var1].type === vaultType) && (odvData.data[var2].type) === vaultType) { //data has to be the same type to be redundant
-                if(odvData.data[var1].epoch === odvData.data[var2].epoch) {
-                    if(odvData.data[var1].value != odvData.data[var2].value) {
-                        if(odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
+            if ((odvData.data[var1].type === vaultType) && (odvData.data[var2].type) === vaultType) { //data has to be the same type to be redundant
+                if (odvData.data[var1].epoch === odvData.data[var2].epoch) {
+                    if (odvData.data[var1].value !== odvData.data[var2].value) {
+                        if (odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
                             odvData.data.splice(var2, 1); //data.splice(index, number of deleting data)
                             iorj = "j";
                         } else {
@@ -45,7 +45,7 @@ exports.handler = function (event, context, callback) {
                             iorj = "i";
                         }
                     } else {
-                        if(odvData.data[var2].origin === "unknown") { //Delete the data which has no given device.
+                        if (odvData.data[var2].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(var2, 1);
                             iorj = "j";
                         } else {
@@ -58,11 +58,11 @@ exports.handler = function (event, context, callback) {
             return iorj;
         }
 
-        for(var i = 0; i < odvData.data.length; i++) {
-            for(var j = i+1; j < odvData.data.length; j++) {
-                if((odvData.data[i].type === "HEART_RATE") && (odvData.data[j].type === "HEART_RATE")) {
-                    if(odvData.data[i].epoch === odvData.data[j].epoch) {
-                        if(odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
+        for (var i = 0; i < odvData.data.length; i++) {
+            for (var j = i + 1; j < odvData.data.length; j++) {
+                if ((odvData.data[i].type === "HEART_RATE") && (odvData.data[j].type === "HEART_RATE")) {
+                    if (odvData.data[i].epoch === odvData.data[j].epoch) {
+                        if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                             j -= 1;
                         } else {
@@ -70,9 +70,9 @@ exports.handler = function (event, context, callback) {
                             i -= 1;
                         }
                     }
-                } else if((odvData.data[i].type === "WEIGHT") && (odvData.data[j].type === "WEIGHT")) {
-                    if(odvData.data[i].epoch === odvData.data[j].epoch) {
-                        if(odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
+                } else if ((odvData.data[i].type === "WEIGHT") && (odvData.data[j].type === "WEIGHT")) {
+                    if (odvData.data[i].epoch === odvData.data[j].epoch) {
+                        if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                             j -= 1;
                         } else {
@@ -80,9 +80,9 @@ exports.handler = function (event, context, callback) {
                             i -= i;
                         }
                     }
-                } else if((odvData.data[i].type === "STRESS") && (odvData.data[j].type === "STRESS")) {
-                    if(odvData.data[i].epoch === odvData.data[j].epoch) {
-                        if(odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
+                } else if ((odvData.data[i].type === "STRESS") && (odvData.data[j].type === "STRESS")) {
+                    if (odvData.data[i].epoch === odvData.data[j].epoch) {
+                        if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
                             j -= 1;
                         } else {
@@ -99,9 +99,9 @@ exports.handler = function (event, context, callback) {
                     minus = check("SLEEP_LIGHT", i, j, minus);
                     minus = check("SLEEP_REM", i, j, minus);
                     minus = check("SLEEP_DEEP", i, j, minus);
-                    if(minus === "i") {
+                    if (minus === "i") {
                         i -= 1;
-                    } else if(minus === "j") {
+                    } else if (minus === "j") {
                         j -= 1;
                     }
                 }
@@ -166,81 +166,7 @@ exports.handler = function (event, context, callback) {
                             ":key": {"S": userId}
                         }
                     };
-
-
-                    //read all entries for the given userID
-                    ddb.query(params, function (err, data) {
-                        if (err) {
-                            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
-                        } else {
-                            const userData = data.Items;
-                            var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
-                                hour12: false,
-                                timeZone: "Europe/Berlin"
-                            }).replace(",", "") + "\",\"data\":[";
-
-                            if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
-                                userData.forEach(function (item) {
-                                    if (item && item.sumType.S && item.data.S) {
-                                        let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
-                                        entries.forEach(function (entry) {
-                                            if (entry && entry.Item) {
-                                                fileData += JSON.stringify((entry.Item)) + ",";
-                                            }
-                                        });
-                                    }
-                                });
-
-                                //cut off last ","
-                                fileData = fileData.substring(0, fileData.length - 1);
-                                fileData += "]}";
-
-                                if (fileData === "{\"title\": \"ODV JSON export\", \"data\":]}") {//check, if no fitness data was found
-                                    //create response, telling the website that no data was found
-                                    const res = {
-                                        "statusCode": 401,
-                                        "headers": {
-                                            "Content-Type": "text/plain",
-                                        },
-                                        "body": "no data"
-                                    };
-                                    //send response
-                                    callback(null, res);
-                                } else {
-                                    //delete all redundant data
-                                    var fileBuffer = JSON.parse(fileData);
-                                    fileData = JSON.stringify(duplicateFilter(fileBuffer));
-
-                                    //create random key for the symmetric encryption
-                                    let symKey = buffer.Buffer.from(crypto.randomBytes(32));
-
-                                    //encrypt fileData symmetrically using the symkey
-                                    let encrypted = encryption.encryption(fileData, symKey, false);
-
-                                    //initialize rsa and import the public key from access.json
-                                    let key = new rsa();
-                                    key.importKey(access.pubKey, "pkcs1-public");
-                                    //use rsa to encrypt the key used to encrypt the fileData
-                                    let encryptedKey = key.encrypt(symKey, "base64");
-
-                                    //append the encrypted key and the encrypted data, divided by "===***==="
-                                    let response = encryptedKey + "===***===" + encrypted;
-
-                                    //create the response containing the encrypted data
-                                    const res = {
-                                        "statusCode": 200,
-                                        "headers": {
-                                            "Content-Type": "text/plain",
-                                        },
-                                        "body": response
-                                    };
-
-                                    //send response
-                                    callback(null, res);
-                                }
-                            }
-                        }
-                    });
+                    ddb.query(params, onQuery);
                 } else {
                     //create response, telling the website that no data was found
                     const res = {
@@ -256,4 +182,98 @@ exports.handler = function (event, context, callback) {
             }
         }
     });
+
+    let userData;
+
+    function onQuery(err, data) {
+        if (err) {
+            console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("Scan succeeded.");
+            if (data && data.Items) {
+                data.Items.forEach(function () {
+                });
+                if (!userData || userData.length < 1) {
+                    userData = data.Items;
+                } else {
+                    userData = userData + data.Items;
+                }
+            }
+
+            // continue scanning if we have more items
+            if (data && data.LastEvaluatedKey) {
+                if (typeof data.LastEvaluatedKey != "undefined") {
+                    console.log("Scanning for more...");
+                    params.ExclusiveStartKey = data.LastEvaluatedKey;
+                    ddb.query(params, onQuery());
+                }
+            } else {
+                var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
+                    hour12: false,
+                    timeZone: "Europe/Berlin"
+                }).replace(",", "") + "\",\"data\":[";
+
+                if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
+                    userData.forEach(function (item) {
+                        if (item && item.sumType.S && item.data.S) {
+                            let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
+                            entries.forEach(function (entry) {
+                                if (entry && entry.Item) {
+                                    fileData += JSON.stringify((entry.Item)) + ",";
+                                }
+                            });
+                        }
+                    });
+
+                    //cut off last ","
+                    fileData = fileData.substring(0, fileData.length - 1);
+                    fileData += "]}";
+
+                    if (fileData === "{\"title\": \"ODV JSON export\", \"data\":]}") {//check, if no fitness data was found
+                        //create response, telling the website that no data was found
+                        const res = {
+                            "statusCode": 401,
+                            "headers": {
+                                "Content-Type": "text/plain",
+                            },
+                            "body": "no data"
+                        };
+                        //send response
+                        callback(null, res);
+                    } else {
+                        //delete all redundant data
+                        var fileBuffer = JSON.parse(fileData);
+                        fileData = JSON.stringify(duplicateFilter(fileBuffer));
+
+                        //create random key for the symmetric encryption
+                        let symKey = buffer.Buffer.from(crypto.randomBytes(32));
+
+                        //encrypt fileData symmetrically using the symkey
+                        let encrypted = encryption.encryption(fileData, symKey, false);
+
+                        //initialize rsa and import the public key from access.json
+                        let key = new rsa();
+                        key.importKey(access.pubKey, "pkcs1-public");
+                        //use rsa to encrypt the key used to encrypt the fileData
+                        let encryptedKey = key.encrypt(symKey, "base64");
+
+                        //append the encrypted key and the encrypted data, divided by "===***==="
+                        let response = encryptedKey + "===***===" + encrypted;
+
+                        //create the response containing the encrypted data
+                        const res = {
+                            "statusCode": 200,
+                            "headers": {
+                                "Content-Type": "text/plain",
+                            },
+                            "body": response
+                        };
+
+                        //send response
+                        callback(null, res);
+                    }
+                }
+            }
+        }
+    }
 };
