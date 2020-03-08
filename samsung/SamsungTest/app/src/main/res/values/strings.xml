@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Health Data Reader</string>
+    <string name="stepcount_text">%d Steps</string>
+    <string name="notification_title">Data Reader active</string>
+    <string name="channel_description">Channel for Samsung Health -> ODV converter</string>
+    <string name="channel_id">HealthReader</string>
+    <string name="channel_name">HealthReader</string>
+</resources>
