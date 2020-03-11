@@ -136,6 +136,7 @@ exports.handler = function (event, context, callback) {
         }
     };
 
+    var userID;
     //read password hash and user access token from database
     ddb.getItem(params, function (err, data) {
         if (err) {
@@ -158,6 +159,7 @@ exports.handler = function (event, context, callback) {
 
                 if (data.Item.UserID) {//check if the user already has an userID to query for data
                     const userId = data.Item.UserID.S;
+                    userID = userId;
 
                     params = {
                         TableName: "FitnessData",
@@ -183,21 +185,23 @@ exports.handler = function (event, context, callback) {
         }
     });
 
-    let userData;
+    let userData = [];
 
     function onQuery(err, data) {
+        params = {
+            TableName: "FitnessData",
+            FilterExpression: "UserID = :key",
+            ExpressionAttributeValues: {
+                ":key": {"S": userID}
+            }
+        };
+
         if (err) {
             console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
         } else {
             console.log("Scan succeeded.");
             if (data && data.Items) {
-                data.Items.forEach(function () {
-                });
-                if (!userData || userData.length < 1) {
-                    userData = data.Items;
-                } else {
-                    userData = userData + data.Items;
-                }
+                userData.push(data.Items);
             }
 
             // continue scanning if we have more items
@@ -205,23 +209,28 @@ exports.handler = function (event, context, callback) {
                 if (typeof data.LastEvaluatedKey != "undefined") {
                     console.log("Scanning for more...");
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    ddb.scan(params, onQuery());
+                    ddb.scan(params, onQuery);
                 }
             } else {
-                var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
+                let fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
                     hour12: false,
                     timeZone: "Europe/Berlin"
                 }).replace(",", "") + "\",\"data\":[";
 
                 if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
-                    userData.forEach(function (item) {
-                        if (item && item.sumType.S && item.data.S) {
-                            let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
-                            entries.forEach(function (entry) {
-                                if (entry && entry.Item) {
-                                    fileData += JSON.stringify((entry.Item)) + ",";
-                                }
-                            });
+                    userData.forEach(function (records) {
+                        for(var i = 0; i < records.length; i++) {
+                            let item = records[i];
+                            if (item && item.sumType.S && item.data.S) {
+                                let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
+                                let buffer = "";
+                                entries.forEach(function (entry) {
+                                    if (entry && entry.Item) {
+                                        buffer += JSON.stringify((entry.Item)) + ",";
+                                    }
+                                });
+                                fileData += buffer;
+                            }
                         }
                     });
 
