@@ -16,10 +16,10 @@
 module.exports.encryption = function (text, password, decryptBool) {
 
     //boolean to decide, if you want to encrypt or decrypt
-    if (!decryptBool) {
-        return encrypt(text, password);
-    } else {
+    if (decryptBool) {
         return decrypt(text, password);
+    } else {
+        return encrypt(text, password);
     }
 };
 
@@ -31,7 +31,7 @@ const buffer = require("buffer");
 //encryption function
 function encrypt(text, password) {
     //create random initialization vector for the encryption
-    let iv = buffer.Buffer.from(crypto.randomBytes(16));
+    const iv = buffer.Buffer.from(crypto.randomBytes(16));
 
     //encrypt the given text with the given password, using aes-256-ctr, utf8 input and hex output
     const cipher = crypto.createCipheriv(algorithm, password, iv);
@@ -46,8 +46,8 @@ function encrypt(text, password) {
 function decrypt(text, password) {
     //split the given string into initialization vector and encrypted text
     const splitValues = text.split(":");
-    let iv = buffer.Buffer.from(splitValues.shift(), "hex");
-    let crypted = buffer.Buffer.from(splitValues.join(":"), "hex");
+    const iv = buffer.Buffer.from(splitValues.shift(), "hex");
+    const crypted = buffer.Buffer.from(splitValues.join(":"), "hex");
 
     //decrypt the given text with the given password, using aes-256-ctr, hex input and utf8 output
     const decipher = crypto.createDecipheriv(algorithm, password, iv);

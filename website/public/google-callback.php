@@ -48,9 +48,9 @@ if ($_POST['submit']) {
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve status
     if (isset($_POST['regCheckbox'])) {
-        $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'random' => '*' . $_GET['val'] . '*', 'secret' => '*' . $google_secret . '*');
+        $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'random' => '*' . $_GET['val'] . '*', 'secret' => '*' . $google_secret . '*');
     } else {
-        $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'random' => '*' . $_GET['val'] . '*', 'secret' => '*' . $google_secret . '*', 'login' . '*');
+        $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'random' => '*' . $_GET['val'] . '*', 'secret' => '*' . $google_secret . '*', 'login' . '*');
     }
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $google_link);

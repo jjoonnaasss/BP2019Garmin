@@ -20,15 +20,15 @@ exports.handler = function (event, context, callback) {
     const fit = google.fitness("v1");
 
     //initialize database
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
     //read client-id, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
-    var points = [];
+    let points = [];
 
     //create oauth2-client
     const oauth2Client = new google.auth.OAuth2(
@@ -38,10 +38,10 @@ exports.handler = function (event, context, callback) {
 
     if (event.body) {
 
-        var postData = event.body.split("*");
+        const postData = event.body.split("*");
         //create variables to store the parameters received from the website
-        var mail = postData[1];
-        var pwhash = postData[3];
+        const mail = postData[1];
+        const pwHash = postData[3];
 
         //check, if website sent the correct secret
         if (postData[5] !== access.app_secret) {
@@ -50,7 +50,7 @@ exports.handler = function (event, context, callback) {
         }
 
         //parameters for the database access
-        var parameters = {
+        const parameters = {
             TableName: "UserData",
             Key: {
                 "Mail": {
@@ -59,11 +59,11 @@ exports.handler = function (event, context, callback) {
             }
         };
 
-        var tokens;
+        let tokens;
 
         ddb.getItem(parameters, function (err, data) { //check, if mail is already registered
-            if (err || !data.Item || (data.Item.PWHash.S !== pwhash)) { //compare passwords
-                let res = {
+            if (err || !data.Item || (data.Item.PWHash.S !== pwHash)) { //compare passwords
+                const res = {
                     "statusCode": 401,
                     "headers": {
                         "Content-Type": "text/plain",
@@ -73,7 +73,7 @@ exports.handler = function (event, context, callback) {
                 callback(null, res); //return error
                 console.log("Error (with login)", err);
             } else if (!data.Item.Google_token || !data.Item.GoogleTimestamp) { //check, if account is connected with Google
-                let res = {
+                const res = {
                     "statusCode": 401,
                     "headers": {
                         "Content-Type": "text/plain",
@@ -86,19 +86,24 @@ exports.handler = function (event, context, callback) {
                 tokens = JSON.parse(data.Item.Google_token.S);
                 console.log("tokens: " + tokens);
 
+                //give tokens to the oauth client
                 oauth2Client.setCredentials({
                     access_token: tokens.access_token
                 });
 
-                let googleTimestamp = data.Item.GoogleTimestamp.S;
-                let currentTimestamp = Date.now().toString();
+                //store last synchronized and current timestamps
+                const googleTimestamp = data.Item.GoogleTimestamp.S;
+                const currentTimestamp = Date.now().toString();
 
+                //request the list of all data sources the user has
                 fit.users.dataSources.list({auth: oauth2Client, userId: "me"}, function (err, resp) {
-                    if (err) {
-                        console.log(err);
-                    } else {
+                    if (!err) {
                         let len = resp.data.dataSource.length;
+
+                        //iterate over the data sources
                         resp.data.dataSource.forEach(source => {
+
+                            //request the actual data stored in the data source
                             fit.users.dataset.aggregate({
                                 auth: oauth2Client,
                                 userId: "me",
@@ -108,35 +113,30 @@ exports.handler = function (event, context, callback) {
                                     aggregateBy: [{dataSourceId: source.dataStreamId}]
                                 }
                             }, function (err, resp) {
-                                if (err) {
-                                    //console.log(err);
+
+                                //collect the data from the different data sources
+                                if (!err) {
                                     len--;
+                                    resp.data.bucket.forEach(bucket => bucket.dataset.forEach(dataset => dataset.point.forEach(point => points.push(JSON.stringify(point)))));
+
+                                    //call store function if all data was collected
                                     if (len <= 0) {
                                         storePoints(points, mail, currentTimestamp, 0, callback);
                                     }
                                 } else {
                                     len--;
-                                    resp.data.bucket.forEach(bucket => bucket.dataset.forEach(dataset => dataset.point.forEach(point => points.push(JSON.stringify(point)))));
+
+                                    //call store function if all data was collected
                                     if (len <= 0) {
                                         storePoints(points, mail, currentTimestamp, 0, callback);
                                     }
                                 }
                             });
                         });
-                        console.log(points.length);
+                    } else {
+                        console.log(err);
                     }
                 });
-
-                console.log(points.length);
-
-                /*fit.users.dataSources.datasets.get({auth: oauth2Client, userId: "me", dataSourceId: "derived:com.google.calories.expended:com.google.android.gms:from_activities",
-                    datasetId: "1580896800000000000-1581253200000000000"}, function(err, resp) {
-                    if(err) {
-                        console.log(err);
-                    } else {
-                        console.log(JSON.stringify(resp));
-                    }
-                });*/
             }
         });
     }
@@ -149,17 +149,17 @@ function storePoints(points, mail, timestamp, counter, callback) {
     const encryption = require("/opt/encryption");
     const fs = require("fs");
     //read client-id, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
     //initialize database
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
-
+    //check if the points-list is small enough to start the last iteration
     if (points.length <= 500 && points.length > 0) {
         //parameters for the database access
-        var parameters = {
+        let parameters = {
             TableName: "GoogleData",
             Item: {
                 "Mail": {
@@ -174,10 +174,9 @@ function storePoints(points, mail, timestamp, counter, callback) {
             }
         };
 
+        //store the encrypted data
         ddb.putItem(parameters, function (err) {
-            if (err) {
-                console.log(err);
-            } else {
+            if (!err) {
                 //parameters for the database access
                 parameters = {
                     TableName: "UserData",
@@ -199,27 +198,30 @@ function storePoints(points, mail, timestamp, counter, callback) {
 
                 //add the google token to the existing database entry of the user
                 ddb.updateItem(parameters, function (err) {
-                    if (err) {
+                    if (!err) {
+                        //create response for the website
+                        const res = {
+                            "statusCode": 200,
+                            "headers": {
+                                "Content-Type": "text/plain",
+                            },
+                            "body": "done"
+                        };
+                        callback(null, res); //return response to website
+                        console.log("done", err);
+                    } else {
                         console.log(err, err.stack); // an error occurred
                     }
-                    //create response for the website
-                    let res = {
-                        "statusCode": 200,
-                        "headers": {
-                            "Content-Type": "text/plain",
-                        },
-                        "body": "done"
-                    };
-                    callback(null, res); //return response to website
-                    console.log("done", err);
                 });
+            } else {
+                console.log(err);
             }
         });
-    } else if (points.length > 0) {
-        var array = points.slice(0, 500);
+    } else if (points.length > 0) { //case, where there are too many datapoints to start last iteration -> recursion
+        const array = points.slice(0, 500);
 
         //parameters for the database access
-        var params = {
+        const params = {
             TableName: "GoogleData",
             Item: {
                 "Mail": {
@@ -234,17 +236,18 @@ function storePoints(points, mail, timestamp, counter, callback) {
             }
         };
 
+        //store the encrypted data
         ddb.putItem(params, function (err) {
-            if (err) {
-                console.log(err);
-            } else {
+            if (!err) {
                 console.log("calling with " + array.slice(500).length + "entries and counter = " + (counter + 1));
-                storePoints(points.slice(500), mail, timestamp, counter + 1, callback);
+                storePoints(points.slice(500), mail, timestamp, counter + 1, callback); //recursion, call function again with remaining data, that has not yet been stored
+            } else {
+                console.log(err);
             }
         });
     } else {
         //create response for the website
-        let res = {
+        const res = {
             "statusCode": 200,
             "headers": {
                 "Content-Type": "text/plain",

@@ -37,7 +37,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve string
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $dd_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -64,7 +64,6 @@ if ($_POST['submit']) {
     $symKey = $rsa->decrypt(base64_decode($responseData[0]));
 
     //decrypt Garmin fitness data
-    $iv_size = openssl_cipher_iv_length("aes-256-ctr");
     $data = explode(":", $responseData[1]);
     $iv = hex2bin($data[0]);
     $cipherText = hex2bin($data[1]);

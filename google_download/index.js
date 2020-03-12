@@ -22,19 +22,19 @@ exports.handler = function (event, context, callback) {
     const crypto = require("crypto");
 
     //read consumer-key, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
     if (event.body) {
 
-        var postData = event.body.split("*");
+        const postData = event.body.split("*");
         //create variables to store the parameters received from the website
-        var mail = postData[1];
-        var pwhash = postData[3];
+        const mail = postData[1];
+        const pwHash = postData[3];
 
         //check, if website sent the correct secret
         if (postData[5] !== access.app_secret) {
@@ -43,7 +43,7 @@ exports.handler = function (event, context, callback) {
         }
 
         //parameters to read password hash and userID from database
-        var params = {
+        const params = {
             TableName: "UserData",
             Key: {
                 "Mail": {
@@ -54,10 +54,8 @@ exports.handler = function (event, context, callback) {
 
         //read user information from database
         ddb.getItem(params, function (err, data) {
-            if (err) {
-                console.log("Error", err);
-            } else {
-                if (!data.Item || data.Item.PWHash.S !== pwhash) {
+            if (!err) {
+                if (!data.Item || data.Item.PWHash.S !== pwHash) {
                     //create response, telling the user that the given password is incorrect
                     const res = {
                         "statusCode": 401,
@@ -70,7 +68,7 @@ exports.handler = function (event, context, callback) {
                     callback(null, res);
                 } else {
 
-                    var params = {
+                    const params = {
                         TableName: "GoogleData",
                         KeyConditionExpression: "Mail = :key",
                         ExpressionAttributeValues: {
@@ -80,9 +78,7 @@ exports.handler = function (event, context, callback) {
 
                     //read all entries for the given userID
                     ddb.query(params, function (err, data) {
-                        if (err) {
-                            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
-                        } else {
+                        if (!err) {
                             var fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
                                 hour12: false,
                                 timeZone: "Europe/Berlin"
@@ -111,19 +107,19 @@ exports.handler = function (event, context, callback) {
                                     callback(null, res);
                                 } else {
                                     //create random key for the symmetric encryption
-                                    let symKey = buffer.Buffer.from(crypto.randomBytes(32));
+                                    const symKey = buffer.Buffer.from(crypto.randomBytes(32));
 
                                     //encrypt fileData symmetrically using the symkey
-                                    let encrypted = encryption.encryption(fileData, symKey, false);
+                                    const encrypted = encryption.encryption(fileData, symKey, false);
 
                                     //initialize rsa and import the public key from access.json
-                                    let key = new rsa();
+                                    const key = new rsa();
                                     key.importKey(access.pubKey, "pkcs1-public");
                                     //use rsa to encrypt the key used to encrypt the fileData
-                                    let encryptedKey = key.encrypt(symKey, "base64");
+                                    const encryptedKey = key.encrypt(symKey, "base64");
 
                                     //append the encrypted key and the encrypted data, divided by "===***==="
-                                    let response = encryptedKey + "===***===" + encrypted;
+                                    const response = encryptedKey + "===***===" + encrypted;
 
                                     //create the response containing the encrypted data
                                     const res = {
@@ -138,9 +134,13 @@ exports.handler = function (event, context, callback) {
                                     callback(null, res);
                                 }
                             }
+                        } else {
+                            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                         }
                     });
                 }
+            } else {
+                console.log("Error", err);
             }
         });
     }

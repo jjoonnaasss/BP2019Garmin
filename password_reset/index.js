@@ -19,16 +19,16 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
 
     //read consumer-key, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
     //initial values to be replaced with the actual parameters
     var mail = "empty";
-    var pwhash = "empty";
+    var pwHash = "empty";
     var random = "empty";
 
     var timestamp = Date.now() / 1000; //current timestamp
@@ -96,7 +96,7 @@ exports.handler = function (event, context, callback) {
         } else if (postData.length === 9 && postData[7] === access.app_secret) { //check, if it is a request to end the reset by changing the password
             mail = postData[1];
             random = postData[3];
-            pwhash = postData[5];
+            pwHash = postData[5];
 
             //parameters for the database access
             var parameters = {
@@ -153,7 +153,7 @@ exports.handler = function (event, context, callback) {
                                         S: uat
                                     },
                                     "PWHash": {
-                                        S: pwhash
+                                        S: pwHash
                                     },
                                     "Mail": {
                                         S: mail

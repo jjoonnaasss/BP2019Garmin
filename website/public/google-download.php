@@ -37,7 +37,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve string
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $google_secret . '*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $google_secret . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $google_data_sync_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -82,7 +82,6 @@ if ($_POST['submit']) {
         $symKey = $rsa->decrypt(base64_decode($responseData[0]));
 
         //decrypt Google Fit data
-        $iv_size = openssl_cipher_iv_length("aes-256-ctr");
         $data = explode(":", $responseData[1]);
         $iv = hex2bin($data[0]);
         $cipherText = hex2bin($data[1]);
@@ -195,7 +194,9 @@ function checkUserInput()
 
     <!--show error message to user-->
     <?php
-    if (isset($_GET['input_error'])) {
+    if (isset($_GET['login'])) {
+        echo '<div class="alert alert-success" role="alert">' . $google_d_login_success . '</div>';
+    } elseif (isset($_GET['input_error'])) {
         echo '<div class="alert alert-danger" role="alert">' . $input_error . '</div>';
     } elseif (isset($_GET['loginError'])) {
         echo '<div class="alert alert-danger" role="alert">' . $login_error . '</div>';
@@ -203,8 +204,6 @@ function checkUserInput()
         echo '<div class="alert alert-danger" role="alert">' . $google_d_data_error . '</div>';
     } elseif (isset($_GET['googleConnect'])) {
         echo '<div class="alert alert-danger" role="alert">' . $google_d_connect_error . '</div>';
-    } elseif (isset($_GET['login'])) {
-        echo '<div class="alert alert-success" role="alert">' . $google_d_login_success . '</div>';
     } elseif (isset($_GET['data_error'])) {
         echo '<div class="alert alert-danger" role="alert">' . $dd_data_error . '</div>';
     }

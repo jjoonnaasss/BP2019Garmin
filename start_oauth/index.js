@@ -22,17 +22,17 @@ exports.handler = function (event, context, callback) {
     const qs = require("querystring");
     const fs = require("fs");
 
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
     //read consumer-key, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
     //initial values to be replaced with the actual parameters
     var mail = "empty";
-    var pwhash = "empty";
+    var pwHash = "empty";
     var secret = "empty";
 
     if (event.body) {   //save the given mail-address and given password
@@ -41,7 +41,7 @@ exports.handler = function (event, context, callback) {
 
         if (postData.length === 7) { //read values entered by the user to create a new account in the database and start connection with garmin
             mail = postData[1];
-            pwhash = postData[3];
+            pwHash = postData[3];
             secret = postData[5];
 
             var parameters = {
@@ -65,14 +65,14 @@ exports.handler = function (event, context, callback) {
                     callback(null, res); //return error
                     console.log("already registered");
                 } else {
-                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, "");
+                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwHash, secret, "");
                 }
             });
         }
 
         if (postData.length >= 8) { //read current password hash from database to reconnect existing account with garmin
             mail = postData[1];
-            pwhash = postData[3];
+            pwHash = postData[3];
             secret = postData[5];
             var params = {
                 TableName: "UserData",
@@ -85,7 +85,7 @@ exports.handler = function (event, context, callback) {
 
             //read password hash from database
             ddb.getItem(params, function (err, data) {
-                if (err || !data.Item ||(data.Item.PWHash.S !== pwhash)) {
+                if (err || !data.Item ||(data.Item.PWHash.S !== pwHash)) {
                     let res = {
                         "statusCode": 401,
                         "headers": {
@@ -115,7 +115,7 @@ exports.handler = function (event, context, callback) {
                     if (data.Item.UserID) {
                         uid = data.Item.UserID.S;
                     }
-                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, uid);
+                    contact_garmin(OAuth, request, crypto, qs, ddb, callback, access, mail, pwHash, secret, uid);
                 }
             });
         }
@@ -123,7 +123,7 @@ exports.handler = function (event, context, callback) {
 };
 
 //function to contact the garmin api, receive a request-token and let user confirm connection
-var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access, mail, pwhash, secret, UserID) {
+var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access, mail, pwHash, secret, UserID) {
 
     if (secret !== access.app_secret) { //check secret-value
         console.log("wrong secret");
@@ -188,7 +188,7 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
                 }
             });
 
-            if (mail !== "empty" && pwhash !== "empty") {
+            if (mail !== "empty" && pwHash !== "empty") {
                 if (UserID === "") {
                     //parameters to store mail with password
                     params = {
@@ -198,7 +198,7 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
                                 S: mail
                             },
                             "PWHash": {
-                                S: pwhash
+                                S: pwHash
                             }
                         }
                     };
@@ -211,7 +211,7 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
                                 S: mail
                             },
                             "PWHash": {
-                                S: pwhash
+                                S: pwHash
                             },
                             "UserID": {
                                 S: UserID

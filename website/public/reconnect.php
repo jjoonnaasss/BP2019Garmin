@@ -34,7 +34,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve zip file
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*', 'reconnect' . '*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*', 'reconnect' . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $start_oauth_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

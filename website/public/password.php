@@ -43,7 +43,7 @@ if ($_POST['submit']) {
     $pwHash = hash('sha3-512', $password);
 
     //call lambda API with a post request, transferring mail, new password and random value, and retrieve success or error code
-    $postfields = array('mail' => '*' . $emailAddress . '*', 'randomValue' => '*' . $randomValue . '*', 'pwhash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'randomValue' => '*' . $randomValue . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $password_reset_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

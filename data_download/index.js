@@ -23,39 +23,39 @@ exports.handler = function (event, context, callback) {
     const buffer = require("buffer");
 
     //read consumer-key, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
     //This function filters the redundant data of a JSON file.
     function duplicateFilter(odvData) {
         //This function helps to avoid redundant code.
-        function check(vaultType, var1, var2, iorj) {
+        function check(vaultType, var1, var2, IorJ) {
             if ((odvData.data[var1].type === vaultType) && (odvData.data[var2].type) === vaultType) { //data has to be the same type to be redundant
                 if (odvData.data[var1].epoch === odvData.data[var2].epoch) {
                     if (odvData.data[var1].value !== odvData.data[var2].value) {
                         if (odvData.data[var1].value > odvData.data[var2].value) { //Keep the data with the longer duration.
                             odvData.data.splice(var2, 1); //data.splice(index, number of deleting data)
-                            iorj = "j";
+                            IorJ = "j";
                         } else {
                             odvData.data.splice(var1, 1);
-                            iorj = "i";
+                            IorJ = "i";
                         }
                     } else {
                         if (odvData.data[var2].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(var2, 1);
-                            iorj = "j";
+                            IorJ = "j";
                         } else {
                             odvData.data.splice(var1, 1);
-                            iorj = "i";
+                            IorJ = "i";
                         }
                     }
                 }
             }
-            return iorj;
+            return IorJ;
         }
 
         for (var i = 0; i < odvData.data.length; i++) {
@@ -112,18 +112,20 @@ exports.handler = function (event, context, callback) {
 
     //initial values to be replaced with the actual parameters
     var mail = "empty";
-    var pwhash = "empty";
+    var pwHash = "empty";
 
     if (event.body) {  //check, if data was received at all
         var postData = event.body.split("*");
         if (postData.length >= 5) { //check, if there are enough parameters given, read parameters, check secret-value
             mail = postData[1];
-            pwhash = postData[3];
+            pwHash = postData[3];
             if (postData[5] !== access.app_secret) { //check secret-value
                 console.log("wrong secret");
                 return;
             }
         }
+    } else {
+        return;
     }
 
     //parameters to read password hash and userID from database
@@ -139,10 +141,8 @@ exports.handler = function (event, context, callback) {
     var userID;
     //read password hash and user access token from database
     ddb.getItem(params, function (err, data) {
-        if (err) {
-            console.log("Error", err);
-        } else {
-            if (!data.Item || data.Item.PWHash.S !== pwhash) {
+        if (!err) {
+            if (!data.Item || data.Item.PWHash.S !== pwHash) {
                 //create response, telling the user that the given password is incorrect
                 const res = {
                     "statusCode": 401,
@@ -182,6 +182,8 @@ exports.handler = function (event, context, callback) {
                     callback(null, res);
                 }
             }
+        } else {
+            console.log("Error", err);
         }
     });
 
@@ -196,9 +198,7 @@ exports.handler = function (event, context, callback) {
             }
         };
 
-        if (err) {
-            console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
-        } else {
+        if (!err) {
             console.log("Scan succeeded.");
             if (data && data.Items) {
                 userData.push(data.Items);
@@ -220,16 +220,16 @@ exports.handler = function (event, context, callback) {
                 if (userData) { //convert all entries to the OpenDataVault-format and append them to the fileData
                     userData.forEach(function (records) {
                         for(var i = 0; i < records.length; i++) {
-                            let item = records[i];
+                            const item = records[i];
                             if (item && item.sumType.S && item.data.S) {
-                                let entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
-                                let buffer = "";
+                                const entries = converter.odvConverter(JSON.parse(encryption.encryption(item.data.S, access.dataEncPW, true)), item.sumType.S); //decrypt the fitness data and give it to the odv_converter
                                 entries.forEach(function (entry) {
                                     if (entry && entry.Item) {
-                                        buffer += JSON.stringify((entry.Item)) + ",";
+                                        /* jshint ignore:start */
+                                        fileData += JSON.stringify((entry.Item)) + ","; // eslint-disable-line no-use-before-define
+                                        /* jshint ignore:end */
                                     }
                                 });
-                                fileData += buffer;
                             }
                         }
                     });
@@ -251,23 +251,23 @@ exports.handler = function (event, context, callback) {
                         callback(null, res);
                     } else {
                         //delete all redundant data
-                        var fileBuffer = JSON.parse(fileData);
+                        const fileBuffer = JSON.parse(fileData);
                         fileData = JSON.stringify(duplicateFilter(fileBuffer));
 
                         //create random key for the symmetric encryption
-                        let symKey = buffer.Buffer.from(crypto.randomBytes(32));
+                        const symKey = buffer.Buffer.from(crypto.randomBytes(32));
 
                         //encrypt fileData symmetrically using the symkey
-                        let encrypted = encryption.encryption(fileData, symKey, false);
+                        const encrypted = encryption.encryption(fileData, symKey, false);
 
                         //initialize rsa and import the public key from access.json
-                        let key = new rsa();
+                        const key = new rsa();
                         key.importKey(access.pubKey, "pkcs1-public");
                         //use rsa to encrypt the key used to encrypt the fileData
-                        let encryptedKey = key.encrypt(symKey, "base64");
+                        const encryptedKey = key.encrypt(symKey, "base64");
 
                         //append the encrypted key and the encrypted data, divided by "===***==="
-                        let response = encryptedKey + "===***===" + encrypted;
+                        const response = encryptedKey + "===***===" + encrypted;
 
                         //create the response containing the encrypted data
                         const res = {
@@ -281,8 +281,20 @@ exports.handler = function (event, context, callback) {
                         //send response
                         callback(null, res);
                     }
+                } else {
+                    const res = {
+                        "statusCode": 401,
+                        "headers": {
+                            "Content-Type": "text/plain",
+                        },
+                        "body": "no data"
+                    };
+                    //send response
+                    callback(null, res);
                 }
             }
+        } else {
+            console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
         }
     }
 };

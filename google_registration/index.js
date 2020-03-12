@@ -20,13 +20,13 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
 
     //initialize database
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
     //read client-id, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
     //create oauth2-client
     const oauth2Client = new google.auth.OAuth2(
@@ -60,14 +60,14 @@ exports.handler = function (event, context, callback) {
     } else if (event.body) {
 
         //split information received by website
-        var postData = event.body.split("*");
+        const postData = event.body.split("*");
         var parameters;
 
         //create variables to store the parameters received from the website
-        var mail = postData[1];
-        var pwhash = postData[3];
-        var ranVal = postData[5];
-        var secret = postData[7];
+        const mail = postData[1];
+        const pwHash = postData[3];
+        const ranVal = postData[5];
+        const secret = postData[7];
 
         if (postData.length === 9) { //read values entered by the user to create a new account in the database and start connection with google
 
@@ -131,7 +131,7 @@ exports.handler = function (event, context, callback) {
                                         S: mail
                                     },
                                     "PWHash": {
-                                        S: pwhash
+                                        S: pwHash
                                     },
                                     "Google_token": {
                                         S: data.Item.Google_token.S
@@ -173,7 +173,7 @@ exports.handler = function (event, context, callback) {
 
             //read password hash from database
             ddb.getItem(params, function (err, data) {
-                if (err || !data.Item ||(data.Item.PWHash.S !== pwhash)) { //compare passwords
+                if (err || !data.Item ||(data.Item.PWHash.S !== pwHash)) { //compare passwords
                     let res = {
                         "statusCode": 401,
                         "headers": {
@@ -234,10 +234,10 @@ exports.handler = function (event, context, callback) {
 
                             //add the google token to the existing database entry of the user
                             ddb.updateItem(params, function (err) {
-                                if (err) {
-                                    console.log(err, err.stack); // an error occurred
-                                } else {
+                                if (!err) {
                                     deleteRandomEntry(ranVal, callback);
+                                } else {
+                                    console.log(err, err.stack); // an error occurred
                                 }
                             });
                         }
@@ -274,14 +274,14 @@ exports.handler = function (event, context, callback) {
 function storeToken(tokens, callback) {
 
     //initialize database
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
     //generate the random value
     var randomVal = "";
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    var charactersLength = characters.length;
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
 
     for (let i = 0; i < 8; i++) {
         randomVal += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -301,44 +301,46 @@ function storeToken(tokens, callback) {
 
     //check if there already is an entry for the random value in the database and if so, start storeToken again
     ddb.getItem(parameters, function (err, data) {
-        if (err) {
-            console.log("Error", err);
-        } else if (!data.Item) {
+        if (!err) {
+            if (!data.Item) {
 
-            //parameters for the database access
-            parameters = {
-                Item: {
-                    "Mail": {
-                        S: randomVal
-                    },
-                    "Google_token": {
-                        S: JSON.stringify(tokens)
-                    }
-                },
-                TableName: "UserData"
-            };
-
-            //store token in the database
-            ddb.putItem(parameters, function (err) {
-                if (err) {
-                    console.log("error at storing entry: " + err, err.stack);
-                } else {
-                    //create response object
-                    const res = {
-                        "statusCode": 200,
-                        "headers": {
-                            "Content-Type": "text/html",
+                //parameters for the database access
+                parameters = {
+                    Item: {
+                        "Mail": {
+                            S: randomVal
                         },
-                        "body": "<meta http-equiv=\"refresh\" content=\"0; URL=http://192.168.178.5/google-callback.php?val=" + randomVal + "\">"
-                    };
-                    //callback to the user, redirecting him to the google callback website
-                    callback(null, res);
-                }
-            });
+                        "Google_token": {
+                            S: JSON.stringify(tokens)
+                        }
+                    },
+                    TableName: "UserData"
+                };
 
+                //store token in the database
+                ddb.putItem(parameters, function (err) {
+                    if (!err) {
+                        //create response object
+                        const res = {
+                            "statusCode": 200,
+                            "headers": {
+                                "Content-Type": "text/html",
+                            },
+                            "body": "<meta http-equiv=\"refresh\" content=\"0; URL=http://192.168.178.5/google-callback.php?val=" + randomVal + "\">"
+                        };
+                        //callback to the user, redirecting him to the google callback website
+                        callback(null, res);
+                    } else {
+                        console.log("error at storing entry: " + err, err.stack);
+                    }
+                });
+
+            } else {
+                //restart storeToken, as the random value was already used
+                storeToken(tokens, callback);
+            }
         } else {
-            //restart storeToken, as the random value was already used
-            storeToken(tokens, callback);
+            console.log("Error", err);
         }
     });
 }
@@ -347,9 +349,9 @@ function storeToken(tokens, callback) {
 function deleteRandomEntry(ranVal, callback) {
 
     //initialize database
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"});
 
     //parameters for the database access
     var params = {
@@ -361,9 +363,7 @@ function deleteRandomEntry(ranVal, callback) {
 
     //remove the random value entry from the table
     ddb.deleteItem(params, function (err) {
-        if (err) {
-            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
-        } else {
+        if (!err) {
             const res = {
                 "statusCode": 200,
                 "headers": {
@@ -373,6 +373,8 @@ function deleteRandomEntry(ranVal, callback) {
             };
             //callback to the website
             callback(null, res);
+        } else {
+            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
         }
     });
 }

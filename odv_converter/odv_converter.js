@@ -16,14 +16,14 @@
 module.exports.odvConverter = function(dataJSON, type) {
 
     // This is the array, which will be returned in the end. It contains all the Table items of the given summary.
-    var params = [];
-    var timeOffset;
+    let params = [];
+    let timeOffset;
 
     // This function returns the correct UTC timeline
     function timeOff(time) {
         let hours = Math.round(time / 3600);
         if(time >= 0) {
-            if(hours.toString().length == 1) {
+            if(hours.toString().length === 1) {
                 return `+0${hours}:00`;
             }
             else {
@@ -31,7 +31,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             }
         }
         else {
-            if((-hours).toString().length == 1) {
+            if((-hours).toString().length === 1) {
                 return `-0${-hours}:00`;
             }
             else {
@@ -49,7 +49,7 @@ module.exports.odvConverter = function(dataJSON, type) {
     *  value: The given value of the VaultEntryType.
     */
     function createTable(ori, typ, epo, iso, val) {
-        var table = {
+        const table = {
             TableName: "FitnessDat",
             Item: {
                 origin: ori,
@@ -306,7 +306,7 @@ module.exports.odvConverter = function(dataJSON, type) {
             if(dataJSON.durationInSeconds == 900) {
                 var epochTable;
                 // met == 1.0 -> sitting -> no exercise(everything which takes more energy than sitting is an exercise)
-                if(dataJSON.intensity == "SEDENTARY" && dataJSON.met > 1.0) {
+                if(dataJSON.intensity === "SEDENTARY" && dataJSON.met > 1.0) {
                     epochTable = createTable(
                         "unknown",
                         "EXERCISE_LOW",
@@ -314,7 +314,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.activeTimeInSeconds.toString());
                 }
-                else if(dataJSON.intensity == "ACTIVE") {
+                else if(dataJSON.intensity === "ACTIVE") {
                     epochTable = createTable(
                         "unknown",
                         "EXERCISE_MID",
@@ -322,7 +322,7 @@ module.exports.odvConverter = function(dataJSON, type) {
                         isoTime(dataJSON.startTimeInSeconds + dataJSON.startTimeOffsetInSeconds, timeOffset),
                         dataJSON.activeTimeInSeconds.toString());
                 }
-                else if(dataJSON.intensity == "HIGHLY_ACTIVE") {
+                else if(dataJSON.intensity === "HIGHLY_ACTIVE") {
                     epochTable = createTable(
                         "unknown",
                         "EXERCISE_HIGH",

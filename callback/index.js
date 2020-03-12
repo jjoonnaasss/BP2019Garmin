@@ -21,9 +21,9 @@ exports.handler = function (event, context, callback) {
     const fs = require("fs");
     const encryption = require("/opt/encryption");
 
-    var AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.update({region: "eu-central-1"});
-    var ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database object
+    const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database object
 
     //initial values to be replaced with the actual parameters
     var ver = "no verifier received";
@@ -38,8 +38,8 @@ exports.handler = function (event, context, callback) {
     }
 
     //read consumer-key, -secret and application secret
-    const access_rawdata = fs.readFileSync("/opt/access.json");
-    const access = JSON.parse(access_rawdata);
+    const accessRawdata = fs.readFileSync("/opt/access.json");
+    const access = JSON.parse(accessRawdata);
 
     //create response object for the callback
     const res = {
