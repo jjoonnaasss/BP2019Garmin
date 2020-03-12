@@ -45,7 +45,7 @@ if ($_POST['submit']) {
     }
 
     //hash the password
-    $pwHash = hash('sha3-512', $password);
+    $pwHash = hash('sha3-512', $emailAddress. $password);
 
     //call lambda API with a post request, transferring mail and password hash, and retrieve redirect url from lambda function
     $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
@@ -198,12 +198,12 @@ function checkUserInput()
                 <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\"
                    aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-de\"> </span> Deutsch</a>
                 <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
-                    <a class=\"dropdown-item\" href=\"?lang=en\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                    <a class=\"dropdown-item\" href=\"?lang=en\"><span class=\"flag-icon flag-icon-us\"> </span> English</a>
                 </div>
             </li>";
             } else {
                 echo "<li class=\"nav-item dropdown\">
-                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-gb\"> </span> English</a>
+                <a class=\"nav-link dropdown-toggle\" href=\"http://example.com\" id=\"dropdown09\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><span class=\"flag-icon flag-icon-us\"> </span> English</a>
                 <div class=\"dropdown-menu\" aria-labelledby=\"dropdown09\">
                     <a class=\"dropdown-item\" href=\"?lang=de\"><span class=\"flag-icon flag-icon-de\"> </span>  Deutsch</a>
                 </div>
