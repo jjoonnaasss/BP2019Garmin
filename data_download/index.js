@@ -60,6 +60,7 @@ exports.handler = function (event, context, callback) {
 
         for (var i = 0; i < odvData.data.length; i++) {
             for (var j = i + 1; j < odvData.data.length; j++) {
+                //delete redundant "HEART_RATE" data
                 if ((odvData.data[i].type === "HEART_RATE") && (odvData.data[j].type === "HEART_RATE")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
@@ -70,6 +71,7 @@ exports.handler = function (event, context, callback) {
                             i -= 1;
                         }
                     }
+                    //delete redundatn "WEIGHT" data
                 } else if ((odvData.data[i].type === "WEIGHT") && (odvData.data[j].type === "WEIGHT")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
@@ -80,6 +82,7 @@ exports.handler = function (event, context, callback) {
                             i -= i;
                         }
                     }
+                    //delete redundant "STRESS" data
                 } else if ((odvData.data[i].type === "STRESS") && (odvData.data[j].type === "STRESS")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
@@ -92,6 +95,7 @@ exports.handler = function (event, context, callback) {
                     }
                 } else {
                     var minus = "none";
+                    //delete redundant data of the specific type
                     minus = check("EXERCISE_MANUAL", i, j, minus);
                     minus = check("EXERCISE_LOW", i, j, minus);
                     minus = check("EXERCISE_MID", i, j, minus);
