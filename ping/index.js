@@ -40,6 +40,8 @@ exports.handler = function (event, context, callback) {
     var url = jsonBody[key][0].callbackURL;
     var UserID = jsonBody[key][0].userId;
 
+    var bodyVal = "";
+
     const res = {
         "statusCode": 200
     };
@@ -143,7 +145,7 @@ exports.handler = function (event, context, callback) {
                 },
                 function (error, response, body) {
 
-                    var userData;
+                    bodyVal = body;
 
                     //parameters, to read all entries for the given userID from the database
                     var params = {
@@ -155,167 +157,190 @@ exports.handler = function (event, context, callback) {
                     };
 
                     //read all entries for the given userID
-                    ddb.query(params, function (err, data) {
-                        if (err) {
-                            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
-                        } else {
-                            userData = data;
-
-                            JSON.parse(body).forEach(function (item) {
-                                //true = either new data is the one we need so we delete the other redundant data in the database or this data is unique
-                                //false = redundant data with exact same or longer duration already exists in the database
-                                var boolVal = true;
-                                if (userData) {
-                                    userData.Items.every(function (entry) {
-                                        if (item.summaryId === entry.SummaryID.S && key !== entry.sumType.S) {//check if there already exists an entry with the same summary ID but a different type
-                                            item.summaryId = item.summaryId + "_" + key; //append type to the summary ID
-                                            return false;
-                                        }
-                                        var deleteItem;
-                                        if ((key === "dailies") || (key === "thirdParty") || (key === "activities") || (key === "manually") || (key === "actDetails") || (key === "epochs") || (key === "sleeps") || (key === "stressDetails")) {
-                                            if (item.startTimeInSeconds === entry.startTime.N) {
-                                                if (item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
-                                                    deleteItem = { //parameters, to search for redundant data
-                                                        TableName: "FitnessData",
-                                                        UserID: entry.UserID.S,
-                                                        SummaryID: entry.summaryId.S,
-                                                        UAT: entry.uat.S,
-                                                        startTime: entry.startTimeInSeconds.toString(),
-                                                        duration: entry.durationInSeconds.toString()
-                                                    };
-                                                    ddb.delete(deleteItem, function (err) { //delete the redundant data
-                                                        if (err) {
-                                                            console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
-                                                        }
-                                                    });
-                                                } else {
-                                                    boolVal = false;
-                                                }
-                                            }
-                                        } else if (key === "bodyComps") {
-                                            if (item.startTimeInSeconds === entry.startTime.N) { //bodyComps contains no duration data
-                                                boolVal = false;
-                                            }
-                                        }
-                                    });
-                                }
-
-                                var parameters;
-
-                                if (boolVal) {
-                                    if (item.startTimeInSeconds && item.durationInSeconds) { //check, which of the attributes exist and build the parameters according to that
-                                        //parameters, to store the new entry
-                                        parameters = {
-                                            Item: {
-                                                "UserID": {
-                                                    S: UserID
-                                                },
-                                                "SummaryID": {
-                                                    S: item.summaryId
-                                                },
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "startTime": {
-                                                    N: item.startTimeInSeconds.toString()
-                                                },
-                                                "duration": {
-                                                    N: item.durationInSeconds.toString()
-                                                },
-                                                "sumType": {
-                                                    S: key
-                                                },
-                                                "data": {
-                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                                }
-                                            },
-                                            TableName: "FitnessData"
-                                        };
-                                    } else if (item.startTimeInSeconds) {
-                                        //parameters, to store the new entry
-                                        parameters = {
-                                            Item: {
-                                                "UserID": {
-                                                    S: UserID
-                                                },
-                                                "SummaryID": {
-                                                    S: item.summaryId
-                                                },
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "startTime": {
-                                                    N: item.startTimeInSeconds.toString()
-                                                },
-                                                "sumType": {
-                                                    S: key
-                                                },
-                                                "data": {
-                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                                }
-                                            },
-                                            TableName: "FitnessData"
-                                        };
-                                    } else if (item.durationInSeconds) {
-                                        //parameters, to store the new entry
-                                        parameters = {
-                                            Item: {
-                                                "UserID": {
-                                                    S: UserID
-                                                },
-                                                "SummaryID": {
-                                                    S: item.summaryId
-                                                },
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "duration": {
-                                                    N: item.durationInSeconds.toString()
-                                                },
-                                                "sumType": {
-                                                    S: key
-                                                },
-                                                "data": {
-                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                                }
-                                            },
-                                            TableName: "FitnessData"
-                                        };
-                                    } else {
-                                        //parameters, to store the new entry
-                                        parameters = {
-                                            Item: {
-                                                "UserID": {
-                                                    S: UserID
-                                                },
-                                                "SummaryID": {
-                                                    S: item.summaryId
-                                                },
-                                                "UAT": {
-                                                    S: uat
-                                                },
-                                                "sumType": {
-                                                    S: key
-                                                },
-                                                "data": {
-                                                    S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
-                                                }
-                                            },
-                                            TableName: "FitnessData"
-                                        };
-                                    }
-                                    //store the new entry
-                                    ddb.putItem(parameters, function (err) {
-                                        if (err) {
-                                            console.log("error at storing entry: " + err, err.stack);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                    ddb.query(params, onQuery);
                 }
             );
         }
     });
+
+    let userData = [];
+    function onQuery(err, data) {
+        params = {
+            TableName: "FitnessData",
+            KeyConditionExpression: "UserID = :key",
+            ExpressionAttributeValues: {
+                ":key": {"S": UserID}
+            }
+        };
+        if (err) {
+            console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("Scan succeeded.");
+            if (data && data.Items) {
+                userData.push(data.Items);
+            }
+            // continue scanning if we have more items
+            if (data && data.LastEvaluatedKey) {
+                if (typeof data.LastEvaluatedKey != "undefined") {
+                    console.log("Scanning for more...");
+                    params.ExclusiveStartKey = data.LastEvaluatedKey;
+                    ddb.query(params, onQuery);
+                }
+            } else {
+                userData = data;
+
+                JSON.parse(bodyVal).forEach(function (item) {
+                    //true = either new data is the one we need so we delete the other redundant data in the database or this data is unique
+                    //false = redundant data with exact same or longer duration already exists in the database
+                    var boolVal = true;
+                    if (userData) {
+                        userData.Items.every(function (entry) {
+                            if (item.summaryId === entry.SummaryID.S && key !== entry.sumType.S) {//check if there already exists an entry with the same summary ID but a different type
+                                item.summaryId = item.summaryId + "_" + key; //append type to the summary ID
+                                return false;
+                            }
+                            var deleteItem;
+                            if ((key === "dailies") || (key === "thirdParty") || (key === "activities") || (key === "manually") || (key === "actDetails") || (key === "epochs") || (key === "sleeps") || (key === "stressDetails")) {
+                                if (item.startTimeInSeconds === entry.startTime.N) {
+                                    if (item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
+                                        deleteItem = { //parameters, to search for redundant data
+                                            TableName: "FitnessData",
+                                            UserID: entry.UserID.S,
+                                            SummaryID: entry.summaryId.S,
+                                            UAT: entry.uat.S,
+                                            startTime: entry.startTimeInSeconds.toString(),
+                                            duration: entry.durationInSeconds.toString()
+                                        };
+                                        ddb.delete(deleteItem, function (err) { //delete the redundant data
+                                            if (err) {
+                                                console.error("Unable to delete item, Error:", JSON.stringify(err, null, 2));
+                                            }
+                                        });
+                                    } else {
+                                        boolVal = false;
+                                    }
+                                }
+                            } else if (key === "bodyComps") {
+                                if (item.startTimeInSeconds === entry.startTime.N) { //bodyComps contains no duration data
+                                    boolVal = false;
+                                }
+                            }
+                        });
+                    }
+
+                    var parameters;
+
+                    if (boolVal) {
+                        if (item.startTimeInSeconds && item.durationInSeconds) { //check, which of the attributes exist and build the parameters according to that
+                            //parameters, to store the new entry
+                            parameters = {
+                                Item: {
+                                    "UserID": {
+                                        S: UserID
+                                    },
+                                    "SummaryID": {
+                                        S: item.summaryId
+                                    },
+                                    "UAT": {
+                                        S: uat
+                                    },
+                                    "startTime": {
+                                        N: item.startTimeInSeconds.toString()
+                                    },
+                                    "duration": {
+                                        N: item.durationInSeconds.toString()
+                                    },
+                                    "sumType": {
+                                        S: key
+                                    },
+                                    "data": {
+                                        S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                    }
+                                },
+                                TableName: "FitnessData"
+                            };
+                        } else if (item.startTimeInSeconds) {
+                            //parameters, to store the new entry
+                            parameters = {
+                                Item: {
+                                    "UserID": {
+                                        S: UserID
+                                    },
+                                    "SummaryID": {
+                                        S: item.summaryId
+                                    },
+                                    "UAT": {
+                                        S: uat
+                                    },
+                                    "startTime": {
+                                        N: item.startTimeInSeconds.toString()
+                                    },
+                                    "sumType": {
+                                        S: key
+                                    },
+                                    "data": {
+                                        S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                    }
+                                },
+                                TableName: "FitnessData"
+                            };
+                        } else if (item.durationInSeconds) {
+                            //parameters, to store the new entry
+                            parameters = {
+                                Item: {
+                                    "UserID": {
+                                        S: UserID
+                                    },
+                                    "SummaryID": {
+                                        S: item.summaryId
+                                    },
+                                    "UAT": {
+                                        S: uat
+                                    },
+                                    "duration": {
+                                        N: item.durationInSeconds.toString()
+                                    },
+                                    "sumType": {
+                                        S: key
+                                    },
+                                    "data": {
+                                        S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                    }
+                                },
+                                TableName: "FitnessData"
+                            };
+                        } else {
+                            //parameters, to store the new entry
+                            parameters = {
+                                Item: {
+                                    "UserID": {
+                                        S: UserID
+                                    },
+                                    "SummaryID": {
+                                        S: item.summaryId
+                                    },
+                                    "UAT": {
+                                        S: uat
+                                    },
+                                    "sumType": {
+                                        S: key
+                                    },
+                                    "data": {
+                                        S: encryption.encryption(JSON.stringify(item), access.dataEncPW, false) //encrypt the actual data using a password from the access.json
+                                    }
+                                },
+                                TableName: "FitnessData"
+                            };
+                        }
+                        //store the new entry
+                        ddb.putItem(parameters, function (err) {
+                            if (err) {
+                                console.log("error at storing entry: " + err, err.stack);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
 };
