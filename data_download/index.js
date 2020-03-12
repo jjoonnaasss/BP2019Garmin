@@ -163,12 +163,12 @@ exports.handler = function (event, context, callback) {
 
                     params = {
                         TableName: "FitnessData",
-                        FilterExpression: "UserID = :key",
+                        KeyConditionExpression: "UserID = :key",
                         ExpressionAttributeValues: {
                             ":key": {"S": userId}
                         }
                     };
-                    ddb.scan(params, onQuery);
+                    ddb.query(params, onQuery);
                 } else {
                     //create response, telling the website that no data was found
                     const res = {
@@ -192,7 +192,7 @@ exports.handler = function (event, context, callback) {
     function onQuery(err, data) {
         params = {
             TableName: "FitnessData",
-            FilterExpression: "UserID = :key",
+            KeyConditionExpression: "UserID = :key",
             ExpressionAttributeValues: {
                 ":key": {"S": userID}
             }
@@ -209,7 +209,7 @@ exports.handler = function (event, context, callback) {
                 if (typeof data.LastEvaluatedKey != "undefined") {
                     console.log("Scanning for more...");
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    ddb.scan(params, onQuery);
+                    ddb.query(params, onQuery);
                 }
             } else {
                 let fileData = "{\"title\":\"DiaConvert ODV JSON export\",\"exportDate\":\"" + new Date(Date.now()).toLocaleString("de-DE", {
