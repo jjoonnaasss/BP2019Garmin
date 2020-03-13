@@ -217,23 +217,45 @@ exports.handler = function (event, context, callback) {
                                         S: mail
                                     }
                                 },
-                                ConditionExpression: "attribute_not_exists(#GTS)",
                                 ExpressionAttributeNames: {
-                                    "#GT": "Google_token",
-                                    "#GTS": "GoogleTimestamp",
+                                    "#GT": "Google_token"
                                 },
                                 ExpressionAttributeValues: {
                                     ":gt": {
                                         S: data.Item.Google_token.S
-                                    },
+                                    }
+                                },
+                                UpdateExpression: "SET #GT = :gt"
+                            };
+
+                            //add the google token to the existing database entry of the user
+                            ddb.updateItem(params, function (err) {
+                                if (!err) {
+                                    deleteRandomEntry(ranVal, callback);
+                                } else {
+                                    console.log(err, err.stack); // an error occurred
+                                }
+                            });
+
+                            params = {
+                                TableName: "UserData",
+                                Key: {
+                                    "Mail": {
+                                        S: mail
+                                    }
+                                },
+                                ConditionExpression: "attribute_not_exists(#GTS)",
+                                ExpressionAttributeNames: {
+                                    "#GTS": "GoogleTimestamp",
+                                },
+                                ExpressionAttributeValues: {
                                     ":gts": {
                                         S: Date.now().toString()
                                     },
                                 },
-                                UpdateExpression: "SET #GT = :gt, #GTS = :gts"
+                                UpdateExpression: "SET #GTS = :gts"
                             };
 
-                            //add the google token to the existing database entry of the user
                             ddb.updateItem(params, function (err) {
                                 if (!err) {
                                     deleteRandomEntry(ranVal, callback);
