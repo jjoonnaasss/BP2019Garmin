@@ -77,8 +77,8 @@ $google_d_headline = "Google Fit Daten Download";
 $pw_subject = "Passwort zurücksetzen";
 
 //messages sent to the user
-$input_error = "Es ist ein Fehler aufgetreten. Bitte alle Felder ausfüllen";
-$pw_error = "Es ist ein Fehler aufgetreten. Die Passwörter müssen gleich sein";
+$input_error = "Es ist ein Fehler aufgetreten. Bitte alle Felder ausfüllen!";
+$pw_error = "Es ist ein Fehler aufgetreten. Die Passwörter müssen gleich sein!";
 $registered = "Die Email ist bereits registriert! Das <a href=\"../password-reset.php\">Passwort</a> kann geändert werden oder die <a href=\"../reconnect.php\">Verbindung</a> zu Garmin erneut erfolgen.";
 $mail_send_error = "Es gab leider einen Fehler... Versuchen sie es später erneut. Passiert dies öfters wenden sie sich bitte an ....";
 $mail_send = "Email wurde verschickt!";
@@ -100,18 +100,18 @@ $call_info_text = "Ihre Registrierung ist in circa 5 Minuten abgeschlossen. <br>
 $dd_info_text = "Hier können sie die gesammelten Fitnessdaten ihres DiaConvert Accounts im <a href=\"https://github.com/OpenDiabetes/OpenDiabetesVault/wiki/Data-Model\">OpenDiabetesVault</a>-Format herunterladen.";
 $pw_reset_success = "Passwort wurde erfolgreich geändert!";
 $login_error = "Es ist ein Fehler aufgetreten. Email und/oder Passwort falsch.";
-$dd_login_success = "Daten werden gedownloadet";
-$dd_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt";
+$dd_login_success = "Daten werden gedownloadet.";
+$dd_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt!";
 $pw_mail_text = "Klicken sie auf den folgenden Link, um ein neues Passwort festzulegen:";
 $google_info_text = "Erstellen sie ein neues DiaConvert Konto mit Google Fit Verknüpfung oder verknüpfen sie ihr vorhandenes DiaConvert Konto mit Google Fit.";
 $google_callback_info_text = "Melden sie sich mit ihrem DiaConvert Konto an oder erstellen sie ein neues, um die Google Fit Verbindung abzuschließen";
-$google_success = "Verbindung erfolgreich";
+$google_success = "Verbindung erfolgreich!";
 $google_error = "Es gab leider einen Fehler, bitte versuchen sie es später erneut. Passiert dies öfters wenden sie sich bitte an ....";
-$google_reg_check = "Bitte auswählen, wenn sie noch kein DiaConvert Konto besitzen";
+$google_reg_check = "Bitte auswählen, wenn sie noch kein DiaConvert Konto besitzen.";
 
 $google_d_info_text = "Hier können sie ihre Google Fit Daten synchronisieren und downloaden.";
-$google_d_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt";
-$google_sync_check = "Bitte auswählen, wenn sie die Daten downloaden möchten";
-$google_d_button = "Daten synchronisieren";
+$google_d_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt!";
+$google_sync_check = "Bitte auswählen, wenn sie die Daten downloaden möchten.";
+$google_d_button = "Daten synchronisieren!";
 $google_d_connect_error = "Ihr Account ist nicht mit Google Fit verbunden. Eine Verbindung mit Google Fit können sie <a href=\"../google.php\">hier</a> eingehen.";
-$google_d_login_success = "Login erfolgreich, Daten werden synchronisiert";
+$google_d_login_success = "Login erfolgreich, Daten werden synchronisiert!";
