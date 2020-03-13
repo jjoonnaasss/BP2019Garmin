@@ -71,7 +71,7 @@ exports.handler = function (event, context, callback) {
                             i -= 1;
                         }
                     }
-                    //delete redundatn "WEIGHT" data
+                    //delete redundant "WEIGHT" data
                 } else if ((odvData.data[i].type === "WEIGHT") && (odvData.data[j].type === "WEIGHT")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
