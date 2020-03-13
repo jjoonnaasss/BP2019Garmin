@@ -98,18 +98,18 @@ $call_info_text = "Your registration will be completed in about 5 minutes. <br> 
 $dd_info_text = "Here you can download the collected fitness data of your DiaConvert account in the <a href=\"https://github.com/OpenDiabetes/OpenDiabetesVault/wiki/Data-Model\"> OpenDiabetesVault </a> format. " ;
 $pw_reset_success = "Password was changed successfully!";
 $login_error = "An error occurred. Wrong email and / or password.";
-$dd_login_success = "Data is being downloaded";
-$dd_data_error = "No fitness data has been collected for you yet";
+$dd_login_success = "Data is being downloaded.";
+$dd_data_error = "No fitness data has been collected for you yet.";
 $pw_mail_text = "Click the following link to set a new password:";
 $google_info_text = "Create a new DiaConvert account with Google Fit link or link an existing DiaConvert account with Google Fit.";
-$google_callback_info_text = "Log in with your DiaConvert account or create a new one to complete the Google Fit link";
-$google_success = "Connection successful";
+$google_callback_info_text = "Log in with your DiaConvert account or create a new one to complete the Google Fit link.";
+$google_success = "Connection successful!";
 $google_error = "Sorry, there was an error, please try again later. If this happens frequently, please contact ....";
-$google_reg_check = "Please choose if you do not have a DiaConvert account yet";
+$google_reg_check = "Please choose if you do not have a DiaConvert account yet.";
 
 $google_d_info_text = "Here you can synchronize and download your Google Fit data.";
-$google_d_data_error = "No fitness data has been collected yet";
-$google_sync_check = "Please select if you want to download the data";
+$google_d_data_error = "No fitness data has been collected yet.";
+$google_sync_check = "Please select if you want to download the data.";
 $google_d_button = "Sync data";
 $google_d_connect_error = "Your account is not connected to Google Fit. You can connect to Google Fit <a href=\"../google.php\">here</a>.";
-$google_d_login_success = "Login successful, data is synchronized";
+$google_d_login_success = "Login successful, data is synchronized!";
