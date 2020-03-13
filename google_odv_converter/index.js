@@ -161,11 +161,11 @@ module.exports.googleOdvConverter = function(dataJSON) {
             if(dataJSON.data[a].value[0].fpVal === 1) {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "MID_EXERCISE", epo, date, activityTime));
+                entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
             } else {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "HIGH_EXERCISE", epo, date, activityTime));
+                entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
             }
             break;
         case "com.google.calories.expended":
