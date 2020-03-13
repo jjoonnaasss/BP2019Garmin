@@ -217,6 +217,7 @@ exports.handler = function (event, context, callback) {
                                         S: mail
                                     }
                                 },
+                                ConditionExpression: "attribute_not_exists(#GTS)",
                                 ExpressionAttributeNames: {
                                     "#GT": "Google_token",
                                     "#GTS": "GoogleTimestamp",
