@@ -20,6 +20,7 @@ exports.handler = function (event, context, callback) {
     const encryption = require("/opt/encryption");
     const buffer = require("buffer");
     const crypto = require("crypto");
+    const converter = require("/opt/google_odv_converter");
 
     //read consumer-key, -secret and application secret
     const accessRawdata = fs.readFileSync("/opt/access.json");
@@ -93,6 +94,9 @@ exports.handler = function (event, context, callback) {
                                 //cut off last ","
                                 fileData = fileData.substring(0, fileData.length - 1);
                                 fileData += "]}";
+
+                                var fileBuffer = JSON.parse(fileData);
+                                fileData = converter.googleOdvConverter(fileBuffer);
 
                                 if (fileData === "{\"title\": \"ODV JSON export\", \"data\":]}") {//check, if no fitness data was found
                                     //create response, telling the website that no data was found
