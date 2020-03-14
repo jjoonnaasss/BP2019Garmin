@@ -60,6 +60,7 @@ exports.handler = function (event, context, callback) {
                         S: random
                     }
                 },
+                ConditionExpression: 'attribute_exists(Mail)',
                 UpdateExpression: "SET #TS = :ts, #R = :r"
             };
             //add the timestamp and random value to the users database entry
@@ -145,23 +146,23 @@ exports.handler = function (event, context, callback) {
 
                     if (timestamp - oldTStamp < 86400) { //check, if request to reset password is older than 24 hours
                         if (random === randVal) { //check, if the random value is correct, to make sure, that the user is the correct one
-                            //parameters to store the users mail-address with the new password
+                            //parameters to update the password
                             params = {
                                 TableName: "UserData",
-                                Item: {
-                                    "UAT": {
-                                        S: uat
-                                    },
-                                    "PWHash": {
-                                        S: pwHash
-                                    },
+                                Key: {
                                     "Mail": {
                                         S: mail
                                     }
-                                }
+                                },
+                                ExpressionAttributeValues: {
+                                    ":hash": {
+                                        S: pwHash
+                                    },
+                                },
+                                UpdateExpression: "SET PWHash = :hash REMOVE RandomValue"
                             };
-                            //store the users mail-address with the new password
-                            ddb.putItem(params, function (err) {
+                            //update the password
+                            ddb.updateItem(params, function (err) {
                                 if (err) {
                                     console.log("Error", err);
                                 } else {
