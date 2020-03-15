@@ -113,6 +113,8 @@ function checkUserInput($email, $rand)
             <a class="nav-item nav-link"
                href="../google-download.php<?php echo "?lang=$_GET[lang]" ?>
             "><?php echo $nav_bar_google_d ?></a>
+            <a class="nav-item nav-link" href="../delete-account.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_delete_acc ?></a>
             <?php
             if ($_GET['lang'] == "de") {
                 echo "<li class=\"nav-item dropdown\">

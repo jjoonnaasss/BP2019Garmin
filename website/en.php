@@ -31,6 +31,7 @@ $nav_bar_pw = "Password reset";
 $nav_bar_rec = "Reconnect";
 $nav_bar_google = "Connect with Google Fit";
 $nav_bar_google_d = "Google Fit data download";
+$nav_bar_delete_acc = "Deleting an account";
 
 //registration settings
 $reg_title = "Registration for DiaConvert";
@@ -59,6 +60,12 @@ $pw_reset_button = "Change password";
 $dd_title = "Data download";
 $dd_headline = "Data download";
 $dd_button = "Download data";
+
+//delete account settings
+$del_acc_title = "Delete account";
+$del_acc_headline = "Delete account";
+$del_acc_button = "Delete account";
+$del_acc_abort = "Abort";
 
 //google settings
 $google_title = "Link Google Fit";
@@ -101,6 +108,7 @@ $login_error = "An error occurred. Wrong email and / or password.";
 $dd_login_success = "Data is being downloaded.";
 $dd_data_error = "No fitness data has been collected for you yet.";
 $pw_mail_text = "Click the following link to set a new password:";
+
 $google_info_text = "Create a new DiaConvert account with Google Fit link or link an existing DiaConvert account with Google Fit.";
 $google_callback_info_text = "Log in with your DiaConvert account or create a new one to complete the Google Fit link.";
 $google_success = "Connection successful!";
@@ -113,3 +121,8 @@ $google_sync_check = "Please select if you want to download the data.";
 $google_d_button = "Sync data";
 $google_d_connect_error = "Your account is not connected to Google Fit. You can connect to Google Fit <a href=\"../google.php\">here</a>.";
 $google_d_login_success = "Login successful, data is synchronized!";
+
+$del_acc_login_success = "Your data has been completely deleted.";
+$del_acc_data_error = "Unfortunately there was an error, please try again later. If this happens frequently, please contact ...";
+$del_acc_info_text = "Here you can delete your account. Doing so will delete all of your data!";
+$del_acc_second_agree = "Are you sure you want to delete your data?";
