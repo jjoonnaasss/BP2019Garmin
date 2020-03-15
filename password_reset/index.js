@@ -60,7 +60,7 @@ exports.handler = function (event, context, callback) {
                         S: random
                     }
                 },
-                ConditionExpression: 'attribute_exists(Mail)',
+                ConditionExpression: "attribute_exists(Mail)",
                 UpdateExpression: "SET #TS = :ts, #R = :r"
             };
             //add the timestamp and random value to the users database entry
@@ -125,12 +125,11 @@ exports.handler = function (event, context, callback) {
                     //send response to website
                     callback(null, res);
                 } else {
-                    var oldTStamp, randVal, uat;
+                    var oldTStamp, randVal;
                     if (data.Item.TimeStamp && data.Item.RandomValue) {
                         //read values received from the database
                         oldTStamp = data.Item.TimeStamp.N;
                         randVal = data.Item.RandomValue.S;
-                        uat = data.Item.UAT.S;
                     } else {
                         res = {
                             "statusCode": 200,
