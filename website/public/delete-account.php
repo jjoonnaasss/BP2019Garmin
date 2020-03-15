@@ -40,7 +40,7 @@ if ($_POST['submit']) {
     //call lambda API with a post request, transferring mail and password hash, and retrieve string
     $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $dd_link);
+    curl_setopt($ch, CURLOPT_URL, $del_acc_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_POST, 1);

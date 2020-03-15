@@ -28,7 +28,7 @@ $password_reset_link = "link-to-password_reset";
 $google_link = "link-to-google_registration";
 
 //delete account settings
-$password_reset_link = "link-to-delete_accounts";
+$del_acc_link = "link-to-delete_accounts";
 
 
 //data download settings
