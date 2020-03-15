@@ -24,24 +24,43 @@ if ($_GET['lang'] == "de") {
 }
 
 if ($_POST['submit']) {
-    //call lambda API with a post request, transferring the secret
-    $postfields = array('secret' => '*' . $google_secret . '*');
+    //check if input is valid
+    checkUserInput();
+
+    //get input data
+    $password = $_POST['password'];
+    $emailAddress = strtolower($_POST['email']);
+
+    //hash the password
+    $pwHash = hash('sha3-512', $emailAddress . $password);
+
+    //call lambda API with a post request, transferring mail and password hash, and retrieve string
+    $postfields = array('mail' => '*' . $emailAddress . '*', 'pwHash' => '*' . $pwHash . '*', 'secret' => '*' . $secret . '*');
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $google_link);
+    curl_setopt($ch, CURLOPT_URL, $del_acc_link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
     $response = curl_exec($ch);
 
-    header("Location: $response");
+    //show error message to user
+    if ($response == 'error with login') {
+        header("Location: /delete-account.php?loginError=true&lang=$_GET[lang]");
+        exit;
+    } else if ($response == 'data error') {
+        header("Location: /delete-account.php?dataError=true&lang=$_GET[lang]");
+        exit;
+    }
+
+    header("Location: /delete-account.php?success=true&lang=$_GET[lang]");
 }
 
 function checkUserInput()
 {
     //checks whether values are empty
     if ($_POST['email'] == "" or !isset($_POST['password'])) {
-        header("Location: /data-download.php?input_error=true&lang=$_GET[lang]");
+        header("Location: /delete-account.php?input_error=true&lang=$_GET[lang]");
         exit;
     }
 }
@@ -51,7 +70,7 @@ function checkUserInput()
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?php echo $google_title ?></title>
+    <title><?php echo $del_acc_title ?></title>
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -76,13 +95,15 @@ function checkUserInput()
                href="../password-reset.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_pw ?></a>
             <a class="nav-item nav-link"
                href="../reconnect.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_rec ?></a>
-            <a class="nav-item nav-link active"
-               href="../google.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_google ?><span
-                        class="sr-only">(current)</span></a>
             <a class="nav-item nav-link"
-               href="../google-download.php<?php echo "?lang=$_GET[lang]" ?>"><?php echo $nav_bar_google_d ?></a>
-            <a class="nav-item nav-link" href="../delete-account.php<?php echo "?lang=$_GET[lang]" ?>
-            "><?php echo $nav_bar_delete_acc ?></a>
+               href="../google.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_google ?></a>
+            <a class="nav-item nav-link"
+               href="../google-download.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_google_d ?></a>
+            <a class="nav-item nav-link active"
+               href="../delete-account.php<?php echo "?lang=$_GET[lang]" ?>
+            "><?php echo $nav_bar_delete_acc ?><span class="sr-only">(current)</span></a>
             <?php
             if ($_GET['lang'] == "de") {
                 echo "<li class=\"nav-item dropdown\">
@@ -107,17 +128,66 @@ function checkUserInput()
 
 <div class="container">
     <br><br>
-    <h1><?php echo $google_headline ?></h1>
+    <h1><?php echo $del_acc_headline ?></h1>
     <br>
-    <p><?php echo $google_info_text ?></p>
+    <p><?php echo $del_acc_info_text ?></p>
     <br>
 
+    <!--show error message to user-->
+    <?php
+    if (isset($_GET['input_error'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $input_error . '</div>';
+    } elseif (isset($_GET['loginError'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $login_error . '</div>';
+    } elseif (isset($_GET['success'])) {
+        echo '<div class="alert alert-success" role="alert">' . $del_acc_login_success . '</div>';
+    } elseif (isset($_GET['dataError'])) {
+        echo '<div class="alert alert-danger" role="alert">' . $del_acc_data_error . '</div>';
+    }
+    ?>
+
     <!--create input fields-->
-    <form id="authorize-plugin-form" method="post">
-        <br>
-        <input data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Processing Order" id="authorize-plugin"
-               name="submit" class="btn btn-primary" type="submit" value="<?php echo $google_button ?>">
+    <form id="delete-form" method="post">
+        <div class="form-group">
+            <input id="email" name="email" class="form-control" type="email"
+                   placeholder="<?php echo $email_input ?>"
+                   value="<?php echo $_POST['email']; ?>" required>
+        </div>
+        <div class="form-group">
+            <input id="password" name="password" type="password" class="form-control"
+                   placeholder="<?php echo $password_input ?>"
+                   required>
+        </div>
+        <br><br>
+        <input id="submit-agree" name="submit-agree" class="btn btn-danger"
+               type="submit"
+               value="<?php echo $del_acc_button ?>">
     </form>
+
+
+    <!--create confirmation popup-->
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <?php echo $del_acc_headline ?>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                <div class="modal-body">
+                    <?php echo $del_acc_second_agree ?>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" class="btn btn-default"
+                            data-dismiss="modal"><?php echo $del_acc_abort ?></button>
+                    <input id="submit"
+                           name="submit" class="btn btn-danger" type="submit" form="delete-form"
+                           value="<?php echo $del_acc_button ?>">
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!--external libraries-->
@@ -128,5 +198,32 @@ function checkUserInput()
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
+
+<script>
+
+    //when enter is pressed, the function checks the form and opens the popup
+    document.onkeypress = enter;
+    function enter(e) {
+        if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+            e.preventDefault();
+            if ($('#password').val().trim() !== "" && $('#email').val() !== "") {
+                $('#modal').modal('show');
+            }
+        }
+    }
+
+    //function is called on a submit
+    //when the call comes from the button submit-agree the popup is shown
+    $('#delete-form').submit(function (e) {
+        if ($(this).find("input[type=submit]:focus")[0].id === "submit-agree") {
+            e.preventDefault();
+            if ($('#password').val().trim() !== "" && $('#email').val() !== "") {
+                $('#modal').modal('show');
+            }
+        }
+    });
+
+
+</script>
 </body>
 </html>

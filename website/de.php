@@ -31,6 +31,7 @@ $nav_bar_pw = "Passwort zurücksetzen";
 $nav_bar_rec = "Neu Verbinden";
 $nav_bar_google = "Mit Google Fit verbinden";
 $nav_bar_google_d = "Google Fit Daten Download";
+$nav_bar_delete_acc = "Konto löschen";
 
 //registration settings
 $reg_title = "Registrierung für DiaConvert";
@@ -59,6 +60,12 @@ $pw_reset_button = "Passwort ändern";
 $dd_title = "Daten Download";
 $dd_headline = "Daten Download";
 $dd_button = "Daten downloaden";
+
+//delete account settings
+$del_acc_title = "Konto löschen";
+$del_acc_headline = "Konto löschen";
+$del_acc_button = "Konto löschen";
+$del_acc_abort = "Abbrechen";
 
 //google settings
 $google_title = "Google Fit verknüpfen";
@@ -103,6 +110,7 @@ $login_error = "Es ist ein Fehler aufgetreten. Email und/oder Passwort falsch.";
 $dd_login_success = "Daten werden gedownloadet.";
 $dd_data_error = "Es wurden noch keine Fitnessdaten für sie gesammelt!";
 $pw_mail_text = "Klicken sie auf den folgenden Link, um ein neues Passwort festzulegen:";
+
 $google_info_text = "Erstellen sie ein neues DiaConvert Konto mit Google Fit Verknüpfung oder verknüpfen sie ihr vorhandenes DiaConvert Konto mit Google Fit.";
 $google_callback_info_text = "Melden sie sich mit ihrem DiaConvert Konto an oder erstellen sie ein neues, um die Google Fit Verbindung abzuschließen";
 $google_success = "Verbindung erfolgreich!";
@@ -115,3 +123,8 @@ $google_sync_check = "Bitte auswählen, wenn sie die Daten downloaden möchten."
 $google_d_button = "Daten synchronisieren!";
 $google_d_connect_error = "Ihr Account ist nicht mit Google Fit verbunden. Eine Verbindung mit Google Fit können sie <a href=\"../google.php\">hier</a> eingehen.";
 $google_d_login_success = "Login erfolgreich, Daten werden synchronisiert!";
+
+$del_acc_login_success = "Ihre Daten wurden vollständig gelöscht.";
+$del_acc_data_error = "Es gab leider einen Fehler, bitte versuchen sie es später erneut. Passiert dies öfters wenden sie sich bitte an ....";
+$del_acc_info_text = "Hier können sie ihr Konto vollständig löschen. Dabei werden alle ihrer Daten gelöscht!";
+$del_acc_second_agree = "Sind sie sicher, dass sie ihre Daten löschen möchten?";

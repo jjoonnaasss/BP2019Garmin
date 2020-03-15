@@ -27,6 +27,10 @@ $password_reset_link = "link-to-password_reset";
 //google settings
 $google_link = "link-to-google_registration";
 
+//delete account settings
+$del_acc_link = "link-to-delete_accounts";
+
+
 //data download settings
 $dd_link = "link-to-api";
 $dd_rsa_private_key = "-----BEGIN RSA PRIVATE KEY-----
