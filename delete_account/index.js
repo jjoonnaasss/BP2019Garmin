@@ -157,7 +157,7 @@ exports.handler = function (event, context, callback) {
                             "SummaryID": { S: fitnessArray[0][a].SummaryID.S }
                         }
                     };
-                    ddb.deleteItem(params, function(err, data) { // jshint ignore:line
+                    ddb.deleteItem(params, function(err, data) {
                         if(err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
                         } else {
