@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createNotificationChannel() {
-        // create notification channel used by the foreground service
+        // create notification channel used by the foreground service's notification
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val descriptionText = getString(R.string.channel_description)
