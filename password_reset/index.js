@@ -158,7 +158,10 @@ exports.handler = function (event, context, callback) {
                                         S: pwHash
                                     },
                                 },
-                                UpdateExpression: "SET PWHash = :hash REMOVE RandomValue"
+                                ExpressionAttributeNames: {
+                                    "#TS": "TimeStamp",
+                                },
+                                UpdateExpression: "SET PWHash = :hash REMOVE RandomValue, #TS"
                             };
                             //update the password
                             ddb.updateItem(params, function (err) {

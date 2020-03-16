@@ -157,7 +157,7 @@ exports.handler = function (event, context, callback) {
                             "SummaryID": { S: fitnessArray[0][a].SummaryID.S }
                         }
                     };
-                    ddb.deleteItem(params, function(err, data) {
+                    ddb.deleteItem(params, function(err, data) { // jshint ignore:line
                         if(err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
                         } else {
@@ -203,7 +203,7 @@ exports.handler = function (event, context, callback) {
                             "ExportTime": { S: googleArray[0][b].ExportTime.S }
                         }
                     };
-                    ddb.deleteItem(params, function(err, data) {
+                    ddb.deleteItem(params, function(err, data) { // jshint ignore:line
                         if(err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
                         } else {
