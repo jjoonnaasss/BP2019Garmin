@@ -57,8 +57,8 @@ exports.handler = function (event, context, callback) {
                 //send response
                 callback(null, res);
             } else {
-                if(data.Item.UAT.S) {
-                    uat = data.Item.UAT.S;
+                if(data.Item.UAT) {
+                    uat = data.Item.UAT;
 
                     params = {
                         TableName: "UserAccessTokens",
@@ -150,20 +150,22 @@ exports.handler = function (event, context, callback) {
                 }
             } else {    // We found every data of the user and now we delete all of them.
                 for(var a = 0; a < fitnessArray[0].length; a ++) {
-                    params = {
-                        TableName: "FitnessData",
-                        Key: {
-                            "UserID": { S: userId },
-                            "SummaryID": { S: fitnessArray[0][a].SummaryID.S }
-                        }
-                    };
-                    ddb.deleteItem(params, function(err, data) {
-                        if(err) {
-                            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
-                        } else {
-                            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
-                        }
-                    });
+                    if(fitnessArray[0][a].SummaryID !== undefined) {
+                        params = {
+                            TableName: "FitnessData",
+                            Key: {
+                                "UserID": { S: userId },
+                                "SummaryID": { S: fitnessArray[0][a].SummaryID.S }
+                            }
+                        };
+                        ddb.deleteItem(params, function(err, data) {
+                            if(err) {
+                                console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+                            } else {
+                                console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
+                            }
+                        });
+                    }
                 }
             }
         }else {
