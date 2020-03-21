@@ -65,10 +65,14 @@ exports.handler = function (event, context, callback) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
-                            j -= 1;
+                            if(j > 0) {
+                                j -= 1;
+                            }
                         } else {
                             odvData.data.splice(i, 1);
-                            i -= 1;
+                            if(i > 0) {
+                                i -= 1;
+                            }
                         }
                     }
                     //delete redundant "WEIGHT" data
@@ -76,10 +80,14 @@ exports.handler = function (event, context, callback) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
-                            j -= 1;
+                            if(j > 0) {
+                                j -= 1;
+                            }
                         } else {
                             odvData.data.splice(i, 1);
-                            i -= i;
+                            if(i > 0) {
+                                i -= 1;
+                            }
                         }
                     }
                     //delete redundant "STRESS" data
@@ -87,10 +95,14 @@ exports.handler = function (event, context, callback) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
-                            j -= 1;
+                            if(j > 0) {
+                                j -= 1;
+                            }
                         } else {
                             odvData.data.splice(i, 1);
-                            i -= i;
+                            if(i > 0) {
+                                i -= 1;
+                            }
                         }
                     }
                 } else {
@@ -104,9 +116,13 @@ exports.handler = function (event, context, callback) {
                     minus = check("SLEEP_REM", i, j, minus);
                     minus = check("SLEEP_DEEP", i, j, minus);
                     if (minus === "i") {
-                        i -= 1;
+                        if(i > 0) {
+                            i -= 1;
+                        }
                     } else if (minus === "j") {
-                        j -= 1;
+                        if(j > 0) {
+                            j -= 1;
+                        }
                     }
                 }
             }

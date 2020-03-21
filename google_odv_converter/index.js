@@ -86,26 +86,35 @@ module.exports.googleOdvConverter = function(dataJSON) {
 
         for (var i = 0; i < odvData.data.length; i++) {
             for (var j = i + 1; j < odvData.data.length; j++) {
+                console.log(i, j);
                 //delete redundant "HEART_RATE" data
                 if ((odvData.data[i].type === "HEART_RATE") && (odvData.data[j].type === "HEART_RATE")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
-                            j -= 1;
+                            if(j > 0) {
+                                j -= 1;
+                            }
                         } else {
                             odvData.data.splice(i, 1);
-                            i -= 1;
+                            if(i > 0) {
+                                i -= 1;
+                            }
                         }
                     }
-                    //delete redundatn "WEIGHT" data
+                    //delete redundant "WEIGHT" data
                 } else if ((odvData.data[i].type === "WEIGHT") && (odvData.data[j].type === "WEIGHT")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
-                            j -= 1;
+                            if(j > 0) {
+                                j -= 1;
+                            }
                         } else {
                             odvData.data.splice(i, 1);
-                            i -= i;
+                            if(i > 0) {
+                                i -= 1;
+                            }
                         }
                     }
                     //delete redundant "STRESS" data
@@ -113,10 +122,14 @@ module.exports.googleOdvConverter = function(dataJSON) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
                         if (odvData.data[j].origin === "unknown") { //Delete the data which has no given device.
                             odvData.data.splice(j, 1);
-                            j -= 1;
+                            if(j > 0) {
+                                j -= 1;
+                            }
                         } else {
                             odvData.data.splice(i, 1);
-                            i -= i;
+                            if(i > 0) {
+                                i -= 1;
+                            }
                         }
                     }
                 } else {
@@ -130,9 +143,13 @@ module.exports.googleOdvConverter = function(dataJSON) {
                     minus = check("SLEEP_REM", i, j, minus);
                     minus = check("SLEEP_DEEP", i, j, minus);
                     if (minus === "i") {
-                        i -= 1;
+                        if(i > 0) {
+                            i -= 1;
+                        }
                     } else if (minus === "j") {
-                        j -= 1;
+                        if(j > 0) {
+                            j -= 1;
+                        }
                     }
                 }
             }
@@ -151,21 +168,57 @@ module.exports.googleOdvConverter = function(dataJSON) {
 
     for(var a = 0; a < dataJSON.data.length; a++) {
         switch(dataJSON.data[a].dataTypeName) {
+        case "com.google.activity.segment":
+            activityTime = Math.round(((dataJSON.data[a].endTimeNanos / 1000000) - (dataJSON.data[a].startTimeNanos / 1000000)) / 1000);
+            epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
+            date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
+            if(dataJSON.data[a].value[0].intVal === 109) {
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "SLEEP_LIGHT", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "SLEEP_LIGHT", epo, date, activityTime));
+                }
+            } else if(dataJSON.data[a].value[0].intVal === 111) {
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "SLEEP_REM", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "SLEEP_REM", epo, date, activityTime));
+                }
+            } else if(dataJSON.data[a].value[0].intVal === 110) {
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "SLEEP_DEEP", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "SLEEP_DEEP", epo, date, activityTime));
+                }
+            }
+            break;
         case "com.google.weight":
             epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));  //Nanoseconds -> Milliseconds
             date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);    //currently using 1 as timezone, since we are located in Germany.
-            entries.push(createJSON("unknown", "WEIGHT", epo, date, dataJSON.data[a].value[0].fpVal));
+            if(dataJSON.data[a].originDataSourceId === undefined) {
+                entries.push(createJSON("unknown", "WEIGHT", epo, date, dataJSON.data[a].value[0].fpVal));
+            } else {
+                entries.push(createJSON(dataJSON.data[a].originDataSourceId, "WEIGHT", epo, date, dataJSON.data[a].value[0].fpVal));
+            }
             break;
         case "com.google.heart_minutes":    //Heart Points: 1 HP (medium intensity activity)	2 HPs (High intensity activity)
             activityTime = Math.round(((dataJSON.data[a].endTimeNanos / 1000000) - (dataJSON.data[a].startTimeNanos / 1000000)) / 1000);
             if(dataJSON.data[a].value[0].fpVal === 1) {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_HIGH", epo, date, activityTime));
+                }
             } else {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_MID", epo, date, activityTime));
+                }
             }
             break;
         case "com.google.calories.expended":
@@ -176,22 +229,38 @@ module.exports.googleOdvConverter = function(dataJSON) {
             if(1.2 < kcalPerMinute && kcalPerMinute < 3.5) {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "EXERCISE_LOW", epo, date, activityTime));
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "EXERCISE_LOW", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_LOW", epo, date, activityTime));
+                }
             } else if(3.5 <= kcalPerMinute && kcalPerMinute <= 7.0) {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_MID", epo, date, activityTime));
+                }
             } else { //more than 7.0 kcal/min
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_HIGH", epo, date, activityTime));
+                }
             }
             break;
         case "com.google.heart_rate.bpm":
             if(dataJSON.data[a].value[0].fpVal > 10) {
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                entries.push(createJSON("unknown", "HEART_RATE", epo, date, dataJSON.data[a].value[0].fpVal));
+                if(dataJSON.data[a].originDataSourceId === undefined) {
+                    entries.push(createJSON("unknown", "HEART_RATE", epo, date, dataJSON.data[a].value[0].fpVal));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "HEART_RATE", epo, date, dataJSON.data[a].value[0].fpVal));
+                }
             }
             break;
         default:
