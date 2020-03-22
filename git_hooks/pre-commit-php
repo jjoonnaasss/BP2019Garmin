@@ -1,0 +1,30 @@
+#!/bin/sh
+./node_modules/.bin/eslint .
+if [ $? != 0 ]
+then
+    echo "ESLint failed. Commit aborted. Try running\n> ./node_modules/.bin/eslint --fix ."
+    exit 1
+fi
+jshint .
+if [ $? != 0 ]
+then
+    echo "JSHint failed. Commit aborted"
+    exit 1
+fi
+
+find . -type f -name '*.php' | while read line 
+do
+    php -l $line > /dev/null
+    if [ $? != 0 ]
+    then
+        exit 1
+    fi
+done
+if [ $? != 0 ]
+then
+    echo "PHP Lint failed. Commit aborted"
+    exit 1
+fi
+
+echo "Commit accepted"
+exit 0

@@ -1,8 +1,14 @@
 #!/bin/sh
+./node_modules/.bin/eslint .
+if [ $? != 0 ]
+then
+    echo "ESLint failed. Commit aborted. Try running\n> ./node_modules/.bin/eslint --fix ."
+    exit 1
+fi
 jshint .
 if [ $? != 0 ]
 then
-    echo "Linting failed. Commit aborted"
+    echo "JSHint failed. Commit aborted"
     exit 1
 fi
 echo "Commit accepted"

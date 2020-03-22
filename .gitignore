@@ -82,3 +82,22 @@ node_modules/\.bin/
 node_modules/ajv/
 
 package-lock\.json
+
+packages/
+
+# app
+
+*.iml 
+/samsung/SamsungTest/.gradle/
+/samsung/SamsungTest/local.properties 
+/samsung/SamsungTest/.idea/caches
+/samsung/SamsungTest/.idea/libraries 
+/samsung/SamsungTest/.idea/modules.xml 
+/samsung/SamsungTest/.idea/workspace.xml 
+/samsung/SamsungTest/.idea/navEditor.xml 
+/samsung/SamsungTest/.idea/assetWizardSettings.xml 
+.DS_Store 
+/samsung/SamsungTest/build 
+/samsung/SamsungTest/captures 
+.externalNativeBuild 
+.cxx 
