@@ -3,5 +3,6 @@
   "secret": "",
   "app_secret": "",
   "encPW": "",
-  "dataEncPW": ""
+  "dataEncPW": "",
+  "pubKey": ""
 }
