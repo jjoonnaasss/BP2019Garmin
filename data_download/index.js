@@ -181,6 +181,7 @@ exports.handler = function (event, context, callback) {
                     const userId = data.Item.UserID.S;
                     userID = userId;
 
+                    //parameters for the database access
                     params = {
                         TableName: "FitnessData",
                         KeyConditionExpression: "UserID = :key",
@@ -209,7 +210,9 @@ exports.handler = function (event, context, callback) {
 
     let userData = [];
 
+    //function used when querying the database for the users data
     function onQuery(err, data) {
+        //parameters for the database access
         params = {
             TableName: "FitnessData",
             KeyConditionExpression: "UserID = :key",
@@ -218,6 +221,7 @@ exports.handler = function (event, context, callback) {
             }
         };
 
+        //scan succeeded, collected data gets stored for later
         if (!err) {
             console.log("Scan succeeded.");
             if (data && data.Items) {
@@ -302,6 +306,7 @@ exports.handler = function (event, context, callback) {
                         callback(null, res);
                     }
                 } else {
+                    //create the response containing an error message
                     const res = {
                         "statusCode": 401,
                         "headers": {
