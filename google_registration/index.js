@@ -237,6 +237,7 @@ exports.handler = function (event, context, callback) {
                                 }
                             });
 
+                            //parameters for the database access
                             params = {
                                 TableName: "UserData",
                                 Key: {

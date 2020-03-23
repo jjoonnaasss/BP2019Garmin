@@ -142,6 +142,16 @@ exports.handler = function (event, context, callback) {
     }
 };
 
+/* What are points?
+ * Data types define the format of the values inside data points. A data point can represent:
+ * -An instantaneous reading or observation
+ * -An aggregate with statistics over a time interval
+ * Google Fit defines data types for instantaneous observations and data types for aggregate data.
+ * Data points consist of values for the fields of a data type and timestamp information.
+ * Points that represent instantaneous observations include a timestamp, and points of an aggregate data type also include the start time for the interval.
+ * source: https://developers.google.com/fit/datatypes
+ */
+
 //stores the received data in the database using multiple entries, max. 500 points per entry
 function storePoints(points, mail, timestamp, counter, callback) {
 

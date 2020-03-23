@@ -56,6 +56,7 @@ if ($_POST['submit']) {
         header("Location: /google-download.php?data_error=true&lang=$_GET[lang]&val=$_GET[val]");
     }
 
+    //check if the user marked the box for the download of the fitness data
     if (isset($_POST['googleSyncCheckbox'])) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $google_d_link);
