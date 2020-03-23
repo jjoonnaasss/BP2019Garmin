@@ -28,6 +28,7 @@ exports.handler = function (event, context, callback) {
         return;
     }
 
+    // parameters for the database access
     let params = {
         TableName: "UserData",
         Key: {
@@ -39,14 +40,14 @@ exports.handler = function (event, context, callback) {
 
     let userId;
     let uat;
-    let googleArray = [];
-    let fitnessArray = [];
+    let googleArray = [];   // While iterating through the database save every google fit data of the given user, so we can delete them afterwards with the deleteItem-function.
+    let fitnessArray = [];  // While iterating through the database save every fitness data if the given user, so we can delete them afterwards with the deleteItem-function.
 
     // We use the database "UserData" to get the UAT and the userID of the user.
     ddb.getItem(params, function (err, data) {
         if (!err) {
-            if (!data.Item || data.Item.PWHash.S !== pwHash) {
-                //create response, telling the user that the given password is incorrect
+            if (!data.Item || data.Item.PWHash.S !== pwHash) {  // check for correct password
+                // create response, telling the user that the given password is incorrect
                 const res = {
                     "statusCode": 401,
                     "headers": {
@@ -60,6 +61,7 @@ exports.handler = function (event, context, callback) {
                 if(data.Item.UAT) {
                     uat = data.Item.UAT;
 
+                    // parameters for the database access
                     params = {
                         TableName: "UserAccessTokens",
                         Key: {
@@ -81,6 +83,7 @@ exports.handler = function (event, context, callback) {
                 // Check if the user has a userID already. If the user has no userID than the user has no fitness data on the database "FitnessData".
                 if (data.Item.UserID) {
                     userId = data.Item.UserID.S;
+                    // parameters for the database access
                     params = {
                         TableName: "FitnessData",
                         KeyConditionExpression: "UserID = :key",
@@ -92,6 +95,7 @@ exports.handler = function (event, context, callback) {
                     ddb.query(params, onQueryFitness);
                 }
 
+                // parameters for the database access
                 params = {
                     TableName: "GoogleData",
                     KeyConditionExpression: "Mail = :key",
@@ -102,6 +106,7 @@ exports.handler = function (event, context, callback) {
                 // Delete every google fitness data on the database "GoogleData".
                 ddb.query(params, onQueryGoogle);
 
+                // parameters for the database access
                 params = {
                     TableName: "UserData",
                     Key: {
@@ -127,6 +132,7 @@ exports.handler = function (event, context, callback) {
 
     // This function iterates through the whole "FitnessData" database and deletes every data of the given user.
     function onQueryFitness(err, data) {
+        // parameters for the database access
         params = {
             TableName: "FitnessData",
             KeyConditionExpression: "UserID = :key",
@@ -151,6 +157,7 @@ exports.handler = function (event, context, callback) {
             } else {    // We found every data of the user and now we delete all of them.
                 for(var a = 0; a < fitnessArray[0].length; a ++) {
                     if(fitnessArray[0][a].SummaryID !== undefined) {
+                        // parameters for the database access
                         params = {
                             TableName: "FitnessData",
                             Key: {
@@ -158,6 +165,7 @@ exports.handler = function (event, context, callback) {
                                 "SummaryID": { S: fitnessArray[0][a].SummaryID.S }
                             }
                         };
+                        // delete the data
                         ddb.deleteItem(params, function(err, data) {
                             if(err) {
                                 console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
@@ -175,6 +183,7 @@ exports.handler = function (event, context, callback) {
 
     // This function iterates through the whole "GoogleData" database and deletes every data of the given user.
     function onQueryGoogle(err, data) {
+        // parameters for the database access
         params = {
             TableName: "GoogleData",
             KeyConditionExpression: "Mail = :key",
@@ -198,6 +207,7 @@ exports.handler = function (event, context, callback) {
                 }
             } else {    // We found every data of the user and now we delete all of them.
                 for(var b = 0; b < googleArray[0].length; b ++) {
+                    // parameters for the database access
                     params = {
                         TableName: "GoogleData",
                         Key: {
@@ -205,6 +215,7 @@ exports.handler = function (event, context, callback) {
                             "ExportTime": { S: googleArray[0][b].ExportTime.S }
                         }
                     };
+                    // delete the data
                     ddb.deleteItem(params, function(err, data) { // jshint ignore:line
                         if(err) {
                             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));

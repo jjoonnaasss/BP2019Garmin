@@ -166,26 +166,31 @@ module.exports.googleOdvConverter = function(dataJSON) {
     let activityTime = 0;
     let kcalPerMinute = 0;
 
+    // Iterate through the given google fit JSON data
     for(var a = 0; a < dataJSON.data.length; a++) {
+        // check the given data type
         switch(dataJSON.data[a].dataTypeName) {
         case "com.google.activity.segment":
             activityTime = Math.round(((dataJSON.data[a].endTimeNanos / 1000000) - (dataJSON.data[a].startTimeNanos / 1000000)) / 1000);
-            epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
-            date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
+            epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));  // epoch times
+            date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);    // iso time
+            // activity type integer value = 109 -> Light sleep
             if(dataJSON.data[a].value[0].intVal === 109) {
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "SLEEP_LIGHT", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "SLEEP_LIGHT", epo, date, activityTime));
                 }
+            // activity type integer value = 111 -> REM sleep
             } else if(dataJSON.data[a].value[0].intVal === 111) {
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "SLEEP_REM", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "SLEEP_REM", epo, date, activityTime));
                 }
+            // activity type integer value = 110 -> Deep sleep
             } else if(dataJSON.data[a].value[0].intVal === 110) {
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "SLEEP_DEEP", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "SLEEP_DEEP", epo, date, activityTime));
@@ -193,59 +198,58 @@ module.exports.googleOdvConverter = function(dataJSON) {
             }
             break;
         case "com.google.weight":
-            epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));  //Nanoseconds -> Milliseconds
-            date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);    //currently using 1 as timezone, since we are located in Germany.
-            if(dataJSON.data[a].originDataSourceId === undefined) {
+            epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));  // Nanoseconds -> Milliseconds
+            date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);    // currently using 1 as timezone, since we are located in Germany.
+            if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                 entries.push(createJSON("unknown", "WEIGHT", epo, date, dataJSON.data[a].value[0].fpVal));
             } else {
                 entries.push(createJSON(dataJSON.data[a].originDataSourceId, "WEIGHT", epo, date, dataJSON.data[a].value[0].fpVal));
             }
             break;
-        case "com.google.heart_minutes":    //Heart Points: 1 HP (medium intensity activity)	2 HPs (High intensity activity)
+        case "com.google.heart_minutes":    // Heart Points: 1 HP (medium intensity activity)	2 HPs (High intensity activity)
             activityTime = Math.round(((dataJSON.data[a].endTimeNanos / 1000000) - (dataJSON.data[a].startTimeNanos / 1000000)) / 1000);
-            if(dataJSON.data[a].value[0].fpVal === 1) {
+            if(dataJSON.data[a].value[0].fpVal === 1) { // HP = 1
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
+                    entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
+                } else {
+                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_MID", epo, date, activityTime));
+                }
+            } else {    // HP = 2
+                epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
+                date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_HIGH", epo, date, activityTime));
                 }
-            } else {
-                epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
-                date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                if(dataJSON.data[a].originDataSourceId === undefined) {
-                    entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
-                } else {
-                    entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_MID", epo, date, activityTime));
-                }
             }
             break;
         case "com.google.calories.expended":
-            //convert nanoseconds to seconds
-            activityTime = Math.round(((dataJSON.data[a].endTimeNanos / 1000000) - (dataJSON.data[a].startTimeNanos / 1000000)) / 1000);
+            activityTime = Math.round(((dataJSON.data[a].endTimeNanos / 1000000) - (dataJSON.data[a].startTimeNanos / 1000000)) / 1000);    // convert nanoseconds to seconds
             kcalPerMinute = dataJSON.data[a].value[0].fpVal / (activityTime/60);
-            //1.2 kcal/min for a 70-kg individual(sitting), which means everything lower than 1.2 kcal/min is no exercise
-            if(1.2 < kcalPerMinute && kcalPerMinute < 3.5) {
+            // 1.2 kcal/min for a 70-kg individual(sitting), which means everything lower than 1.2 kcal/min is no exercise
+            if(1.2 < kcalPerMinute && kcalPerMinute < 3.5) { // Low exercise
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "EXERCISE_LOW", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_LOW", epo, date, activityTime));
                 }
-            } else if(3.5 <= kcalPerMinute && kcalPerMinute <= 7.0) {
+            } else if(3.5 <= kcalPerMinute && kcalPerMinute <= 7.0) { // Medium exercise
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "EXERCISE_MID", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_MID", epo, date, activityTime));
                 }
-            } else { //more than 7.0 kcal/min
+            } else { //more than 7.0 kcal/min -> High exercise
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "EXERCISE_HIGH", epo, date, activityTime));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "EXERCISE_HIGH", epo, date, activityTime));
@@ -253,10 +257,10 @@ module.exports.googleOdvConverter = function(dataJSON) {
             }
             break;
         case "com.google.heart_rate.bpm":
-            if(dataJSON.data[a].value[0].fpVal > 10) {
+            if(dataJSON.data[a].value[0].fpVal > 10) { // to avoid accidental errors we chose a boundary of fpVal > 10, since there has never been a person on earth with a heart rate lower than 10.
                 epo = (Math.round(dataJSON.data[a].startTimeNanos / 1000000));
                 date = addHours(new Date(dataJSON.data[a].startTimeNanos / 1000000), 1);
-                if(dataJSON.data[a].originDataSourceId === undefined) {
+                if(dataJSON.data[a].originDataSourceId === undefined) { // check for origin
                     entries.push(createJSON("unknown", "HEART_RATE", epo, date, dataJSON.data[a].value[0].fpVal));
                 } else {
                     entries.push(createJSON(dataJSON.data[a].originDataSourceId, "HEART_RATE", epo, date, dataJSON.data[a].value[0].fpVal));
