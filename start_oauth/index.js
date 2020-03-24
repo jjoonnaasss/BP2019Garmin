@@ -85,7 +85,7 @@ exports.handler = function (event, context, callback) {
 
             //read password hash from database
             ddb.getItem(params, function (err, data) {
-                if (err || !data.Item ||(data.Item.PWHash.S !== pwHash)) {
+                if (err || !data.Item || (data.Item.PWHash.S !== pwHash)) {
                     let res = {
                         "statusCode": 401,
                         "headers": {
@@ -96,7 +96,7 @@ exports.handler = function (event, context, callback) {
                     callback(null, res); //return error
                     console.log("Error", err);
                 } else {
-                    if(data.Item.UAT){
+                    if (data.Item.UAT) {
                         let parameters = {
                             TableName: "UserAccessTokens",
                             Key: {
@@ -188,37 +188,19 @@ var contact_garmin = function (OAuth, request, crypto, qs, ddb, callback, access
                 }
             });
 
-            if (mail !== "empty" && pwHash !== "empty") {
-                if (UserID === "") {
-                    //parameters to store mail with password
-                    params = {
-                        TableName: "UserData",
-                        Item: {
-                            "Mail": {
-                                S: mail
-                            },
-                            "PWHash": {
-                                S: pwHash
-                            }
+            if (mail !== "empty" && pwHash !== "empty" && UserID === "") {
+                //parameters to store mail with password
+                params = {
+                    TableName: "UserData",
+                    Item: {
+                        "Mail": {
+                            S: mail
+                        },
+                        "PWHash": {
+                            S: pwHash
                         }
-                    };
-                } else {
-                    //parameters to store mail with password
-                    params = {
-                        TableName: "UserData",
-                        Item: {
-                            "Mail": {
-                                S: mail
-                            },
-                            "PWHash": {
-                                S: pwHash
-                            },
-                            "UserID": {
-                                S: UserID
-                            }
-                        }
-                    };
-                }
+                    }
+                };
 
                 //store mail with password
                 ddb.putItem(params, function (err) {
