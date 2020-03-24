@@ -86,7 +86,6 @@ module.exports.googleOdvConverter = function(dataJSON) {
 
         for (var i = 0; i < odvData.data.length; i++) {
             for (var j = i + 1; j < odvData.data.length; j++) {
-                console.log(i, j);
                 //delete redundant "HEART_RATE" data
                 if ((odvData.data[i].type === "HEART_RATE") && (odvData.data[j].type === "HEART_RATE")) {
                     if (odvData.data[i].epoch === odvData.data[j].epoch) {
