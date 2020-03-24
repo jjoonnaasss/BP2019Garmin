@@ -111,7 +111,9 @@ function checkUserInput()
     <br>
     <p><?php echo $google_info_text ?></p>
     <br>
-
+    <?php if (isset($_GET['success'])) {
+        echo '<div class="alert alert-success" role="alert">' . $google_success . '</div>';
+    } ?>
     <!--create input fields-->
     <form id="authorize-plugin-form" method="post">
         <br>

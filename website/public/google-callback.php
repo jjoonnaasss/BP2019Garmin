@@ -148,7 +148,7 @@ if ($_POST['submit']) {
         }
     }
 
-    header("Location: /google-callback.php?success=true&lang=$_GET[lang]");
+    header("Location: /google.php?success=true&lang=$_GET[lang]");
 }
 
 function checkUserInput()
