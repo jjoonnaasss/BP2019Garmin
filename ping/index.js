@@ -131,9 +131,12 @@ exports.handler = function (event, context, callback) {
             //create signature
             var sig = oauth.getSignature(request_data, uat_secret, base_string_params);
 
+            // Save in 2 string variables to avoid long lines of code.
+            var auth_header1 = "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_token=\"" + uat + "\", oauth_signature_method=\"HMAC-SHA1\"" + "\", oauth_signature=\"";
+            var auth_header2 = oauth.percentEncode(sig) + "\", oauth_timestamp=\"" + timestamp + "\", oauth_nonce=\"" + nonce + "\", oauth_version=\"1.0\"";
             //create authorization-header
             var auth_header = {
-                "Authorization": "OAuth oauth_consumer_key=\"" + access.key + "\", oauth_token=\"" + uat + "\", oauth_signature_method=\"HMAC-SHA1\"" + "\", oauth_signature=\"" + oauth.percentEncode(sig) + "\", oauth_timestamp=\"" + timestamp + "\", oauth_nonce=\"" + nonce + "\", oauth_version=\"1.0\""
+                "Authorization": auth_header1 + auth_header2
             };
 
             //HTTPS-request, to receive the fitness data
@@ -200,7 +203,8 @@ exports.handler = function (event, context, callback) {
                                 return false;
                             }
                             var deleteItem;
-                            if ((key === "dailies") || (key === "thirdParty") || (key === "activities") || (key === "manually") || (key === "actDetails") || (key === "epochs") || (key === "sleeps") || (key === "stressDetails")) {
+                            var typeArray = ["dailies", "thirdParty", "activities", "manually", "actDetails", "epochs", "sleeps", "stressDetails"];
+                            if (typeArray.includes(key)) {
                                 if (item.startTimeInSeconds === entry.startTime.N) {
                                     if (item.durationInSeconds > entry.duration.N) { //delete the redundant data with the shorter duration
                                         deleteItem = { //parameters, to search for redundant data
