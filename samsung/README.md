@@ -16,6 +16,9 @@ This folder contains a demo application that illustrates the most important
 aspects of working with the SDK. The app is written in [Kotlin](https://kotlinlang.org/)
 using the [Android Studio IDE](https://developer.android.com/studio).
 
+The Samsung Health Android SDK can be downloaded [here](https://developer.samsung.com/health/android/overview.html).
+The "samsung-health-data-v1.4.0.jar" then has to be copied into the apps "libs" folder.
+
 Android apps consist of "Activities", where each activity is responsible for a screen
 in the user interface.
 (More on the basics of Android development can be found [here](https://developer.android.com/guide/components/fundamentals).)
@@ -48,7 +51,8 @@ Requesting data (as in the "readSteps" method)
 works by first creating a [HealthDataResolver](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataResolver.html) 
 which will read
 our request and pass the results to a listener.
-A read request can be constructed using a "ReadRequest.Builder".
+A read request can be constructed using the
+["ReadRequest.Builder"](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataResolver.ReadRequest.Builder.html) class.
 It is necessary to specify the type of the requested data with the "setDataType"
 method. Additionaly, "setLocalTimeRange" can be used to restrict the data to
 a certain time range. A [ResultListener](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthResultHolder.ResultListener.html)
@@ -82,12 +86,13 @@ for the [StepCount](https://img-developer.samsung.com/onlinedocs/health/android/
 For an application to keep performing tasks in the background, it is necessary
 to start a [service](https://developer.android.com/guide/components/services.html).
 There are different types of services, but the only way to ensure that a service
-can keep running indefinitely without being killed by the system is by using
-a [foreground service](https://developer.android.com/guide/components/services#Foreground). 
-Such a service is tied to permanent [notification](https://developer.android.com/guide/topics/ui/notifiers/notifications).
+can keep running indefinitely with a low probability of being killed by the system is by using
+a [foreground service](https://developer.android.com/guide/components/services#Foreground).
+Such a service is tied to a permanent [notification](https://developer.android.com/guide/topics/ui/notifiers/notifications).
 
 Our example service is found in ForegroundService.kt.
 When the service is started ("startReading" in MainActivity.kt), its "onCreate" method
 is called. A foreground service first creates a notification and then calls "startForeground"
-to attach itself to the notification. When creating a notification, a notification channel
-has to be specified. This is done by "createNotificationChannel" in MainActivity.kt.
+to attach itself to the notification. When creating a notification, a 
+notification channel has to be specified.
+This is done by "createNotificationChannel" in MainActivity.kt.
