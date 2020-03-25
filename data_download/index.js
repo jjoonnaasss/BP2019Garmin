@@ -30,9 +30,9 @@ exports.handler = function (event, context, callback) {
     AWS.config.update({region: "eu-central-1"});
     const ddb = new AWS.DynamoDB({apiVersion: "2012-08-10"}); //initialize database
 
-    //This function filters the redundant data of a JSON file.
+    // This function filters the redundant data of a JSON file.
     function duplicateFilter(odvData) {
-        //This function helps to avoid redundant code.
+        // Similar code snippets as line 61-107 are replaced with this function to avoid redundant code
         function check(vaultType, var1, var2, IorJ) {
             if ((odvData.data[var1].type === vaultType) && (odvData.data[var2].type) === vaultType) { //data has to be the same type to be redundant
                 if (odvData.data[var1].epoch === odvData.data[var2].epoch) {

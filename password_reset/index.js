@@ -68,26 +68,12 @@ exports.handler = function (event, context, callback) {
                 if (err) {
                     console.log(err, err.stack); // an error occurred
                     //define response to website
-                    res = {
-                        "statusCode": 200,
-                        "headers": {
-                            "Content-Type": "text/plain",
-                            "Access-Control-Allow-Origin": "*"
-                        },
-                        "body": "error"
-                    };
+                    res = websiteResponse("error");
 
 
                 } else {// successful response from database
                     //define response to website
-                    res = {
-                        "statusCode": 200,
-                        "headers": {
-                            "Content-Type": "text/plain",
-                            "Access-Control-Allow-Origin": "*"
-                        },
-                        "body": "success"
-                    };
+                    res = websiteResponse("success");
                 }
 
                 //send response
@@ -114,14 +100,7 @@ exports.handler = function (event, context, callback) {
                 if (err) {
                     console.log("Error", err);
                     //define response to website
-                    res = {
-                        "statusCode": 200,
-                        "headers": {
-                            "Content-Type": "text/plain",
-                            "Access-Control-Allow-Origin": "*"
-                        },
-                        "body": "error"
-                    };
+                    res = websiteResponse("error");
                     //send response to website
                     callback(null, res);
                 } else {
@@ -131,14 +110,7 @@ exports.handler = function (event, context, callback) {
                         oldTStamp = data.Item.TimeStamp.N;
                         randVal = data.Item.RandomValue.S;
                     } else {
-                        res = {
-                            "statusCode": 200,
-                            "headers": {
-                                "Content-Type": "text/plain",
-                                "Access-Control-Allow-Origin": "*"
-                            },
-                            "body": "request already used"
-                        };
+                        res = websiteResponse("request already used");
                         //send response to website
                         callback(null, res);
                     }
@@ -169,41 +141,20 @@ exports.handler = function (event, context, callback) {
                                     console.log("Error", err);
                                 } else {
                                     //define response to website
-                                    res = {
-                                        "statusCode": 200,
-                                        "headers": {
-                                            "Content-Type": "text/plain",
-                                            "Access-Control-Allow-Origin": "*"
-                                        },
-                                        "body": "success"
-                                    };
+                                    res = websiteResponse("success");
                                     //send response to website
                                     callback(null, res);
                                 }
                             });
                         } else {
                             //define response to website
-                            res = {
-                                "statusCode": 200,
-                                "headers": {
-                                    "Content-Type": "text/plain",
-                                    "Access-Control-Allow-Origin": "*"
-                                },
-                                "body": "error"
-                            };
+                            res = websiteResponse("error");
                             //send response to website
                             callback(null, res);
                         }
                     } else {
                         //define response to website
-                        res = {
-                            "statusCode": 200,
-                            "headers": {
-                                "Content-Type": "text/plain",
-                                "Access-Control-Allow-Origin": "*"
-                            },
-                            "body": "request already used"
-                        };
+                        res = websiteResponse("request already used");
                         //send response to website
                         callback(null, res);
                     }
@@ -211,16 +162,21 @@ exports.handler = function (event, context, callback) {
             });
         } else {
             //define response to website
-            res = {
-                "statusCode": 200,
-                "headers": {
-                    "Content-Type": "text/plain",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                "body": "error"
-            };
+            res = websiteResponse("error");
             //send response to website
             callback(null, res);
         }
+    }
+
+    function websiteResponse(body) {
+        var buffer = {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "text/plain",
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": body
+        };
+        return buffer;
     }
 };
