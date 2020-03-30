@@ -26,36 +26,38 @@ in the user interface.
 SamsungTest contains only one activity, which can be found in the file MainActivity.kt
 in folder SamsungTest/app/src/main/java/com/example/samsungtest.
 Most of the app's logic is found here.
-When the app is started, the method "onCreate" is called.
+When the app is started, the function "onCreate" is called.
 
 To access health data, an app first needs to acquire a connection to the
 [Samsung Health data store](https://developer.samsung.com/health/android/data/guide/health-data-store.html).
-This occurs in the "connect" method by instantiating the
+This occurs in the "connect" function by instantiating the
 [HealthDataStore](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataStore.html) class
 and providing it with a
 [ConnectionListener](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataStore.ConnectionListener.html)
 which is notified when the connection is established.
 
 Accessing data requires receiving the relevant permissions from the user first.
-(See the "permission" method).
+(See the "permission" function).
 For this, we need to create a [HealthPermissionManager](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthPermissionManager.html). We specify which permissions
 are needed. A dialog then opens up and the user can choose which permissions to
 grant. The desired permissions also need to be specified in the AndroidManifest.xml file.
+The user can change the permissions given by pressing the "Permission" button, which
+calls the "permission" function.
 
 The SDK can notify the app whenever data is created or updated.
 We create a [HealthDataObserver](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataObserver.html)
 (called "obs" in our app) which we register
 as an observer for a specific datatype so that we can react to new data of that
-type being added (see method "startReading").
+type being added (see function "startReading").
 
-Requesting data (as in the "read" method) 
+Requesting data (as in the "read" function) 
 works by first creating a [HealthDataResolver](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataResolver.html) 
 which will read
 our request and pass the results to a listener.
 A read request can be constructed using the
 ["ReadRequest.Builder"](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataResolver.ReadRequest.Builder.html) class.
 It is necessary to specify the type of the requested data with the "setDataType"
-method. Additionaly, "setLocalTimeRange" can be used to restrict the data to
+function. Additionaly, "setLocalTimeRange" can be used to restrict the data to
 a certain time range. A [ResultListener](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthResultHolder.ResultListener.html)
 is responsible for handling the results
 of the query ("mlistener" in our app). A query is then performed by passing
@@ -66,7 +68,7 @@ which provides an iterator over the data entries.
 
 Entries belong to the [HealthData](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthData.html)
 class. It maps property names (of type String) to values of
-one of multiple types. A value of type Long can be accessed with the "getLong" method,
+one of multiple types. A value of type Long can be accessed with the "getLong" function,
 a value of type String with "getString", and so on.
 Important properties include:
 
@@ -99,7 +101,7 @@ a [foreground service](https://developer.android.com/guide/components/services#F
 Such a service is tied to a permanent [notification](https://developer.android.com/guide/topics/ui/notifiers/notifications).
 
 Our example service is found in ForegroundService.kt.
-When the service is started ("startReading" in MainActivity.kt), its "onCreate" method
+When the service is started ("startReading" in MainActivity.kt), its "onCreate" function
 is called. A foreground service first creates a notification and then calls "startForeground"
 to attach itself to the notification. When creating a notification, a 
 notification channel has to be specified.
