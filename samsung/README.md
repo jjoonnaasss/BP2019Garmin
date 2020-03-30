@@ -13,7 +13,8 @@ Official documentation:
 ## SamsungTest
 
 This folder contains a demo application that illustrates the most important
-aspects of working with the SDK. The app is written in [Kotlin](https://kotlinlang.org/)
+aspects of working with the SDK. It reads different types of data from the Samsung Health
+store, converts them to the ODV format and displays them. The app is written in [Kotlin](https://kotlinlang.org/)
 using the [Android Studio IDE](https://developer.android.com/studio).
 
 The Samsung Health Android SDK can be downloaded [here](https://developer.samsung.com/health/android/overview.html).
@@ -39,7 +40,7 @@ Accessing data requires receiving the relevant permissions from the user first.
 (See the "permission" method).
 For this, we need to create a [HealthPermissionManager](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthPermissionManager.html). We specify which permissions
 are needed. A dialog then opens up and the user can choose which permissions to
-grant.
+grant. The desired permissions also need to be specified in the AndroidManifest.xml file.
 
 The SDK can notify the app whenever data is created or updated.
 We create a [HealthDataObserver](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataObserver.html)
@@ -47,7 +48,7 @@ We create a [HealthDataObserver](https://img-developer.samsung.com/onlinedocs/he
 as an observer for a specific datatype so that we can react to new data of that
 type being added (see method "startReading").
 
-Requesting data (as in the "readSteps" method) 
+Requesting data (as in the "read" method) 
 works by first creating a [HealthDataResolver](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthDataResolver.html) 
 which will read
 our request and pass the results to a listener.
@@ -80,6 +81,13 @@ Important properties include:
 
 Additionally, each data type has specific properties, like StepCount.COUNT and StepCount.SPEED
 for the [StepCount](https://img-developer.samsung.com/onlinedocs/health/android/data/com/samsung/android/sdk/healthdata/HealthConstants.StepCount.html) data type.
+
+We describe the measurements using the "Measurement" class, which contains metadata (such as the time)
+and a "Data" entry for the specific datatype (supported are StepCount, SleepStage, BloodGlucose and HeartRate).
+Measurements are acquired in "readData".
+Measurements are converted using the "measureToODV" function, yielding
+an "ODV" value, which is an abstract representation of the OpenDiabetesVault format.
+This is then converted to a String containing a JSON value with the "ODVtoJSON" function.
 
 ## Services
 
