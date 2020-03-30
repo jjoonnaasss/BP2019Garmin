@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
         // convert Health measurement to ODV
         val isoTime = fmtDate(m.meta.start)
         val start = m.meta.start
-        val duration = (m.meta.end - start).toString()
+        val duration = ((m.meta.end - start)/1000).toString()
         return when (m.data) {
             is Sleep -> ODV(when(m.data.stage) {
                 Stage.LIGHT -> "SLEEP_LIGHT"
@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun ODVtoJSON(o: ODV) =
         // convert ODV to JSON String
-        "{\"origin\":\"unknown\",\"source\":\"Samsung-Health\",\"type\":\"${o.type}\",\"epoch\":${o.epoch},\"isoTime\":\"${o.isoTime}\",\"value\":\"${o.value}\"}"
+        "{\"origin\":\"unknown\",\n\"source\":\"Samsung-Health\",\n\"type\":\"${o.type}\",\n\"epoch\":${o.epoch},\n\"isoTime\":\"${o.isoTime}\",\n\"value\":\"${o.value}\"}\n"
 
     private fun getMeta(entry: HealthData): Meta {
         // get meta data from a HealthData entry

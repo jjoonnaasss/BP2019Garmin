@@ -10,6 +10,8 @@ Official documentation:
 * [Overview](https://developer.samsung.com/health/android/overview.html)
 * [API reference](https://img-developer.samsung.com/onlinedocs/health/android/data/index.html)
 
+Samsung also offers a ["Data Viewer"](https://developer.samsung.com/health/android/data/guide/data-viewer.html) app, which allows to view and manually enter data.
+
 ## SamsungTest
 
 This folder contains a demo application that illustrates the most important
