@@ -29,8 +29,8 @@ enum class Stage {
 sealed class Data
 data class Sleep(val stage: Stage) : Data()
 data class Steps(val speed: Float) : Data()
-data class Glucose(val mmpl: Float) : Data()
-data class Heart(val bpm: Float) : Data()
+data class Glucose(val mmpl: Int) : Data()
+data class Heart(val bpm: Int) : Data()
 
 data class Meta(val uuid: String, val start: Long, val end: Long, val offset: Long)
 data class Measurement(val meta: Meta, val data: Data)
@@ -41,12 +41,11 @@ class MainActivity : AppCompatActivity() {
     private val act: Activity = this
     private val dayMilli = 24 * 60 * 60 * 1000L
     private val tag = "MainActivity"
-    private val datatypes = listOf(StepCount.HEALTH_DATA_TYPE, Exercise.HEALTH_DATA_TYPE,
+    private val datatypes = listOf(StepCount.HEALTH_DATA_TYPE,
         BloodGlucose.HEALTH_DATA_TYPE, HeartRate.HEALTH_DATA_TYPE, SleepStage.HEALTH_DATA_TYPE)
 
     var store: HealthDataStore? = null
-
-    val test : Data = Sleep(Stage.LIGHT)
+    val measurements = mutableListOf<Measurement>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // this method is called when the app is started
@@ -105,13 +104,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startReading() {
-        /* TODO
-        SleepStage -> SLEEP_LIGHT, SLEEP_DEEP, SLEEP_REM
-        Exercise -> EXERCISE_LOW, EXERCISE_MID, EXERCISE_HIGH
-        BloodGlucose -> GLUCOSE_BG
-        HeartRate -> HEART_RATE
-        StepCount -> EXERCISE_LOW, EXERCISE_MID, EXERCISE_HIGH
-         */
+        // start observer and service
         for (data in datatypes) {
             HealthDataObserver.addObserver(store, data, obs)
         }
@@ -120,7 +113,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun permission(@Suppress("UNUSED_PARAMETER")view: View?) {
-        // Ask user for permissions
+        // ask user for permissions
 
         val keys = HashSet<PermissionKey>()
         val pmsManager = HealthPermissionManager(store)
@@ -140,6 +133,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun read(data: String, listener: ResultListener<HealthDataResolver.ReadResult>) {
+        // given data type name and listener, query measurements of that data type and hand them
+        // to the listener
         val resolver = HealthDataResolver(store, null)
         // Set time range from start time of today to the current time
         // the time is coded as the number of milliseconds since 00:00:00 UTC on 1 January 1970
@@ -164,7 +159,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun measureToODV(m: Measurement): ODV {
-        val isoTime = ""
+        // convert Health measurement to ODV
+        val isoTime = fmtDate(m.meta.start)
         val start = m.meta.start
         val duration = (m.meta.end - start).toString()
         return when (m.data) {
@@ -175,14 +171,16 @@ class MainActivity : AppCompatActivity() {
             }, duration, start, isoTime)
             is Steps -> ODV("EXERCISE_MID", duration, start, isoTime)
             is Glucose -> ODV("GLUCOSE_BG", m.data.mmpl.toString(), start, isoTime)
-            is Heart -> ODV("HEART_RATE", m.data.bpm.roundToInt().toString(), start, isoTime)
+            is Heart -> ODV("HEART_RATE", m.data.bpm.toString(), start, isoTime)
         }
     }
 
-    fun ODVtoJSON(o: ODV) =
+    private fun ODVtoJSON(o: ODV) =
+        // convert ODV to JSON String
         "{\"origin\":\"unknown\",\"source\":\"Samsung-Health\",\"type\":\"${o.type}\",\"epoch\":${o.epoch},\"isoTime\":\"${o.isoTime}\",\"value\":\"${o.value}\"}"
 
     private fun getMeta(entry: HealthData): Meta {
+        // get meta data from a HealthData entry
         val uuid = entry.getString(StepCount.UUID)
         val start = entry.getLong(StepCount.START_TIME)
         val end = entry.getLong(StepCount.END_TIME)
@@ -190,78 +188,57 @@ class MainActivity : AppCompatActivity() {
         return Meta(uuid, start, end, offset)
     }
 
+    private fun refresh() {
+        // refreshes textbox
+        val historyView : TextView = findViewById(R.id.history)
+        val samples = measurements.map {ODVtoJSON(measureToODV(it))}
+        historyView.text = samples.joinToString(separator = "\n")
+    }
+
     fun readData() {
-        val entries = mutableListOf<Measurement>()
+        // read data and write it to measurements variable
+        measurements.clear()
         val stepListener = ResultListener<HealthDataResolver.ReadResult> { result ->
-            var daily : Long = 0
             for (entry in result) {
                 val speed = entry.getFloat(StepCount.SPEED)
-                entries.add(Measurement(getMeta(entry), Steps(speed)))
+                measurements.add(Measurement(getMeta(entry), Steps(speed)))
             }
             result.close()
+            refresh()
         }
-
-        val odvs = entries.map {measureToODV(it)}
-        read(StepCount.HEALTH_DATA_TYPE, stepListener)
-    }
-
-    fun offsetToTimezone(offset: Long): String {
-        val offHour = offset / (60 * 60) / 1000
-        val offHourStr = if (offHour >= 0) "+$offHour" else "$offHour"
-        val offMinStr = if (offset % 60 * 60 * 1000 == 500L) "30" else "00"
-        return "GTM$offHourStr:$offMinStr"
-    }
-
-    fun readDataOld() {
-        // read StepCount data and update UI
-
-        val resolver = HealthDataResolver(store, null)
-        // Set time range from start time of today to the current time
-        // the time is coded as the number of milliseconds since 00:00:00 UTC on 1 January 1970
-        val startTime = getStartTimeOfToday()
-        val endTime = startTime + dayMilli
-        val request = ReadRequest.Builder()
-            .setDataType(StepCount.HEALTH_DATA_TYPE)
-            .setLocalTimeRange(
-                StepCount.START_TIME, StepCount.TIME_OFFSET,
-                startTime, endTime
-            )
-            .build()
-        val history = mutableListOf<String>()
-        // mListener receives the results of the query
-        val mListener = ResultListener<HealthDataResolver.ReadResult> { result ->
-            var daily : Long = 0
+        val sleepListener = ResultListener<HealthDataResolver.ReadResult> { result ->
             for (entry in result) {
-                    //val uuid = entry.getString(StepCount.UUID)
-                    //val changed = entry.getLong(StepCount.UPDATE_TIME)
-                    val count = entry.getInt(StepCount.COUNT)
-                    val start = getDate(entry.getLong(StepCount.START_TIME))
-                    val stop = getDate(entry.getLong(StepCount.END_TIME))
-                    val offset = entry.getLong(StepCount.TIME_OFFSET) / (60 * 60)
-                    val offHour = offset / 1000
-                    val offHourStr = if (offHour >= 0) "+$offHour" else "$offHour"
-                    val offMinStr = if (offset % 1000 == 500L) "30" else "00"
-                    val speed = "%.1f".format(entry.getFloat(StepCount.SPEED))
-                    daily += count
-                    history.add("$start - $stop ($offHourStr:$offMinStr) : $count steps at $speed m/s")
+                val stage = when(entry.getInt(SleepStage.STAGE)) {
+                    SleepStage.STAGE_LIGHT -> Stage.LIGHT
+                    SleepStage.STAGE_DEEP -> Stage.DEEP
+                    SleepStage.STAGE_REM -> Stage.REM
+                    else -> throw java.lang.Exception("Invalid SleepStage")
+                }
+                measurements.add(Measurement(getMeta(entry), Sleep(stage)))
             }
             result.close()
-            val stepText = getString(R.string.stepcount_text).format(daily)
-            Log.d(tag, stepText)
-            val stepCount : TextView = findViewById(R.id.stepCount)
-            stepCount.setText(stepText, TextView.BufferType.NORMAL)
-            val historyView : TextView = findViewById(R.id.history)
-            historyView.text = history.joinToString(separator = "\n")
+            refresh()
         }
-        try {
-            // Request data asynchronously.
-            // Synchronous requests can be made like this:
-            // val rdResult = resolver.read(request).await()
-            // This is not allowed in the main thread, but may be acceptable for services.
-            resolver.read(request).setResultListener(mListener)
-        } catch (e: Exception) {
-            Log.e(null, "couldn't read steps", e)
+        val heartListener = ResultListener<HealthDataResolver.ReadResult> { result ->
+            for (entry in result) {
+                val rate = entry.getFloat(HeartRate.HEART_RATE).roundToInt()
+                measurements.add(Measurement(getMeta(entry), Heart(rate)))
+            }
+            result.close()
+            refresh()
         }
+        val glucoseListener = ResultListener<HealthDataResolver.ReadResult> { result ->
+            for (entry in result) {
+                val glucose = entry.getFloat(BloodGlucose.GLUCOSE).roundToInt()
+                measurements.add(Measurement(getMeta(entry), Glucose(glucose)))
+            }
+            result.close()
+            refresh()
+        }
+        read(StepCount.HEALTH_DATA_TYPE, stepListener)
+        read(SleepStage.HEALTH_DATA_TYPE, sleepListener)
+        read(HeartRate.HEALTH_DATA_TYPE, heartListener)
+        read(BloodGlucose.HEALTH_DATA_TYPE, glucoseListener)
     }
 
     private val obs = object : HealthDataObserver(null) {
@@ -281,16 +258,10 @@ class MainActivity : AppCompatActivity() {
         return today.timeInMillis
     }
 
-    fun fmtDate(epoch: Long, timezone: String): String {
+    fun fmtDate(epoch: Long): String {
+        // given unix timestamp and timezone ID, return ISO 8601 time string
         val date = Date(epoch)
-        val sdf = SimpleDateFormat("yyyy-MM-ddTHH:mm:ssX")
-        sdf.timeZone = TimeZone.getTimeZone(timezone)
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
         return sdf.format(date)
-    }
-
-    private fun getDate(milliSeconds: Long): String {
-        // convert time to String containing hours and minutes
-        val df = SimpleDateFormat("HH:mm", Locale.GERMANY)
-        return df.format(Date(milliSeconds))
     }
 }
